@@ -33,12 +33,12 @@ namespace FixPointCS
     public struct F64Vec2
     {
         // Constants
-        public static F64Vec2 Zero     => new F64Vec2(F64.Zero, F64.Zero);
-        public static F64Vec2 One      => new F64Vec2(F64.One, F64.One);
-        public static F64Vec2 Down     => new F64Vec2(F64.Zero, F64.Neg1);
-        public static F64Vec2 Up       => new F64Vec2(F64.Zero, F64.One);
-        public static F64Vec2 Left     => new F64Vec2(F64.Neg1, F64.Zero);
-        public static F64Vec2 Right    => new F64Vec2(F64.One, F64.Zero);
+        public static F64Vec2 Zero     { get { return new F64Vec2(F64.Zero, F64.Zero); } }
+        public static F64Vec2 One      { get { return new F64Vec2(F64.One, F64.One); } }
+        public static F64Vec2 Down     { get { return new F64Vec2(F64.Zero, F64.Neg1); } }
+        public static F64Vec2 Up       { get { return new F64Vec2(F64.Zero, F64.One); } }
+        public static F64Vec2 Left     { get { return new F64Vec2(F64.Neg1, F64.Zero); } }
+        public static F64Vec2 Right    { get { return new F64Vec2(F64.One, F64.Zero); } }
 
         // The components
         public F64 x;

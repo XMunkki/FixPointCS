@@ -54,6 +54,8 @@ namespace FixPointCS
     /// </summary>
     public static class Fixed64
     {
+        // Backwards compatible way to use MethodImplOptions.AggressiveInlining
+        public const MethodImplOptions AggressiveInlining = (MethodImplOptions)256;
 #endif
         public const int Shift = 32;
         public const long FractionMask = ( 1L << Shift ) - 1; // Space before 1L needed because of hacky C++ code generator
@@ -155,7 +157,7 @@ namespace FixPointCS
         /// <summary>
         /// Returns the absolute (positive) value of x.
         /// </summary>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(AggressiveInlining)]
         public static long Abs(long x)
         {
             // \note fails with LONG_MIN
@@ -166,7 +168,7 @@ namespace FixPointCS
         /// <summary>
         /// Negative absolute value (returns -abs(x)).
         /// </summary>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(AggressiveInlining)]
         public static long Nabs(long x)
         {
             return (x > 0) ? -x : x;
@@ -225,7 +227,7 @@ namespace FixPointCS
         /// <summary>
         /// Adds the two FP numbers together.
         /// </summary>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(AggressiveInlining)]
         public static long Add(long a, long b)
         {
             return a + b;
@@ -234,7 +236,7 @@ namespace FixPointCS
         /// <summary>
         /// Subtracts the two FP numbers from each other.
         /// </summary>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(AggressiveInlining)]
         public static long Sub(long a, long b)
         {
             return a - b;
@@ -273,7 +275,7 @@ namespace FixPointCS
                 (long)af * bi;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(AggressiveInlining)]
         private static int MulIntLongLow(int a, long b)
         {
             Debug.Assert(a >= 0);
@@ -284,7 +286,7 @@ namespace FixPointCS
             return (int)((long)((af * bf) >> Shift) + (long)af * bi);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(AggressiveInlining)]
         private static int Nlz(ulong x)
         {
             int n = 0;
@@ -345,7 +347,7 @@ namespace FixPointCS
                 } else break;
             } while (rhat < b);
 
-            ulong un21 = un32 * b + un1 - q1 * v; // Multiply and substract
+            ulong un21 = un32 * b + un1 - q1 * v; // Multiply and subtract
 
             // Compute the second quotient digit, q0
             ulong q0 = un21 / vn1;
@@ -427,19 +429,19 @@ namespace FixPointCS
             return (long)q;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(AggressiveInlining)]
         private static int Qmul29(int a, int b)
         {
             return (int)((long)a * (long)b >> 29);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(AggressiveInlining)]
         private static int Qmul30(int a, int b)
         {
             return (int)((long)a * (long)b >> 30);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(AggressiveInlining)]
         private static int qRcpNorm29(int n)
         {
             // Constants.
@@ -497,7 +499,7 @@ namespace FixPointCS
             // Use Newton iterations to increase accuracy: y' = y/2 * (3 - x*y*y).
             y = Qmul29(y >> 1, THREE - Qmul29(n, Qmul29(y, y)));
             //y = Qmul29(y >> 1, THREE - Qmul29(n, Qmul29(y, y)));
-            Debug.Assert(y >= HALF && y <= ONE);    // \todo [petri] need to check that no inputs cause this!
+            Debug.Assert(y >= HALF && y <= ONE);
 
             // Reciprocal (pre- and post-multiply by 2 to get y into [1.0, 2.0] range).
             y = qRcpNorm29(y << 1) << 1;
@@ -515,6 +517,8 @@ namespace FixPointCS
             // Refinement using Newton's method: y' = y/2 * (3 - x*y^2)
             // see: https://www.geometrictools.com/Documentation/ApproxInvSqrt.pdf
 
+            Debug.Assert(x > 0);
+
             // Constants (s3.29).
             const int ONE = (1 << 29);
             const int THREE = (3 << 29);
@@ -531,10 +535,6 @@ namespace FixPointCS
             offset = offset >> 1;
 
             // Use polynomial approximation for initial guess of rsqrt(n).
-            // Using coefficients: a == 1/sqrt(2), b == -1.0, c == 1.0
-            // \todo [petri] the coefficients could probably be improved
-            // int k = n - ONE;
-            // int y = Qmul29(Qmul29(k, k), HALF_SQRT2) - k + ONE;
             const int n0 = (int)(ONE * -0.0854582920881071);
             const int n1 = (int)(ONE * 0.534580261270677);
             const int n2 = (int)(ONE * -1.298425958008734);
@@ -551,22 +551,27 @@ namespace FixPointCS
         }
 
         /// <summary>
-        /// Calculates the reciprocal.
+        /// Calculates the reciprocal using precise division.
         /// </summary>
         public static long RcpDiv(long a)
         {
-            // \todo [petri] naive implementation!
             return Div(One, a);
         }
 
+        /// <summary>
+        /// Calculates reciprocal approximation.
+        /// </summary>
         public static long RcpFast(long x)
         {
             // Refinement using Newton's method: y' = y * (2 - x*y)
             // see: https://www.geometrictools.com/Documentation/ApproxInvSqrt.pdf
 
+            // \todo [petri] optimize
+            if (x == MinValue)
+                return 0;
+
             // Handle negative values.
             int sign = (x < 0) ? -1 : 1;
-            // \todo [petri] abs() behaves weird with MIN_LONG
             x = Abs(x);
 
             // Normalize input into [1.0, 2.0( range (convert to s3.29).

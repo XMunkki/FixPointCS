@@ -330,7 +330,7 @@ namespace Fixed64
             } else break;
         } while (rhat < b);
 
-        FP_ULONG un21 = un32 * b + un1 - q1 * v; // Multiply and substract
+        FP_ULONG un21 = un32 * b + un1 - q1 * v; // Multiply and subtract
 
         // Compute the second quotient digit, q0
         FP_ULONG q0 = un21 / vn1;
@@ -475,7 +475,7 @@ namespace Fixed64
         // Use Newton iterations to increase accuracy: y' = y/2 * (3 - x*y*y).
         y = Qmul29(y >> 1, THREE - Qmul29(n, Qmul29(y, y)));
         //y = Qmul29(y >> 1, THREE - Qmul29(n, Qmul29(y, y)));
-        FP_ASSERT(y >= HALF && y <= ONE);    // \todo [petri] need to check that no inputs cause this!
+        FP_ASSERT(y >= HALF && y <= ONE);
 
         // Reciprocal (pre- and post-multiply by 2 to get y into [1.0, 2.0] range).
         y = qRcpNorm29(y << 1) << 1;
@@ -493,6 +493,8 @@ namespace Fixed64
         // Refinement using Newton's method: y' = y/2 * (3 - x*y^2)
         // see: https://www.geometrictools.com/Documentation/ApproxInvSqrt.pdf
 
+        FP_ASSERT(x > 0);
+
         // Constants (s3.29).
         static const FP_INT ONE = (1 << 29);
         static const FP_INT THREE = (3 << 29);
@@ -509,10 +511,6 @@ namespace Fixed64
         offset = offset >> 1;
 
         // Use polynomial approximation for initial guess of rsqrt(n).
-        // Using coefficients: a == 1/sqrt(2), b == -1.0, c == 1.0
-        // \todo [petri] the coefficients could probably be improved
-        // FP_INT k = n - ONE;
-        // FP_INT y = Qmul29(Qmul29(k, k), HALF_SQRT2) - k + ONE;
         static const FP_INT n0 = (FP_INT)(ONE * -0.0854582920881071);
         static const FP_INT n1 = (FP_INT)(ONE * 0.534580261270677);
         static const FP_INT n2 = (FP_INT)(ONE * -1.298425958008734);
@@ -529,22 +527,27 @@ namespace Fixed64
     }
 
     /// <summary>
-    /// Calculates the reciprocal.
+    /// Calculates the reciprocal using precise division.
     /// </summary>
     static FP_LONG RcpDiv(FP_LONG a)
     {
-        // \todo [petri] naive implementation!
         return Div(One, a);
     }
 
+    /// <summary>
+    /// Calculates reciprocal approximation.
+    /// </summary>
     static FP_LONG RcpFast(FP_LONG x)
     {
         // Refinement using Newton's method: y' = y * (2 - x*y)
         // see: https://www.geometrictools.com/Documentation/ApproxInvSqrt.pdf
 
+        // \todo [petri] optimize
+        if (x == MinValue)
+            return 0;
+
         // Handle negative values.
         FP_INT sign = (x < 0) ? -1 : 1;
-        // \todo [petri] abs() behaves weird with MIN_LONG
         x = Abs(x);
 
         // Normalize input into [1.0, 2.0( range (convert to s3.29).
