@@ -694,7 +694,7 @@ namespace FixPointCSTest
 
             new UnaryOp(
                 "Exp(x)",
-                100000,
+                500000,
                 (int n, F64[] i0, F64[] o) => { for (int i=0; i<n; i++) { o[i] = i0[i].Exp(); } },
                 (double i0) => { return Math.Exp(i0); },
                 RelativeUnaryErrorEvaluator(),
@@ -708,7 +708,7 @@ namespace FixPointCSTest
 
             new UnaryOp(
                 "Exp2(x)",
-                100000,
+                500000,
                 (int n, F64[] i0, F64[] o) => { for (int i=0; i<n; i++) { o[i] = i0[i].Exp2(); } },
                 (double i0) => { return Math.Pow(2.0, i0); },
                 RelativeUnaryErrorEvaluator(),

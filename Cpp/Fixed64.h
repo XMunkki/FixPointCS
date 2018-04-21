@@ -418,71 +418,37 @@ namespace Fixed64
         return (FP_INT)((FP_LONG)a * (FP_LONG)b >> 30);
     }
 
-    static FP_INT qRcpNorm29(FP_INT n)
-    {
-        // Constants.
-        static const FP_INT ONE = (1 << 29);
-        static const FP_INT TWO = (2 << 29);
-
-        FP_ASSERT(n >= ONE && n <= TWO);
-
-        // Use polynomial approximation for initial guess of rcp().
-        static const FP_INT n0 = (FP_INT)(ONE * 0.3388308335945457);
-        static const FP_INT n1 = (FP_INT)(ONE * -1.5164925007836372);
-        static const FP_INT n2 = (FP_INT)(ONE * 2.1776616671890916);
-        FP_INT y = Qmul29(Qmul29(n0, n) + n1, n) + n2;
-
-        // Use Newton iterations to increase accuracy: y' = y * (2 - n*y)
-        y = Qmul29(y, TWO - Qmul29(n, y));
-        y = Qmul29(y, TWO - Qmul29(n, y));
-        //y = Qmul29(y, TWO - Qmul29(n, y));
-
-        return y;
-    }
-
     static FP_LONG SqrtFast(FP_LONG x)
     {
-        // Performs basically RSqrt(), followed by reciprocal.
-        // See: https://www.geometrictools.com/Documentation/ApproxInvSqrt.pdf
-
         // Return 0 for all non-positive values.
         if (x <= 0)
             return 0;
 
-        // Constants (s3.29).
-        static const FP_INT HALF = (1 << 28);
-        static const FP_INT ONE = (1 << 29);
-        static const FP_INT THREE = (3 << 29);
-        static const FP_INT SQRT2 = 2 * 379625062; // sqrt(2.0)
+        // Constants (s2.30).
+        static const FP_INT ONE = (1 << 30);
+        static const FP_INT SQRT2 = 1518500250; // sqrt(2.0)
 
-        // Normalize input into [1.0, 2.0( range.
-        // Convert normalized value to s3.29.
+        // Normalize input into [1.0, 2.0( range (as s2.30).
         FP_INT offset = 31 - Nlz((FP_ULONG)x);
-        FP_INT n = (FP_INT)(((offset >= 0) ? (x >> offset) : (x << -offset)) >> 3);
-        FP_ASSERT(n >= ONE && n < 2 * ONE);
+        FP_INT n = (FP_INT)(((offset >= 0) ? (x >> offset) : (x << -offset)) >> 2);
+        FP_ASSERT(n >= ONE);
 
         // Divide offset by 2 (to get sqrt), compute adjust value for odd exponents.
         FP_INT adjust = ((offset & 1) != 0) ? SQRT2 : ONE;
         offset = offset >> 1;
 
-        // Use polynomial approximation for initial guess of rsqrt().
-        static const FP_INT n0 = (FP_INT)(ONE * -0.0854582920881071);
-        static const FP_INT n1 = (FP_INT)(ONE * 0.534580261270677);
-        static const FP_INT n2 = (FP_INT)(ONE * -1.298425958008734);
-        static const FP_INT n3 = (FP_INT)(ONE * 1.8493039888261642);
-        FP_INT y = Qmul29(Qmul29(Qmul29(n0, n) + n1, n) + n2, n) + n3;
-
-        // Use Newton iterations to increase accuracy: y' = y/2 * (3 - x*y*y).
-        y = Qmul29(y >> 1, THREE - Qmul29(n, Qmul29(y, y)));
-        //y = Qmul29(y >> 1, THREE - Qmul29(n, Qmul29(y, y)));
-        FP_ASSERT(y >= HALF && y <= ONE);
-
-        // Reciprocal (pre- and post-multiply by 2 to get y into [1.0, 2.0] range).
-        y = qRcpNorm29(y << 1) << 1;
+        // Polynomial approximation.
+        static const FP_INT C0 = 314419284; // 0.29282577753675165
+        static const FP_INT C1 = 1106846240; // 1.0308308904662433
+        static const FP_INT C2 = -513029237; // -0.4777957102057744
+        static const FP_INT C3 = 211384540; // 0.1968671947173073
+        static const FP_INT C4 = -51222328; // -0.04770451046583708
+        static const FP_INT C5 = 5343323; // 0.004976357951309034
+        FP_INT y = Qmul30(Qmul30(Qmul30(Qmul30(Qmul30(C5, n) + C4, n) + C3, n) + C2, n) + C1, n) + C0;
 
         // Apply exponent, convert back to s32.32.
-        FP_LONG yr = (FP_LONG)Qmul29(adjust, y);
-        return ((offset >= 0) ? (yr << offset) : (yr >> -offset)) << 3;
+        FP_LONG yr = (FP_LONG)Qmul30(adjust, y) << 2;
+        return (offset >= 0) ? (yr << offset) : (yr >> -offset);
     }
 
     /// <summary>
@@ -490,40 +456,34 @@ namespace Fixed64
     /// </summary>
     static FP_LONG RSqrt(FP_LONG x)
     {
-        // Refinement using Newton's method: y' = y/2 * (3 - x*y^2)
-        // see: https://www.geometrictools.com/Documentation/ApproxInvSqrt.pdf
-
         FP_ASSERT(x > 0);
 
-        // Constants (s3.29).
-        static const FP_INT ONE = (1 << 29);
-        static const FP_INT THREE = (3 << 29);
-        static const FP_INT HALF_SQRT2 = 379625062; // 0.5 * sqrt(2.0)
+        // Constants (s2.30).
+        static const FP_INT ONE = (1 << 30);
+        static const FP_INT HALF_SQRT2 = 759250125; // 0.5 * sqrt(2.0)
 
-        // Normalize input into [1.0, 2.0( range.
-        // Convert normalized value to s3.29.
+        // Normalize input into [1.0, 2.0( range (as s2.30).
         FP_INT offset = 31 - Nlz((FP_ULONG)x);
-        FP_INT n = (FP_INT)(((offset >= 0) ? (x >> offset) : (x << -offset)) >> 3);
-        FP_ASSERT(n >= ONE && n < 2*ONE);
+        FP_INT n = (FP_INT)(((offset >= 0) ? (x >> offset) : (x << -offset)) >> 2);
+        FP_ASSERT(n >= ONE);
+        FP_INT k = n - ONE;
 
         // Divide offset by 2 (to get sqrt), compute adjust value for odd exponents.
         FP_INT adjust = ((offset & 1) != 0) ? HALF_SQRT2 : ONE;
         offset = offset >> 1;
 
-        // Use polynomial approximation for initial guess of rsqrt(n).
-        static const FP_INT n0 = (FP_INT)(ONE * -0.0854582920881071);
-        static const FP_INT n1 = (FP_INT)(ONE * 0.534580261270677);
-        static const FP_INT n2 = (FP_INT)(ONE * -1.298425958008734);
-        static const FP_INT n3 = (FP_INT)(ONE * 1.8493039888261642);
-        FP_INT y = Qmul29(Qmul29(Qmul29(n0, n) + n1, n) + n2, n) + n3;
-
-        // Use Newton iterations to increase accuracy: y' = y/2 * (3 - x*y*y).
-        y = Qmul29(y >> 1, THREE - Qmul29(n, Qmul29(y, y)));
-        // y = Qmul29(y >> 1, THREE - Qmul29(n, Qmul29(y, y)));
+        // Polynomial approximation.
+        static const FP_INT C0 = 1073741824; // 1.0
+        static const FP_INT C1 = -536046292; // -0.49923201361564506
+        static const FP_INT C2 = 390824581; // 0.36398375576777275
+        static const FP_INT C3 = -274993667; // -0.2561078101369758
+        static const FP_INT C4 = 139580279; // 0.12999426553507287
+        static const FP_INT C5 = -33856600; // -0.031531416363677275
+        FP_INT y = Qmul30(Qmul30(Qmul30(Qmul30(Qmul30(C5, k) + C4, k) + C3, k) + C2, k) + C1, k) + C0;
 
         // Apply exponent, convert back to s32.32.
-        FP_LONG yr = (FP_LONG)Qmul29(adjust, y);
-        return ((offset >= 0) ? (yr >> offset) : (yr << -offset)) << 3;
+        FP_LONG yr = (FP_LONG)Qmul30(adjust, y) << 2;
+        return (offset >= 0) ? (yr >> offset) : (yr << -offset);
     }
 
     /// <summary>
@@ -548,17 +508,25 @@ namespace Fixed64
 
         // Handle negative values.
         FP_INT sign = (x < 0) ? -1 : 1;
-        x = Abs(x);
+        x *= sign;
 
-        // Normalize input into [1.0, 2.0( range (convert to s3.29).
+        // Normalize input into [1.0, 2.0( range (convert to s2.30).
+        static const FP_INT ONE = (1 << 30);
         FP_INT offset = 31 - Nlz((FP_ULONG)x);
-        FP_INT n = (FP_INT)(((offset >= 0) ? (x >> offset) : (x << -offset)) >> 3);
+        FP_INT n = (FP_INT)(((offset >= 0) ? (x >> offset) : (x << -offset)) >> 2);
+        FP_INT k = n - ONE;
 
-        // Compute normalized reciprocal.
-        FP_INT y = sign * qRcpNorm29(n);
+        // Fifth order polynomial approximation.
+        static const FP_INT C0 = 1073741823; // 0.9999999999999999
+        static const FP_INT C1 = -1070600273; // -0.9970742035352514
+        static const FP_INT C2 = 1028280545; // 0.9576608849486308
+        static const FP_INT C3 = -837745462; // -0.7802112611061196
+        static const FP_INT C4 = 459071950; // 0.42754407090099306
+        static const FP_INT C5 = -115877671; // -0.10791949120825255
+        FP_LONG y = (FP_LONG)(sign * (Qmul30(Qmul30(Qmul30(Qmul30(Qmul30(C5, k) + C4, k) + C3, k) + C2, k) + C1, k) + C0)) << 2;
 
         // Apply exponent, convert back to s32.32.
-        return ((offset >= 0) ? ((FP_LONG)y >> offset) : ((FP_LONG)y << -offset)) << 3;
+        return (offset >= 0) ? (y >> offset) : (y << -offset);
     }
 
     /// <summary>
@@ -567,42 +535,26 @@ namespace Fixed64
     static FP_LONG Exp2(FP_LONG x)
     {
         // Base 2 exponent: returns 2^x
-        // See: https://github.com/asik/FixedMath.Net/blob/master/src/Fix64.cs
-
-        // \todo [petri] early exit for zero and one?
 
         // Handle values that would under or overflow.
         if (x >= 32 * One) return MaxValue;
         if (x <= -32 * One) return 0;
 
-        // Handle negative inputs with: exp(-x) == rcp(exp(x)).
-        bool isNeg = x < 0;
-        x = Abs(x);
-
         // Get fractional part as s2.30.
-        FP_INT frac = (FP_INT)((x & FractionMask) >> 2);
+        FP_INT k = (FP_INT)((x & FractionMask) >> 2);
 
-        // Constants (in s2.30).
-        static const FP_INT LN2 = 744261117; // log(e) ~= 0.6931471805599453
-
-        // Accumulate fractional part iteratively.
-        // \note adjust performance vs precision trade-off by adjusting the number of iterations
-        FP_LONG result = 1 << 30;
-	    FP_INT term = Qmul30(frac, LN2); result += term;
-	    term = Qmul30(Qmul30(frac, term), LN2 / 2); result += term;
-        term = Qmul30(Qmul30(frac, term), LN2 / 3); result += term;
-        term = Qmul30(Qmul30(frac, term), LN2 / 4); result += term;
-        term = Qmul30(Qmul30(frac, term), LN2 / 5); result += term;
-        term = Qmul30(Qmul30(frac, term), LN2 / 6); result += term;
-        //term = Qmul30(Qmul30(frac, term), LN2 / 7); result += term;
+        // Fifth order polynomial approximation.
+        static const FP_INT C0 = 1073741823; // 0.9999999999999998
+        static const FP_INT C1 = 744267999; // 0.6931535893913809
+        static const FP_INT C2 = 257852859; // 0.24014418895798456
+        static const FP_INT C3 = 59977680; // 0.05585856767689564
+        static const FP_INT C4 = 9608316; // 0.008948442467833984
+        static const FP_INT C5 = 2034967; // 0.001895211505904865
+        FP_LONG y = (FP_LONG)(Qmul30(Qmul30(Qmul30(Qmul30(Qmul30(C5, k) + C4, k) + C3, k) + C2, k) + C1, k) + C0) << 2;
 
         // Combine integer and fractional result, and convert back to s32.32.
         FP_INT intPart = (FP_INT)(x >> 32);
-        FP_LONG res = result << (intPart + 2);
-
-        // Reciprocal if input was negative.
-        // \todo [petri] is there a faster way?
-        return isNeg ? RcpFast(res) : res;
+        return (intPart >= 0) ? (y << intPart) : (y >> -intPart);
     }
 
     static FP_LONG Exp(FP_LONG x)
@@ -614,46 +566,30 @@ namespace Fixed64
     static FP_LONG Log(FP_LONG x)
     {
         // Natural logarithm (base e).
-        // See: https://gist.github.com/Madsy/1088393#file-gistfile1-c-L127
-
-        // Constants (in s3.29).
-        static const FP_INT ONE = (1 << 29);
-        static const FP_INT DENOM_0 = (1 << 29) / 1;
-        static const FP_INT DENOM_1 = (1 << 29) / 3;
-        static const FP_INT DENOM_2 = (1 << 29) / 5;
-        static const FP_INT DENOM_3 = (1 << 29) / 7;
-        static const FP_INT DENOM_4 = (1 << 29) / 9;
-        static const FP_INT DENOM_5 = (1 << 29) / 11;
-        //static const FP_INT DENOM_6 = (1 << 29) / 13;
-        //static const FP_INT DENOM_7 = (1 << 29) / 15;
-        //static const FP_INT DENOM_8 = (1 << 29) / 17;
-        //static const FP_INT DENOM_9 = (1 << 29) / 19;
-        static const FP_LONG RCP_LOG2_E = INT64_C(0xb17217f7);     // 1.0 / log2(e) ~= 0.6931471805599453
 
         FP_ASSERT(x > 0);
 
-        // Normalize value to range [1.0, 2.0( as s3.29 and extract "exponent".
+        // Constants (in s2.30).
+        static const FP_INT ONE = (1 << 30);
+
+        // Normalize value to range [1.0, 2.0( as s2.30 and extract exponent.
         FP_INT offset = 31 - Nlz((FP_ULONG)x);
-        FP_INT frac = (FP_INT)(((offset >= 0) ? (x >> offset) : (x << -offset)) >> 3);
-        FP_ASSERT(frac >= ONE && frac < 2*ONE);
+        FP_INT n = (FP_INT)(((offset >= 0) ? (x >> offset) : (x << -offset)) >> 2);
+        FP_ASSERT(n >= ONE);
+        FP_INT k = n - ONE;
 
-        // Compute initial value: y = (frac - 1.0) / (frac + 1.0)
-        // \note y is in range [0.0, 0.3333..], keep it as s3.29
-        FP_INT y = Qmul29(frac - ONE, qRcpNorm29((frac + ONE) >> 1) >> 1);
-        FP_ASSERT(y >= 0 && y < ONE/2);
-
-        // Iterative refinement of fractional part: f' = (f + k) * y*y
-        FP_INT ySq = Qmul29(y, y);
-        FP_INT fracr = 0;
-        fracr = Qmul29(fracr + DENOM_5, ySq);
-        fracr = Qmul29(fracr + DENOM_4, ySq);
-        fracr = Qmul29(fracr + DENOM_3, ySq);
-        fracr = Qmul29(fracr + DENOM_2, ySq);
-        fracr = Qmul29(fracr + DENOM_1, ySq);
-        fracr = Qmul29(fracr + DENOM_0, y*2);
+        // Sixth order polynomial approximation.
+        static const FP_INT C1 = 1073597915; // 0.9998659751270219
+        static const FP_INT C2 = -534132486; // -0.4974496428625768
+        static const FP_INT C3 = 339191744; // 0.3158969285196944
+        static const FP_INT C4 = -204547008; // -0.19049924682078279
+        static const FP_INT C5 = 88850940; // 0.08274888660136276
+        static const FP_INT C6 = -18699986; // -0.017415720004774433
+        FP_INT y = Qmul30(Qmul30(Qmul30(Qmul30(Qmul30(Qmul30(C6, k) + C5, k) + C4, k) + C3, k) + C2, k) + C1, k);
 
         // Combine integer and fractional parts (into s32.32).
-        return (FP_LONG)offset * RCP_LOG2_E + ((FP_LONG)fracr << 3);
+        static const FP_LONG RCP_LOG2_E = INT64_C(0xb17217f7);     // 1.0 / log2(e) ~= 0.6931471805599453
+        return (FP_LONG)offset * RCP_LOG2_E + ((FP_LONG)y << 2);
     }
 
     static FP_LONG Log2(FP_LONG x)
@@ -711,12 +647,39 @@ namespace Fixed64
         return Mul(SinPoly5(x), RcpFast(CosPoly5(x)));
     }
 
+    static FP_INT Atan2Div(FP_LONG y, FP_LONG x)
+    {
+        FP_ASSERT(x > 0);
+        FP_ASSERT(y > 0);
+        FP_ASSERT(x >= y);
+
+        static const FP_INT HALF = (1 << 29);
+        static const FP_INT ONE = (1 << 30);
+
+        // Normalize input into [1.0, 2.0( range (convert to s2.30).
+        FP_INT offset = 31 - Nlz((FP_ULONG)x);
+        FP_INT n = (FP_INT)(((offset >= 0) ? (x >> offset) : (x << -offset)) >> 2);
+        FP_INT k = n - ONE;
+
+        // Fifth order polynomial approximation.
+        static const FP_INT C0 = 1073741823; // 0.9999999999999999
+        static const FP_INT C1 = -1070600273; // -0.9970742035352514
+        static const FP_INT C2 = 1028280545; // 0.9576608849486308
+        static const FP_INT C3 = -837745462; // -0.7802112611061196
+        static const FP_INT C4 = 459071950; // 0.42754407090099306
+        static const FP_INT C5 = -115877671; // -0.10791949120825255
+        FP_INT oox = Qmul30(Qmul30(Qmul30(Qmul30(Qmul30(C5, k) + C4, k) + C3, k) + C2, k) + C1, k) + C0;
+        FP_ASSERT(oox >= HALF && oox <= ONE);
+
+        // Apply exponent and multiply.
+        FP_LONG yr = (offset >= 0) ? (y >> offset) : (y << -offset);
+        return Qmul30((FP_INT)(yr >> 2), oox);
+    }
+
     static FP_LONG Atan2(FP_LONG y, FP_LONG x)
     {
-        // Fast, but inaccurate 2nd order polynomial approximation.
         // See: https://www.dsprelated.com/showarticle/1052.php
         // \todo [petri] can divs-by-rcp be optimized, since result is known to be <= 1.0 ?
-        // \todo [petri] more accurate variant? higher order poly?
 
         if (x == 0)
         {
@@ -725,26 +688,28 @@ namespace Fixed64
             return 0;
         }
 
-        static const FP_INT n0 = (FP_INT)((1 << 30) * -0.2713689403818643);
-        static const FP_INT n1 = (FP_INT)((1 << 30) * 1.0597123221174944);
-
-        FP_LONG nx = Nabs(x);
-        FP_LONG ny = Nabs(y);
+        FP_LONG nx = x ^ (x >> 63); // approx abs
+        FP_LONG ny = y ^ (y >> 63);
         FP_LONG negMask = ((x ^ y) >> 63);   // \note this isn't strictly symmetrical
 
-        if (nx <= ny)
+        static const FP_INT C1 = 1075846406; // 1.0019600447288488
+        static const FP_INT C2 = -10418146; // -0.009702654828140988
+        static const FP_INT C3 = -377890075; // -0.3519375581283367
+        static const FP_INT C4 = 156064417; // 0.14534631494325442
+
+        if (nx >= ny)
         {
-            FP_INT z = (FP_INT)(Mul(ny, RcpFast(nx)) >> 2);
-            FP_LONG angle = negMask ^ (FP_LONG)Qmul30(Qmul30(n0, z) + n1, z) << 2;
+            FP_INT z = Atan2Div(ny, nx);
+            FP_LONG angle = negMask ^ ((FP_LONG)Qmul30(Qmul30(Qmul30(Qmul30(C4, z) + C3, z) + C2, z) + C1, z) << 2);
             if (x > 0) return angle;
             if (y > 0) return angle + Pi;
             return angle - Pi;
         }
         else
         {
-            FP_INT z = (FP_INT)(Mul(nx, RcpFast(ny)) >> 2);
-            FP_LONG angle = negMask ^ (FP_LONG)Qmul30(Qmul30(n0, z) + n1, z) << 2;
-            return (y > 0) ? (PiHalf - angle) : (-PiHalf - angle);
+            FP_INT z = Atan2Div(nx, ny);
+            FP_LONG angle = negMask ^ ((FP_LONG)Qmul30(Qmul30(Qmul30(Qmul30(C4, z) + C3, z) + C2, z) + C1, z) << 2);
+            return ((y > 0) ? PiHalf : -PiHalf) - angle;
         }
     }
 
