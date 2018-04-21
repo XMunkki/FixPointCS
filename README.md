@@ -66,6 +66,7 @@ The performance was measured with C# (Release build) on a Core i7-4700MQ @ 2.40G
 
 |        Operation |     Mops/s | Precision
 |------------------|-----------:|----------:
+|         Identity |  1523.8095 |     exact
 |           Ceil() |   870.7483 |     exact
 |          Floor() |  1015.8730 |     exact
 |          Round() |   441.3793 |     exact
@@ -93,6 +94,7 @@ The performance was measured with C# (Release build) on a Core i7-4700MQ @ 2.40G
 |              a-b |  1066.6667 |     exact
 |              a*b |   432.4324 |     26.45
 |              a/b |    33.1606 |     41.97
+|              a%b |    96.9697 |     exact
 |         Min(a,b) |   463.7681 |     exact
 |         Max(a,b) |   526.7490 |     exact
 |        Pow(a, b) |    46.0432 |     14.94

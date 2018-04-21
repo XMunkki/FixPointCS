@@ -109,6 +109,7 @@ namespace FixPointCS
         public F64 Ceil() { return FromRaw(Fixed64.Ceil(raw)); }
         public F64 Floor() { return FromRaw(Fixed64.Floor(raw)); }
         public F64 Round() { return FromRaw(Fixed64.Round(raw)); }
+        public F64 Fract() { return FromRaw(Fixed64.Fract(raw)); }
         public F64 Sqrt() { return FromRaw(Fixed64.Sqrt(raw)); }
         public F64 SqrtFast() { return FromRaw(Fixed64.SqrtFast(raw)); }
         public F64 RSqrt() { return FromRaw(Fixed64.RSqrt(raw)); }

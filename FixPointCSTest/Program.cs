@@ -51,6 +51,13 @@ namespace FixPointCSTest
 
     class Input
     {
+        public enum SignMode
+        {
+            Direct,
+            Negate,
+            Random
+        }
+
         static public ValueGenerator Uniform(double mn, double mx)
         {
             return (Random rnd, int count) =>
@@ -62,7 +69,7 @@ namespace FixPointCSTest
             };
         }
 
-        static public ValueGenerator Exponential(double mn, double mx)
+        static public ValueGenerator Exponential(double mn, double mx, SignMode signMode = SignMode.Direct)
         {
             Debug.Assert(Math.Sign(mn) == Math.Sign(mx));
             Debug.Assert(Math.Abs(mn) < Math.Abs(mx));
@@ -71,8 +78,23 @@ namespace FixPointCSTest
             return (Random rnd, int count) =>
             {
                 double[] values = new double[count];
-                for (int i = 0; i < count; i++)
-                    values[i] = mn * Math.Pow(2.0, ratio * rnd.NextDouble());
+                switch (signMode)
+                {
+                    case SignMode.Direct:
+                        for (int i = 0; i < count; i++)
+                            values[i] = mn * Math.Pow(2.0, ratio * rnd.NextDouble());
+                        break;
+
+                    case SignMode.Negate:
+                        for (int i = 0; i < count; i++)
+                            values[i] = -mn * Math.Pow(2.0, ratio * rnd.NextDouble());
+                        break;
+
+                    case SignMode.Random:
+                        for (int i = 0; i < count; i++)
+                            values[i] = ((i & 2) - 1) * mn * Math.Pow(2.0, ratio * rnd.NextDouble());
+                        break;
+                }
                 return values;
             };
         }
@@ -524,6 +546,18 @@ namespace FixPointCSTest
         static OpBase[] operations = new OpBase[]
         {
             new UnaryOp(
+                "Identity",
+                5000000,
+                (int n, F64[] i0, F64[] o) => { for (int i=0; i<n; i++) { o[i] = i0[i]; } },
+                (double i0) => { return i0; },
+                AbsoluteUnaryErrorEvaluator(),
+                new[] {
+                    Input.Uniform(ValueBounds.TestNegMax, ValueBounds.TestPosMax)
+                },
+                rcpValues
+            ),
+
+            new UnaryOp(
                 "Ceil()",
                 1000000,
                 (int n, F64[] i0, F64[] o) => { for (int i=0; i<n; i++) { o[i] = i0[i].Ceil(); } },
@@ -556,6 +590,20 @@ namespace FixPointCSTest
                 1000000,
                 (int n, F64[] i0, F64[] o) => { for (int i=0; i<n; i++) { o[i] = i0[i].Round(); } },
                 (double i0) => { return Math.Floor(i0 + 0.5); },
+                AbsoluteUnaryErrorEvaluator(),
+                new[] {
+                    Input.Uniform(-1.0, 1.0),
+                    Input.Uniform(-1e6, 1e6),
+                    Input.Uniform(ValueBounds.TestNegMax, ValueBounds.TestPosMax)
+                },
+                rcpValues
+            ),
+
+            new UnaryOp(
+                "Fract()",
+                1000000,
+                (int n, F64[] i0, F64[] o) => { for (int i=0; i<n; i++) { o[i] = i0[i].Fract(); } },
+                (double i0) => { return i0 - Math.Floor(i0); },
                 AbsoluteUnaryErrorEvaluator(),
                 new[] {
                     Input.Uniform(-1.0, 1.0),
@@ -700,6 +748,7 @@ namespace FixPointCSTest
                 RelativeUnaryErrorEvaluator(),
                 new[] {
                     Input.Uniform(-10.0, 10.0),
+                    Input.Uniform(-100.0, 100.0),
                     Input.Exponential(ValueBounds.TestPosMin, 10.0),
                     Input.Exponential(ValueBounds.TestNegMin, -10.0)
                 },
@@ -712,7 +761,12 @@ namespace FixPointCSTest
                 (int n, F64[] i0, F64[] o) => { for (int i=0; i<n; i++) { o[i] = i0[i].Exp2(); } },
                 (double i0) => { return Math.Pow(2.0, i0); },
                 RelativeUnaryErrorEvaluator(),
-                new[] { Input.Uniform(-10.0, 10.0) },
+                new[] {
+                    Input.Uniform(-10.0, 10.0),
+                    Input.Uniform(-100.0, 100.0),
+                    Input.Exponential(ValueBounds.TestPosMin, 10.0),
+                    Input.Exponential(ValueBounds.TestNegMin, -10.0)
+                },
                 new double[] { 0.5, 1.0, 6.9999888928141445 }
             ),
 
@@ -722,7 +776,7 @@ namespace FixPointCSTest
                 (int n, F64[] i0, F64[] o) => { for (int i=0; i<n; i++) { o[i] = i0[i].Log(); } },
                 (double i0) => { return Math.Log(i0); },
                 RelativeUnaryErrorEvaluator(),
-                new[] { Input.Exponential(0.001, 1e6) },
+                new[] { Input.Exponential(ValueBounds.TestPosMin, ValueBounds.TestPosMax) },
                 new double[] { 0.5, 0.99994553346186, 1.0 }
             ),
 
@@ -732,7 +786,7 @@ namespace FixPointCSTest
                 (int n, F64[] i0, F64[] o) => { for (int i=0; i<n; i++) { o[i] = i0[i].Log2(); } },
                 (double i0) => { return Math.Log(i0, 2.0); },
                 RelativeUnaryErrorEvaluator(),
-                new[] { Input.Exponential(0.001, 1e6) },
+                new[] { Input.Exponential(ValueBounds.TestPosMin, ValueBounds.TestPosMax) },
                 new double[] { 0.5, 0.99994553346186, 1.0 }
             ),
 
@@ -773,9 +827,9 @@ namespace FixPointCSTest
                 (double i0) => { return Math.Tan(i0); },
                 RelativeUnaryErrorEvaluator(),
                 new[] {
-                    Input.Uniform(-0.99, -0.1),
+                    Input.Exponential(-0.1, -0.9999),
                     Input.Uniform(-0.1, 0.1),
-                    Input.Uniform(0.1, 0.99),
+                    Input.Exponential(0.1, 0.9999),
                 },
                 new double[] { 0.5, 1.0 }
             ),
@@ -808,7 +862,9 @@ namespace FixPointCSTest
                 AbsoluteUnaryErrorEvaluator(),
                 new[] {
                     Input.Uniform(-1.0, 1.0),
-                    Input.Uniform(-1000.0, 1000.0)
+                    Input.Uniform(-1000.0, 1000.0),
+                    Input.Exponential(1.0, ValueBounds.TestPosMax),
+                    Input.Exponential(-1.0, ValueBounds.TestNegMax),
                 },
                 new double[] { 0.5, 1.0 }
             ),
@@ -819,7 +875,11 @@ namespace FixPointCSTest
                 (int n, F64[] i0, F64[] i1, F64[] o) => { for (int i=0; i<n; i++) { o[i] = i0[i] + i1[i]; } },
                 (double i0, double i1) => { return i0 + i1; },
                 AbsoluteBinaryErrorEvaluator(),
-                new[] { Tuple.Create(Input.Uniform(-1e6, 1e6), Input.Uniform(-1e6, 1e6)) },
+                new[] {
+                    Tuple.Create(Input.Uniform(-10.0, 10.0), Input.Uniform(-10.0, 10.0)),
+                    Tuple.Create(Input.Uniform(ValueBounds.TestNegMax, ValueBounds.TestPosMax), Input.Uniform(ValueBounds.TestNegMax, ValueBounds.TestPosMax)),
+                    Tuple.Create(Input.Exponential(1.0, ValueBounds.TestPosMax), Input.Exponential(ValueBounds.TestPosMin, 1.0)),
+                },
                 new Tuple<double, double>[] { }
             ),
 
@@ -829,7 +889,11 @@ namespace FixPointCSTest
                 (int n, F64[] i0, F64[] i1, F64[] o) => { for (int i=0; i<n; i++) { o[i] = i0[i] - i1[i]; } },
                 (double i0, double i1) => { return i0 - i1; },
                 AbsoluteBinaryErrorEvaluator(),
-                new[] { Tuple.Create(Input.Uniform(-1e6, 1e6), Input.Uniform(-1e6, 1e6)) },
+                new[] {
+                    Tuple.Create(Input.Uniform(-10.0, 10.0), Input.Uniform(-10.0, 10.0)),
+                    Tuple.Create(Input.Uniform(ValueBounds.TestNegMax, ValueBounds.TestPosMax), Input.Uniform(ValueBounds.TestNegMax, ValueBounds.TestPosMax)),
+                    Tuple.Create(Input.Exponential(1.0, ValueBounds.TestPosMax), Input.Exponential(ValueBounds.TestPosMin, 1.0)),
+                },
                 new Tuple<double, double>[] { }
             ),
 
@@ -838,7 +902,7 @@ namespace FixPointCSTest
                 1000000,
                 (int n, F64[] i0, F64[] i1, F64[] o) => { for (int i=0; i<n; i++) { o[i] = i0[i] * i1[i]; } },
                 (double i0, double i1) => { return i0 * i1; },
-                RelativeBinaryErrorEvaluator(), // \todo [petri] param
+                RelativeBinaryErrorEvaluator(),
                 new[] {
                     Tuple.Create(Input.Uniform(-1e3, 1e3), Input.Uniform(-1e3, 1e3)),
                     Tuple.Create(Input.Uniform(-1e6, 1e6), Input.Uniform(-1.0, 1.0)),
@@ -852,10 +916,32 @@ namespace FixPointCSTest
                 100000,
                 (int n, F64[] i0, F64[] i1, F64[] o) => { for (int i=0; i<n; i++) { o[i] = i0[i] / i1[i]; } },
                 (double i0, double i1) => { return i0 / i1; },
-                DivisionErrorEvaluator(), // \todo [petri] param
+                DivisionErrorEvaluator(),
                 new[] {
-                    // \todo [petri] add more test ranges -- need solution for error being relative to divisor & can wrap
-                    Tuple.Create(Input.Uniform(0.0, 1e3), Input.Exponential(1e3, 1e9)),
+                    Tuple.Create(Input.Uniform(-1000.0, 1000.0), Input.Exponential(1.0, ValueBounds.TestPosMax, Input.SignMode.Random)),
+                    Tuple.Create(Input.Uniform(ValueBounds.TestNegMax, ValueBounds.TestPosMax), Input.Uniform(ValueBounds.TestNegMax, ValueBounds.TestPosMax)),
+                    Tuple.Create(Input.Uniform(999.0, 1000.0), Input.Uniform(-999.0, -1000.0)),
+                },
+                new [] {
+                    Tuple.Create(0.0, 1.0),
+                    Tuple.Create(4.0, 2.0),
+                    Tuple.Create(6.0, 0.5),
+                    Tuple.Create(39.483308344613761, 87595497.47375004)
+                }
+            ),
+
+            new BinaryOp(
+                "a%b",
+                100000,
+                (int n, F64[] i0, F64[] i1, F64[] o) => { for (int i=0; i<n; i++) { o[i] = i0[i] % i1[i]; } },
+                (double i0, double i1) => { return i0 % i1; },
+                DivisionErrorEvaluator(),
+                new[] {
+                    // \note performance highly dependent on inputs
+                    Tuple.Create(Input.Uniform(-1000.0, 1000.0), Input.Exponential(1.0, 10.0)),
+                    Tuple.Create(Input.Uniform(-1000.0, 1000.0), Input.Exponential(1.0, ValueBounds.TestPosMax, Input.SignMode.Random)),
+                    Tuple.Create(Input.Uniform(ValueBounds.TestNegMax, ValueBounds.TestPosMax), Input.Uniform(ValueBounds.TestNegMax, ValueBounds.TestPosMax)),
+                    Tuple.Create(Input.Uniform(999.0, 1000.0), Input.Uniform(-999.0, -1000.0)),
                 },
                 new [] {
                     Tuple.Create(0.0, 1.0),
@@ -873,7 +959,7 @@ namespace FixPointCSTest
                 AbsoluteBinaryErrorEvaluator(),
                 new[] {
                     Tuple.Create(Input.Uniform(-1e6, 1e6), Input.Uniform(-1e6, 1e6)),
-                    Tuple.Create(Input.Uniform(-1e6, 1e6), Input.Uniform(-1e6, -1e6)),
+                    Tuple.Create(Input.Uniform(ValueBounds.TestNegMax, ValueBounds.TestPosMax), Input.Uniform(ValueBounds.TestNegMax, ValueBounds.TestPosMax)),
                 },
                 new Tuple<double, double>[] { }
             ),
@@ -885,8 +971,9 @@ namespace FixPointCSTest
                 (double i0, double i1) => { return Math.Max(i0, i1); },
                 AbsoluteBinaryErrorEvaluator(),
                 new[] {
+                    Tuple.Create(Input.Uniform(-1.0, 1.0), Input.Uniform(-1.0, 1.0)),
                     Tuple.Create(Input.Uniform(-1e6, 1e6), Input.Uniform(-1e6, 1e6)),
-                    Tuple.Create(Input.Uniform(-1e6, 1e6), Input.Uniform(-1e6, -1e6)),
+                    Tuple.Create(Input.Uniform(ValueBounds.TestNegMax, ValueBounds.TestPosMax), Input.Uniform(ValueBounds.TestNegMax, ValueBounds.TestPosMax)),
                 },
                 new Tuple<double, double>[] { }
             ),
@@ -898,10 +985,9 @@ namespace FixPointCSTest
                 (double i0, double i1) => { return Math.Pow(i0, i1); },
                 RelativeBinaryErrorEvaluator(1.0 / 256), // \todo [petri] pretty high threshold
                 new[] {
-                    // \todo [petri] very small numbers need absolute error!
-                    // \todo [petri] add more range!
                     Tuple.Create(Input.Exponential(1e-6, 1.0), Input.Exponential(1e-3, 20.0)),
                     Tuple.Create(Input.Exponential(1.0, 16.0), Input.Exponential(1e-3, 1.0)),
+                    // \todo [petri] better inputs
                 },
                 new[] {
                     Tuple.Create(0.03431271179579, 8.52991297887638),
@@ -918,16 +1004,15 @@ namespace FixPointCSTest
                 (double i0, double i1) => { return Math.Atan2(i0, i1); },
                 AbsoluteBinaryErrorEvaluator(),
                 new[] {
-                    Tuple.Create(Input.Exponential(1e-6, 1.0), Input.Exponential(1e-6, 1.0)),
-                    Tuple.Create(Input.Exponential(1.0, 1e6), Input.Exponential(1.0, 1e6)),
-                    // \todo [petri] all sign combinations
+                    Tuple.Create(Input.Exponential(1e-6, 1.0, Input.SignMode.Random), Input.Exponential(1e-6, 1.0, Input.SignMode.Random)),
+                    Tuple.Create(Input.Exponential(1.0, ValueBounds.TestPosMax, Input.SignMode.Random), Input.Exponential(1.0, ValueBounds.TestPosMax, Input.SignMode.Random)),
                 },
                 new[] {
                     Tuple.Create(1.0, 1.0),
                     Tuple.Create(0.0, 0.0),
                     Tuple.Create(6.99465692322701, 3.93830072996207),
                 }
-            ),
+            )
         };
 /*
         private static double[] g_test_vals =
@@ -980,8 +1065,8 @@ namespace FixPointCSTest
 
         static void Main(string[] args)
         {
-            // Name prefix of operations to test.
-            // Set this to, eg, "Atan2" or "Rcp(x)" to only measure that operation
+            // Name prefix of operations to test. Empty matches all operations.
+            // Set this to, eg, "Atan2" or "Rcp(x)" to only measure that operation.
             string testFilter = "";
 
             BasicTests(testFilter);

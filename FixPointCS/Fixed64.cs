@@ -198,8 +198,15 @@ namespace FixPointCS
         /// </summary>
         public static long Round(long x)
         {
-            // \todo [petri] Math.Round() round to nearest even number
             return (x + Half) & IntegerMask;
+        }
+
+        /// <summary>
+        /// Returns the fractional part of x. Equal to 'x - floor(x)'.
+        /// </summary>
+        public static long Fract(long x)
+        {
+            return x & FractionMask;
         }
 
         /// <summary>
@@ -704,7 +711,6 @@ namespace FixPointCS
         public static long Atan2(long y, long x)
         {
             // See: https://www.dsprelated.com/showarticle/1052.php
-            // \todo [petri] can divs-by-rcp be optimized, since result is known to be <= 1.0 ?
 
             if (x == 0)
             {
@@ -713,9 +719,10 @@ namespace FixPointCS
                 return 0;
             }
 
-            long nx = x ^ (x >> 63); // approx abs
+            // \note these round negative numbers slightly
+            long nx = x ^ (x >> 63);
             long ny = y ^ (y >> 63);
-            long negMask = ((x ^ y) >> 63);   // \note this isn't strictly symmetrical
+            long negMask = ((x ^ y) >> 63);
 
             const int C1 = 1075846406; // 1.0019600447288488
             const int C2 = -10418146; // -0.009702654828140988

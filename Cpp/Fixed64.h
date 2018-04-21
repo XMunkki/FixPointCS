@@ -186,8 +186,15 @@ namespace Fixed64
     /// </summary>
     static FP_LONG Round(FP_LONG x)
     {
-        // \todo [petri] Math.Round() round to nearest even number
         return (x + Half) & IntegerMask;
+    }
+
+    /// <summary>
+    /// Returns the fractional part of x. Equal to 'x - floor(x)'.
+    /// </summary>
+    static FP_LONG Fract(FP_LONG x)
+    {
+        return x & FractionMask;
     }
 
     /// <summary>
@@ -678,7 +685,6 @@ namespace Fixed64
     static FP_LONG Atan2(FP_LONG y, FP_LONG x)
     {
         // See: https://www.dsprelated.com/showarticle/1052.php
-        // \todo [petri] can divs-by-rcp be optimized, since result is known to be <= 1.0 ?
 
         if (x == 0)
         {
@@ -687,9 +693,10 @@ namespace Fixed64
             return 0;
         }
 
-        FP_LONG nx = x ^ (x >> 63); // approx abs
+        // \note these round negative numbers slightly
+        FP_LONG nx = x ^ (x >> 63);
         FP_LONG ny = y ^ (y >> 63);
-        FP_LONG negMask = ((x ^ y) >> 63);   // \note this isn't strictly symmetrical
+        FP_LONG negMask = ((x ^ y) >> 63);
 
         static const FP_INT C1 = 1075846406; // 1.0019600447288488
         static const FP_INT C2 = -10418146; // -0.009702654828140988
