@@ -93,7 +93,7 @@ def fitFunc(name, order, func, domain, fixed):
   return fitted
 
 FUNCS = {
-  'sin': ((0.0, 1.0), lambda x: np.sin(x * 0.5*np.pi), [0.0, 1.0]),
+  'sin': ((-1.0, 1.0), lambda x: np.sin(x * 0.5*np.pi), [-1.0, 0.0, 1.0]),
   'cos': ((0.0, 1.0), lambda x: np.cos(x * 0.5*np.pi), [0.0, 1.0]),
   'atan': ((0.0, 1.0), lambda x: np.arctan(x), [0.0]),
   'rcp': ((1.0, 2.0), lambda x: 1.0 / x, [1.0, 2.0]),

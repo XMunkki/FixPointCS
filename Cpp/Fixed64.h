@@ -92,7 +92,7 @@ namespace Fixed64
     /// </summary>
     static FP_LONG FromDouble(double v)
     {
-        return (FP_LONG)(v * (4294967296.0));
+        return (FP_LONG)(v * 4294967296.0);
     }
 
     /// <summary>
@@ -608,12 +608,11 @@ namespace Fixed64
 
     static FP_LONG SinPoly5(FP_LONG x)
     {
-        // Formula for 5th order sin: z/2 * (pi - z*z*((2pi - 5) - z*z*(pi-3)))
         // See: http://www.coranac.com/2009/07/sines/
 
         // Map [0, 2pi] to [0, 4] (as s2.30).
         // This also wraps the values into one period.
-        static const FP_INT RCP_HALF_PI = (FP_INT)(One / (4.0 * 0.5 * FP_PI));  // the 4.0 factor converts directly to s2.30
+        static const FP_INT RCP_HALF_PI = 683565276; // 1.0 / (4.0 * 0.5 * FP_PI);  // the 4.0 factor converts directly to s2.30
         FP_INT z = MulIntLongLow(RCP_HALF_PI, x);
 
         // Handle quadrants 1 and 2 by mirroring the [1, 3] range to [-1, 1] (by calculating 2 - z).
@@ -625,12 +624,12 @@ namespace Fixed64
         static const FP_INT ONE = (1 << 30);
         FP_ASSERT((z >= -ONE) && (z <= ONE));
 
-        // Calculate polynomial approximation.
-        static const FP_INT n0 = (FP_INT)((1 << 30) * 0.07177026534258267);
-        static const FP_INT n1 = (FP_INT)((1 << 30) * -0.64210704557858);
-        static const FP_INT n2 = (FP_INT)((1 << 30) * 1.5703367802359975);
+        // Polynomial approximation.
+        static const FP_INT C1 = 1686136278; // 1.5703367802360138
+        static const FP_INT C3 = -689457190; // -0.6421070455786427
+        static const FP_INT C5 = 77062735; // 0.0717702653426288
         FP_INT zz = Qmul30(z, z);
-        FP_INT res = Qmul30(Qmul30(Qmul30(n0, zz) + n1, zz) + n2, z);
+        FP_INT res = Qmul30(Qmul30(Qmul30(C5, zz) + C3, zz) + C1, z);
 
         // Convert back to s32.32.
         return (FP_LONG)res << 2;

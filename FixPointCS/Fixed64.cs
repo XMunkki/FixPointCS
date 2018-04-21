@@ -93,7 +93,7 @@ namespace FixPointCS
         /// </summary>
         public static long FromDouble(double v)
         {
-            return (long)(v * (4294967296.0));
+            return (long)(v * 4294967296.0);
         }
 
         /// <summary>
@@ -631,12 +631,11 @@ namespace FixPointCS
 
         public static long SinPoly5(long x)
         {
-            // Formula for 5th order sin: z/2 * (pi - z*z*((2pi - 5) - z*z*(pi-3)))
             // See: http://www.coranac.com/2009/07/sines/
 
             // Map [0, 2pi] to [0, 4] (as s2.30).
             // This also wraps the values into one period.
-            const int RCP_HALF_PI = (int)(One / (4.0 * 0.5 * Math.PI));  // the 4.0 factor converts directly to s2.30
+            const int RCP_HALF_PI = 683565276; // 1.0 / (4.0 * 0.5 * Math.PI);  // the 4.0 factor converts directly to s2.30
             int z = MulIntLongLow(RCP_HALF_PI, x);
 
             // Handle quadrants 1 and 2 by mirroring the [1, 3] range to [-1, 1] (by calculating 2 - z).
@@ -648,12 +647,12 @@ namespace FixPointCS
             const int ONE = (1 << 30);
             Debug.Assert((z >= -ONE) && (z <= ONE));
 
-            // Calculate polynomial approximation.
-            const int n0 = (int)((1 << 30) * 0.07177026534258267);
-            const int n1 = (int)((1 << 30) * -0.64210704557858);
-            const int n2 = (int)((1 << 30) * 1.5703367802359975);
+            // Polynomial approximation.
+            const int C1 = 1686136278; // 1.5703367802360138
+            const int C3 = -689457190; // -0.6421070455786427
+            const int C5 = 77062735; // 0.0717702653426288
             int zz = Qmul30(z, z);
-            int res = Qmul30(Qmul30(Qmul30(n0, zz) + n1, zz) + n2, z);
+            int res = Qmul30(Qmul30(Qmul30(C5, zz) + C3, zz) + C1, z);
 
             // Convert back to s32.32.
             return (long)res << 2;
