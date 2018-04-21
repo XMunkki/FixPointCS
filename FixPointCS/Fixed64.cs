@@ -45,6 +45,9 @@ using System.Diagnostics;
  * You can use "#if CPP" else "#if !CPP" to block out code that's C# or C++
  * only. Currently the generator preprocessor is really ad-hoc and gets mixed
  * up by any other #if:s, #else:s or #endif:s.
+ * 
+ * Use up-to C# 3 features to keep the library compatible with older versions
+ * of Unity.
  */
 
 namespace FixPointCS
