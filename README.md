@@ -59,9 +59,44 @@ It is automatically generated from the Fixed64.cs file by the GenerateCpp -tool.
 
 New contributions are welcome! Especially new operations, faster versions of existing ones or testing/verification code.
 
-## TODO: Benchmarks
+## Operations
 
-Todo: performance profiles of functions (also against doubles, floats)
+Below is a table describing the supported operations, their relative performance and precision (as number of accurate bits).
+The performance was measured on a Core i7-4700MQ @ 2.40GHz using a single thread.
+
+|        Operation |     Mops/s | Precision
+|------------------|-----------:|----------:
+|           Ceil() |   870.7483 |     exact
+|          Floor() |  1015.8730 |     exact
+|          Round() |   439.8625 |     exact
+|            Abs() |   402.5157 |     exact
+|           Nabs() |   505.9289 |     exact
+|              1/x |    33.2468 |     16.00
+|           Rcp(x) |    89.5105 |     13.00
+|          Sqrt(x) |     7.3988 |     17.23
+|    Rcp(RSqrt(x)) |    42.5249 |     14.01
+|      SqrtFast(x) |    56.1404 |     14.00
+|         RSqrt(x) |   100.6289 |     14.01
+|        1/Sqrt(x) |     6.0952 |     17.00
+|     Rcp(Sqrt(x)) |     6.9189 |     14.01
+|           Exp(x) |    45.7143 |     14.58
+|          Exp2(x) |    52.2449 |     16.87
+|           Log(x) |    55.1724 |      7.08
+|          Log2(x) |    46.5455 |      7.60
+|           Sin(x) |   199.3769 |     10.16
+|           Cos(x) |   194.5289 |     10.15
+|           Tan(x) |    43.0976 |     11.25
+|          Asin(x) |    21.6216 |      7.98
+|          Acos(x) |    21.8430 |      7.98
+|          Atan(x) |    48.4848 |      7.98
+|              a+b |  1066.6667 |     exact
+|              a-b |  1075.6303 |     exact
+|              a*b |   438.3562 |     26.45
+|              a/b |    33.1606 |     41.97
+|         Min(a,b) |   445.9930 |     exact
+|         Max(a,b) |   503.9370 |     exact
+|        Pow(a, b) |    17.5824 |      7.72
+|      Atan2(a, b) |    54.0084 |      7.89
 
 ## History
 

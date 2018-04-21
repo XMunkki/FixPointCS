@@ -78,10 +78,14 @@ namespace FixPointCSTest
         }
     };
 
-    class UnaryOp
+    class OpBase
     {
-        public string                   name;
-        public int                      numBenchmarkIters;
+        public string   name;
+        public int      numBenchmarkIters;
+    };
+
+    class UnaryOp : OpBase
+    {
         public UnaryExecutor            arrayExecute;
         public Func<double, double>     refExecute;
         public UnaryErrorEvaluator      evaluateError;
@@ -103,10 +107,8 @@ namespace FixPointCSTest
         }
     }
 
-    class BinaryOp
+    class BinaryOp : OpBase
     {
-        public string                       name;
-        public int                          numBenchmarkIters;
         public BinaryExecutor               arrayExecute;
         public Func<double, double, double> refExecute;
         public BinaryErrorEvaluator         evaluateError;
@@ -128,11 +130,40 @@ namespace FixPointCSTest
         }
     }
 
-    class PrecisionTest
+    class TestRunner
     {
-        private static readonly int NUM_PRECISION_TESTS = 1024 * 1024;
+        private const int NUM_PRECISION_TESTS = 1024 * 1024;
+        private const int BENCHMARK_CHUNK_SIZE = 128;
 
         private static Random rnd = new Random(12345678);
+
+        public struct PrecisionResult
+        {
+            public double   avgError;
+            public double   maxError;
+            public double   numPrecisionBits;
+            public F64[]    worstInput;
+
+            public PrecisionResult(double avgError, double maxError, double numPrecisionBits, F64[] worstInput)
+            {
+                this.avgError           = avgError;
+                this.maxError           = maxError;
+                this.numPrecisionBits   = numPrecisionBits;
+                this.worstInput         = worstInput;
+            }
+        }
+
+        public struct BenchmarkResult
+        {
+            public double   opsPerSec;
+            public double   elapsedSeconds;
+
+            public BenchmarkResult(double opsPerSec, double elapsedSeconds)
+            {
+                this.opsPerSec      = opsPerSec;
+                this.elapsedSeconds = elapsedSeconds;
+            }
+        }
 
         static string DoubleToString(double val, int numChars)
         {
@@ -140,7 +171,7 @@ namespace FixPointCSTest
             return str.Substring(0, Math.Min(str.Length, numChars));
         }
 
-        public static void UnaryBasicValues(UnaryOp op)
+        public static void TestUnaryBasicValues(UnaryOp op)
         {
             int numValues = op.basicValues.Length;
             if (numValues > 0)
@@ -170,7 +201,7 @@ namespace FixPointCSTest
             }
         }
 
-        public static void BinaryBasicValues(BinaryOp op)
+        public static void TestBinaryBasicValues(BinaryOp op)
         {
             int numValues = op.basicValues.Length;
             if (numValues > 0)
@@ -204,7 +235,7 @@ namespace FixPointCSTest
             }
         }
 
-        public static void TestUnaryPrecision(UnaryOp op)
+        public static PrecisionResult TestUnaryPrecision(UnaryOp op)
         {
             int     numTested   = 0;
             double  totalErr    = 0.0;
@@ -242,13 +273,10 @@ namespace FixPointCSTest
             Debug.Assert(numTested > 1000);
             double avgErr = totalErr / (double)numTested;
             double numBits = -Math.Log(maxErr, 2.0);
-            if (maxErr == 0.0)
-                Console.WriteLine("{0,16} {1,16} {2,16}", op.name, "exact", "exact");
-            else
-                Console.WriteLine("{0,16} {1} {2} {3} [x={4}]", op.name, DoubleToString(totalErr / NUM_PRECISION_TESTS, 16), DoubleToString(maxErr, 16), DoubleToString(numBits, 6), DoubleToString(worstInput.Double, 16));
+            return new PrecisionResult(avgErr, maxErr, numBits, new[]{ worstInput });
         }
 
-        public static void TestBinaryPrecision(BinaryOp op)
+        public static PrecisionResult TestBinaryPrecision(BinaryOp op)
         {
             int             numTested   = 0;
             double          totalErr    = 0.0;
@@ -288,19 +316,10 @@ namespace FixPointCSTest
             Debug.Assert(numTested > 1000);
             double avgErr = totalErr / (double)numTested;
             double numBits = -Math.Log(maxErr, 2.0);
-            if (maxErr == 0.0)
-                Console.WriteLine("{0,16} {1,16} {2,16}", op.name, "exact", "exact");
-            else
-                Console.WriteLine("{0,16} {1} {2} {3} [a={4}, b={5}]", op.name, DoubleToString(totalErr / NUM_PRECISION_TESTS, 16), DoubleToString(maxErr, 16), DoubleToString(numBits, 6), DoubleToString(worstInput.Item1.Double, 16), DoubleToString(worstInput.Item2.Double, 16));
+            return new PrecisionResult(avgErr, maxErr, numBits, new[] { worstInput.Item1, worstInput.Item2});
         }
-    }
 
-    class Benchmark
-    {
-        private const int CHUNK_SIZE = 128;
-        private static Random rnd = new Random();
-
-        private static double Measure(Action func)
+        private static double BenchmarkFunction(Action func)
         {
             // Measure execution time X times (pick fastest).
             const int NUM_ITERS = 7;
@@ -317,42 +336,71 @@ namespace FixPointCSTest
             return elapsed;
         }
 
-        private static void MeasureReport(string opName, int numIters, Action func)
+        public static BenchmarkResult BenchmarkUnaryOperation(UnaryOp op)
         {
+            // \todo [petri] use all generators?
+            F64[] inputs = op.inputGenerators[0](rnd, BENCHMARK_CHUNK_SIZE).Select(d => F64.FromDouble(d)).ToArray();
+            F64[] outputs = new F64[BENCHMARK_CHUNK_SIZE];
+
             // Measure execution time.
-            double elapsed = Measure(func);
-
-            // Report result.
-            long numOps = numIters * CHUNK_SIZE;
-            double opsPerS = numOps / elapsed;
-            Console.WriteLine("{0,-13}{1,10:0.0000} Mops/s ({2:0.0000}s elapsed)", opName, opsPerS / 1000000.0, elapsed);
-        }
-
-        public static void ExecuteUnary(UnaryOp op)
-        {
-            // \todo [petri] use all generators?
-            F64[] inputs = op.inputGenerators[0](rnd, CHUNK_SIZE).Select(d => F64.FromDouble(d)).ToArray();
-            F64[] outputs = new F64[CHUNK_SIZE];
-
-            MeasureReport(op.name, op.numBenchmarkIters, () =>
+            double elapsedSeconds = BenchmarkFunction(() =>
             {
                 for (int iter = 0; iter < op.numBenchmarkIters; iter++)
-                    op.arrayExecute(CHUNK_SIZE, inputs, outputs);
+                    op.arrayExecute(BENCHMARK_CHUNK_SIZE, inputs, outputs);
             });
+
+            // Return result.
+            long numTotalOps = op.numBenchmarkIters * BENCHMARK_CHUNK_SIZE;
+            double opsPerSec = numTotalOps / elapsedSeconds;
+            return new BenchmarkResult(opsPerSec, elapsedSeconds);
         }
 
-        public static void ExecuteBinary(BinaryOp op)
+        public static BenchmarkResult BenchmarkBinaryOperation(BinaryOp op)
         {
             // \todo [petri] use all generators?
-            F64[] inputs0 = op.inputGenerators[0].Item1(rnd, CHUNK_SIZE).Select(d => F64.FromDouble(d)).ToArray();
-            F64[] inputs1 = op.inputGenerators[0].Item2(rnd, CHUNK_SIZE).Select(d => F64.FromDouble(d)).ToArray();
-            F64[] outputs = new F64[CHUNK_SIZE];
+            F64[] inputs0 = op.inputGenerators[0].Item1(rnd, BENCHMARK_CHUNK_SIZE).Select(d => F64.FromDouble(d)).ToArray();
+            F64[] inputs1 = op.inputGenerators[0].Item2(rnd, BENCHMARK_CHUNK_SIZE).Select(d => F64.FromDouble(d)).ToArray();
+            F64[] outputs = new F64[BENCHMARK_CHUNK_SIZE];
 
-            MeasureReport(op.name, op.numBenchmarkIters, () =>
+            // Measure execution time.
+            double elapsedSeconds = BenchmarkFunction(() =>
             {
                 for (int iter = 0; iter < op.numBenchmarkIters; iter++)
-                    op.arrayExecute(CHUNK_SIZE, inputs0, inputs1, outputs);
+                    op.arrayExecute(BENCHMARK_CHUNK_SIZE, inputs0, inputs1, outputs);
             });
+
+            // Return reuslt.
+            long numTotalOps = op.numBenchmarkIters * BENCHMARK_CHUNK_SIZE;
+            double opsPerSec = numTotalOps / elapsedSeconds;
+            return new BenchmarkResult(opsPerSec, elapsedSeconds);
+        }
+
+        public static void PrintOperationSummary(string name, PrecisionResult precision, BenchmarkResult benchmark)
+        {
+            if (benchmark.elapsedSeconds < 0.1 || benchmark.elapsedSeconds > 1.0)
+                Console.WriteLine("WARNING: {0} took {1:0.00}s to execute, tweak its iteration count so that it executes in roughly 0.5s", name, benchmark.elapsedSeconds);
+
+            if (precision.maxError == 0.0)
+                Console.WriteLine("| {0,16} | {1,10:0.0000} |     exact | {2,16} | {3,16} |", name, benchmark.opsPerSec / 1000000.0, "0.0", "0.0");
+            else
+            {
+                string coordsStr = String.Join(" ", precision.worstInput.Select(v => DoubleToString(v.Double, 16)));
+                Console.WriteLine("| {0,16} | {1,10:0.0000} | {2,9:0.00} | {3} | {4} | {5}", name, benchmark.opsPerSec / 1000000.0, precision.numPrecisionBits, DoubleToString(precision.avgError, 16), DoubleToString(precision.maxError, 16), coordsStr);
+            }
+        }
+
+        public static void TestUnaryOperation(UnaryOp op)
+        {
+            PrecisionResult precision = TestUnaryPrecision(op);
+            BenchmarkResult benchmark = BenchmarkUnaryOperation(op);
+            PrintOperationSummary(op.name, precision, benchmark);
+        }
+
+        public static void TestBinaryOperation(BinaryOp op)
+        {
+            PrecisionResult precision = TestBinaryPrecision(op);
+            BenchmarkResult benchmark = BenchmarkBinaryOperation(op);
+            PrintOperationSummary(op.name, precision, benchmark);
         }
     }
 
@@ -473,7 +521,8 @@ namespace FixPointCSTest
             0.9999972383957,
         };
 
-        static UnaryOp[] unaryOps = new UnaryOp[] {
+        static OpBase[] operations = new OpBase[]
+        {
             new UnaryOp(
                 "Ceil()",
                 1000000,
@@ -763,9 +812,7 @@ namespace FixPointCSTest
                 },
                 new double[] { 0.5, 1.0 }
             ),
-        };
 
-        static BinaryOp[] binaryOps = new BinaryOp[] {
             new BinaryOp(
                 "a+b",
                 1000000,
@@ -899,53 +946,46 @@ namespace FixPointCSTest
         {
             Console.WriteLine("Basic tests:");
 
-            foreach (UnaryOp op in unaryOps)
+            foreach (OpBase op in operations)
+            {
                 if (op.name.StartsWith(testFilter))
-                    PrecisionTest.UnaryBasicValues(op);
-
-            foreach (BinaryOp op in binaryOps)
-                if (op.name.StartsWith(testFilter))
-                    PrecisionTest.BinaryBasicValues(op);
+                {
+                    if (op is UnaryOp)
+                        TestRunner.TestUnaryBasicValues((UnaryOp)op);
+                    else if (op is BinaryOp)
+                        TestRunner.TestBinaryBasicValues((BinaryOp)op);
+                }
+            }
         }
 
-        static void PrecisionTests(string testFilter)
+        static void TestOperations(string testFilter)
         {
-            Console.WriteLine("Precision tests:          average            worst   bits [coord]");
+            Console.WriteLine("OPERATIONS SUMMARY:");
+            Console.WriteLine("|        Operation |     Mops/s | Precision |        Max error |        Avg error | Worst input");
+            Console.WriteLine("|------------------|-----------:|----------:|-----------------:|-----------------:|-----------------");
 
-            foreach (UnaryOp op in unaryOps)
+            foreach (OpBase op in operations)
+            {
                 if (op.name.StartsWith(testFilter))
-                    PrecisionTest.TestUnaryPrecision(op);
-
-            foreach (BinaryOp op in binaryOps)
-                if (op.name.StartsWith(testFilter))
-                    PrecisionTest.TestBinaryPrecision(op);
-
-            Console.WriteLine();
-        }
-
-        static void PerfTests(string testFilter)
-        {
-            Console.WriteLine("Performance benchmark:");
-
-            foreach (UnaryOp op in unaryOps)
-                if (op.name.StartsWith(testFilter))
-                    Benchmark.ExecuteUnary(op);
-
-            foreach (BinaryOp op in binaryOps)
-                if (op.name.StartsWith(testFilter))
-                    Benchmark.ExecuteBinary(op);
+                {
+                    if (op is UnaryOp)
+                        TestRunner.TestUnaryOperation((UnaryOp)op);
+                    else if (op is BinaryOp)
+                        TestRunner.TestBinaryOperation((BinaryOp)op);
+                }
+            }
 
             Console.WriteLine();
         }
 
         static void Main(string[] args)
         {
-            // Set this to, eg, "Atan2" to only measure that operation
+            // Name prefix of operations to test.
+            // Set this to, eg, "Atan2" or "Rcp(x)" to only measure that operation
             string testFilter = "";
 
             BasicTests(testFilter);
-            PrecisionTests(testFilter);
-            PerfTests(testFilter);
+            TestOperations(testFilter);
 
             /*Console.WriteLine("-ENTER-");
             Console.ReadLine();*/
