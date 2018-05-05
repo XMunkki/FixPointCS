@@ -64,7 +64,6 @@ New contributions are welcome! Especially new operations, faster versions of exi
 Below is a table describing the supported operations, their relative performance and precision (as number of accurate bits).
 The performance was measured with C# (Release build) on Windows 10 using a Core i7-4700MQ @ 2.40GHz using a single thread.
 
-OPERATIONS SUMMARY:
 |          Operation |     Mops/s | Precision
 |--------------------|-----------:|----------:
 |           Identity |    1502.35 |     exact
