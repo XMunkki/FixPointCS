@@ -40,7 +40,7 @@ namespace FixPointCS
         public static F64Vec2 Left     { get { return new F64Vec2(F64.Neg1, F64.Zero); } }
         public static F64Vec2 Right    { get { return new F64Vec2(F64.One, F64.Zero); } }
 
-        // The components
+        // Components
         public F64 x;
         public F64 y;
 
@@ -49,11 +49,6 @@ namespace FixPointCS
             this.x = x;
             this.y = y;
         }
-
-        // Conversions
-//        public int Int { get { return FP.ToInt(raw); } }
-//        public float Float { get { return FP.ToFloat(raw); } }
-//        public double Double { get { return FP.ToDouble(raw); } }
 
         // Operators
         public static F64Vec2 operator -(F64Vec2 a) { return new F64Vec2(-a.x, -a.y); }
@@ -77,34 +72,60 @@ namespace FixPointCS
 
         public static bool operator ==(F64Vec2 a, F64Vec2 b) { return a.x == b.x && a.y == b.y; }
         public static bool operator !=(F64Vec2 a, F64Vec2 b) { return a.x != b.x || a.y != b.y; }
-//        public static bool operator <(F64Vec2 a, F64Vec2 b) { return a.raw < b.raw; }
-//        public static bool operator <=(F64Vec2 a, F64Vec2 b) { return a.raw <= b.raw; }
-//        public static bool operator >(F64Vec2 a, F64Vec2 b) { return a.raw > b.raw; }
-//        public static bool operator >=(F64Vec2 a, F64Vec2 b) { return a.raw >= b.raw; }
 
-        // \todo [petri] make static?
-        public F64Vec2 Sqrt() { return new F64Vec2(x.Sqrt(), y.Sqrt()); }
-        public F64Vec2 RSqrt() { return new F64Vec2(x.RSqrt(), y.RSqrt()); }
-        public F64Vec2 Rcp() { return new F64Vec2(x.Rcp(), y.Rcp()); }
-        public F64Vec2 Exp() { return new F64Vec2(x.Exp(), y.Exp()); }
-        public F64Vec2 Exp2() { return new F64Vec2(x.Exp2(), y.Exp2()); }
-        public F64Vec2 Log() { return new F64Vec2(x.Log(), y.Log()); }
-        public F64Vec2 Log2() { return new F64Vec2(x.Log2(), y.Log2()); }
-        public F64Vec2 Sin() { return new F64Vec2(x.Sin(), y.Sin()); }
-        public F64Vec2 Cos() { return new F64Vec2(x.Cos(), y.Cos()); }
+        public static F64Vec2 SqrtPrecise(F64Vec2 a) { return new F64Vec2(F64.SqrtPrecise(a.x), F64.SqrtPrecise(a.y)); }
+        public static F64Vec2 Sqrt(F64Vec2 a) { return new F64Vec2(F64.Sqrt(a.x), F64.Sqrt(a.y)); }
+        public static F64Vec2 SqrtFast(F64Vec2 a) { return new F64Vec2(F64.SqrtFast(a.x), F64.SqrtFast(a.y)); }
+        public static F64Vec2 SqrtFastest(F64Vec2 a) { return new F64Vec2(F64.SqrtFastest(a.x), F64.SqrtFastest(a.y)); }
+        public static F64Vec2 RSqrt(F64Vec2 a) { return new F64Vec2(F64.RSqrt(a.x), F64.RSqrt(a.y)); }
+        public static F64Vec2 RSqrtFast(F64Vec2 a) { return new F64Vec2(F64.RSqrtFast(a.x), F64.RSqrtFast(a.y)); }
+        public static F64Vec2 RSqrtFastest(F64Vec2 a) { return new F64Vec2(F64.RSqrtFastest(a.x), F64.RSqrtFastest(a.y)); }
+        public static F64Vec2 Rcp(F64Vec2 a) { return new F64Vec2(F64.Rcp(a.x), F64.Rcp(a.y)); }
+        public static F64Vec2 RcpFast(F64Vec2 a) { return new F64Vec2(F64.RcpFast(a.x), F64.RcpFast(a.y)); }
+        public static F64Vec2 RcpFastest(F64Vec2 a) { return new F64Vec2(F64.RcpFastest(a.x), F64.RcpFastest(a.y)); }
+        public static F64Vec2 Exp(F64Vec2 a) { return new F64Vec2(F64.Exp(a.x), F64.Exp(a.y)); }
+        public static F64Vec2 ExpFast(F64Vec2 a) { return new F64Vec2(F64.ExpFast(a.x), F64.ExpFast(a.y)); }
+        public static F64Vec2 ExpFastest(F64Vec2 a) { return new F64Vec2(F64.ExpFastest(a.x), F64.ExpFastest(a.y)); }
+        public static F64Vec2 Exp2(F64Vec2 a) { return new F64Vec2(F64.Exp2(a.x), F64.Exp2(a.y)); }
+        public static F64Vec2 Exp2Fast(F64Vec2 a) { return new F64Vec2(F64.Exp2Fast(a.x), F64.Exp2Fast(a.y)); }
+        public static F64Vec2 Exp2Fastest(F64Vec2 a) { return new F64Vec2(F64.Exp2Fastest(a.x), F64.Exp2Fastest(a.y)); }
+        public static F64Vec2 Log(F64Vec2 a) { return new F64Vec2(F64.Log(a.x), F64.Log(a.y)); }
+        public static F64Vec2 LogFast(F64Vec2 a) { return new F64Vec2(F64.LogFast(a.x), F64.LogFast(a.y)); }
+        public static F64Vec2 LogFastest(F64Vec2 a) { return new F64Vec2(F64.LogFastest(a.x), F64.LogFastest(a.y)); }
+        public static F64Vec2 Log2(F64Vec2 a) { return new F64Vec2(F64.Log2(a.x), F64.Log2(a.y)); }
+        public static F64Vec2 Log2Fast(F64Vec2 a) { return new F64Vec2(F64.Log2Fast(a.x), F64.Log2Fast(a.y)); }
+        public static F64Vec2 Log2Fastest(F64Vec2 a) { return new F64Vec2(F64.Log2Fastest(a.x), F64.Log2Fastest(a.y)); }
+        public static F64Vec2 Sin(F64Vec2 a) { return new F64Vec2(F64.Sin(a.x), F64.Sin(a.y)); }
+        public static F64Vec2 SinFast(F64Vec2 a) { return new F64Vec2(F64.SinFast(a.x), F64.SinFast(a.y)); }
+        public static F64Vec2 SinFastest(F64Vec2 a) { return new F64Vec2(F64.SinFastest(a.x), F64.SinFastest(a.y)); }
+        public static F64Vec2 Cos(F64Vec2 a) { return new F64Vec2(F64.Cos(a.x), F64.Cos(a.y)); }
+        public static F64Vec2 CosFast(F64Vec2 a) { return new F64Vec2(F64.CosFast(a.x), F64.CosFast(a.y)); }
+        public static F64Vec2 CosFastest(F64Vec2 a) { return new F64Vec2(F64.CosFastest(a.x), F64.CosFastest(a.y)); }
 
         public static F64Vec2 Pow(F64Vec2 a, F64 b) { return new F64Vec2(F64.Pow(a.x, b), F64.Pow(a.y, b)); }
+        public static F64Vec2 PowFast(F64Vec2 a, F64 b) { return new F64Vec2(F64.PowFast(a.x, b), F64.PowFast(a.y, b)); }
+        public static F64Vec2 PowFastest(F64Vec2 a, F64 b) { return new F64Vec2(F64.PowFastest(a.x, b), F64.PowFastest(a.y, b)); }
         public static F64Vec2 Pow(F64 a, F64Vec2 b) { return new F64Vec2(F64.Pow(a, b.x), F64.Pow(a, b.y)); }
+        public static F64Vec2 PowFast(F64 a, F64Vec2 b) { return new F64Vec2(F64.PowFast(a, b.x), F64.PowFast(a, b.y)); }
+        public static F64Vec2 PowFastest(F64 a, F64Vec2 b) { return new F64Vec2(F64.PowFastest(a, b.x), F64.PowFastest(a, b.y)); }
         public static F64Vec2 Pow(F64Vec2 a, F64Vec2 b) { return new F64Vec2(F64.Pow(a.x, b.x), F64.Pow(a.y, b.y)); }
+        public static F64Vec2 PowFast(F64Vec2 a, F64Vec2 b) { return new F64Vec2(F64.PowFast(a.x, b.x), F64.PowFast(a.y, b.y)); }
+        public static F64Vec2 PowFastest(F64Vec2 a, F64Vec2 b) { return new F64Vec2(F64.PowFastest(a.x, b.x), F64.PowFastest(a.y, b.y)); }
 
-        public static F64 Length(F64Vec2 a) { return (a.x * a.x + a.y * a.y).SqrtFast(); }
+        public static F64 Length(F64Vec2 a) { return F64.Sqrt(a.x * a.x + a.y * a.y); }
+        public static F64 LengthFast(F64Vec2 a) { return F64.SqrtFast(a.x * a.x + a.y * a.y); }
+        public static F64 LengthFastest(F64Vec2 a) { return F64.SqrtFastest(a.x * a.x + a.y * a.y); }
         public static F64 LengthSqr(F64Vec2 a) { return (a.x * a.x + a.y * a.y); }
-        public static F64Vec2 Normalize(F64Vec2 a) { F64 ooLen = LengthSqr(a).RSqrt(); return ooLen * a; }
+        public static F64Vec2 Normalize(F64Vec2 a) { F64 ooLen = F64.RSqrt(LengthSqr(a)); return ooLen * a; }
+        public static F64Vec2 NormalizeFast(F64Vec2 a) { F64 ooLen = F64.RSqrtFast(LengthSqr(a)); return ooLen * a; }
+        public static F64Vec2 NormalizeFastest(F64Vec2 a) { F64 ooLen = F64.RSqrtFastest(LengthSqr(a)); return ooLen * a; }
 
         public static F64 Dot(F64Vec2 a, F64Vec2 b) { return (a.x * b.x + a.y * b.y); }
         public static F64 Distance(F64Vec2 a, F64Vec2 b) { return Length(a - b); }
+        public static F64 DistanceFast(F64Vec2 a, F64Vec2 b) { return LengthFast(a - b); }
+        public static F64 DistanceFastest(F64Vec2 a, F64Vec2 b) { return LengthFastest(a - b); }
 
-        public static F64Vec2 Lerp(F64Vec2 a, F64Vec2 b, F64 t) { return (F64.One - t) * a + t * b; }   // \todo [petri] is a + t*(b-a) better formula?
+        public static F64Vec2 Lerp(F64Vec2 a, F64Vec2 b, F64 t) { return a + t*(b - a); }
 
         public static F64Vec2 Min(F64Vec2 a, F64Vec2 b) { return new F64Vec2(F64.Min(a.x, b.x), F64.Min(a.y, b.y)); }
         public static F64Vec2 Max(F64Vec2 a, F64Vec2 b) { return new F64Vec2(F64.Max(a.x, b.x), F64.Max(a.y, b.y)); }

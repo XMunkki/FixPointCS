@@ -62,43 +62,72 @@ New contributions are welcome! Especially new operations, faster versions of exi
 ## Operations
 
 Below is a table describing the supported operations, their relative performance and precision (as number of accurate bits).
-The performance was measured with C# (Release build) on a Core i7-4700MQ @ 2.40GHz using a single thread.
+The performance was measured with C# (Release build) on Windows 10 using a Core i7-4700MQ @ 2.40GHz using a single thread.
 
-|        Operation |     Mops/s | Precision
-|------------------|-----------:|----------:
-|         Identity |  1523.8095 |     exact
-|           Ceil() |   870.7483 |     exact
-|          Floor() |  1015.8730 |     exact
-|          Round() |   441.3793 |     exact
-|            Abs() |   416.9381 |     exact
-|           Nabs() |   528.9256 |     exact
-|              1/x |    32.8205 |     16.00
-|           Rcp(x) |   101.5873 |     13.22
-|          Sqrt(x) |     6.9189 |     17.23
-|    Rcp(RSqrt(x)) |    46.8864 |     13.52
-|      SqrtFast(x) |    96.9697 |     17.00
-|         RSqrt(x) |   110.1549 |     15.66
-|        1/Sqrt(x) |     5.8986 |     17.00
-|     Rcp(Sqrt(x)) |     6.6321 |     13.39
-|           Exp(x) |   120.7547 |     17.59
-|          Exp2(x) |   156.4792 |     21.69
-|           Log(x) |   111.3043 |     12.45
-|          Log2(x) |    96.2406 |     12.20
-|           Sin(x) |   188.7906 |     10.16
-|           Cos(x) |   192.1922 |     10.15
-|           Tan(x) |    44.5993 |     11.25
-|          Asin(x) |    31.2195 |     11.78
-|          Acos(x) |    31.2195 |     11.78
-|          Atan(x) |    67.3684 |     11.87
-|              a+b |  1049.1803 |     exact
-|              a-b |  1066.6667 |     exact
-|              a*b |   432.4324 |     26.45
-|              a/b |    33.1606 |     41.97
-|              a%b |    96.9697 |     exact
-|         Min(a,b) |   463.7681 |     exact
-|         Max(a,b) |   526.7490 |     exact
-|        Pow(a, b) |    46.0432 |     14.94
-|      Atan2(a, b) |    65.3061 |     11.66
+OPERATIONS SUMMARY:
+|          Operation |     Mops/s | Precision
+|--------------------|-----------:|----------:
+|           Identity |    1502.35 |     exact
+|                a+b |    1066.67 |     exact
+|                a-b |    1057.85 |     exact
+|                a*b |     288.29 |     exact
+|                a/b |      32.08 |     exact
+|                a%b |      96.24 |     exact
+|           Min(a,b) |     477.61 |     exact
+|           Max(a,b) |     505.93 |     exact
+|             Ceil() |     920.86 |     exact
+|            Floor() |     977.10 |     exact
+|            Round() |     507.94 |     exact
+|            Fract() |    1163.64 |     exact
+|              Abs() |     914.29 |     exact
+|             Nabs() |     673.68 |     exact
+|                1/x |      32.16 |     52.01
+|             Rcp(x) |      79.50 |     23.71
+|         RcpFast(x) |     101.59 |     16.13
+|      RcpFastest(x) |     108.47 |     10.95
+|     SqrtPrecise(x) |       6.92 |     exact
+|            Sqrt(x) |      91.43 |     23.22
+|        SqrtFast(x) |     104.07 |     16.23
+|     SqrtFastest(x) |     104.07 |     13.32
+|           RSqrt(x) |      89.51 |     24.25
+|       RSqrtFast(x) |     101.59 |     15.71
+|    RSqrtFastest(x) |     108.47 |     10.54
+|             Exp(x) |     127.24 |     23.01
+|         ExpFast(x) |     137.63 |     17.85
+|      ExpFastest(x) |     150.94 |     12.97
+|            Exp2(x) |     170.21 |     23.01
+|        Exp2Fast(x) |     199.38 |     17.85
+|     Exp2Fastest(x) |     238.81 |     12.97
+|             Log(x) |      84.21 |     30.05
+|         LogFast(x) |      96.24 |     15.10
+|      LogFastest(x) |     120.75 |      9.27
+|            Log2(x) |      89.51 |     exact
+|        Log2Fast(x) |     104.92 |     17.98
+|     Log2Fastest(x) |     121.90 |     10.69
+|          Pow(a, b) |      41.29 |     22.89
+|      PowFast(a, b) |      52.67 |     14.87
+|   PowFastest(a, b) |      53.78 |     10.31
+|             Sin(x) |     153.11 |     26.63
+|         SinFast(x) |     177.29 |     19.57
+|      SinFastest(x) |     212.62 |     12.57
+|             Cos(x) |     125.74 |     26.64
+|         CosFast(x) |     171.58 |     19.57
+|      CosFastest(x) |     198.76 |     12.57
+|             Tan(x) |      33.42 |     23.78
+|         TanFast(x) |      38.67 |     16.24
+|      TanFastest(x) |      48.48 |     11.22
+|            Asin(x) |      23.62 |     23.46
+|        AsinFast(x) |      27.23 |     16.60
+|     AsinFastest(x) |      35.56 |     11.44
+|            Acos(x) |      23.10 |     22.67
+|        AcosFast(x) |      26.23 |     16.60
+|     AcosFastest(x) |      34.78 |     11.44
+|            Atan(x) |      39.02 |     24.90
+|        AtanFast(x) |      47.58 |     17.53
+|     AtanFastest(x) |      71.91 |     11.45
+|        Atan2(a, b) |      39.02 |     22.03
+|    Atan2Fast(a, b) |      47.94 |     17.52
+| Atan2Fastest(a, b) |      72.73 |     11.13
 
 ## History
 

@@ -22,6 +22,8 @@
 # SOFTWARE.
 #
 
+# OBSOLETE -- remez.py is used instead
+
 # Utility script for generating fitted polynomials to approximate various
 # trascendental functions for use in Fixed64.cs.
 #
@@ -35,6 +37,7 @@
 
 import numpy as np
 import numpy.polynomial.polynomial as poly
+import matplotlib.pyplot as plt
 
 FIT_SAMPLES = 500     # number of samples to use for fitting polynomials
 ERR_SAMPLES = 50000   # number of samples to use for computing error in fitted polynomials
@@ -57,13 +60,13 @@ def polyfitWithFixedPoints(n, x, y, xf, yf):
   params = np.linalg.solve(mat, vec)
   return params[:n + 1]
 
-def genQmul(ndx, order):
+def genQmul(inputName, ndx, order):
   if ndx == order:
-    return f"Qmul30(C{ndx}, n)"
+    return f"Qmul30(C{ndx}, {inputName})"
   else:
-    return f"Qmul30({genQmul(ndx+1, order)} + C{ndx}, n)"
+    return f"Qmul30({genQmul(inputName, ndx+1, order)} + C{ndx}, {inputName})"
 
-def fitFunc(name, order, func, domain, fixed):
+def fitFunc(name, order, func, domain, fixed, inputName):
   (mn, mx) = domain
   x = mn + (mx - mn) * (np.arange(FIT_SAMPLES * 1.0) / (FIT_SAMPLES - 1))
   y = func(x)
@@ -87,36 +90,38 @@ def fitFunc(name, order, func, domain, fixed):
       coef = 0
     print(f"    const int C{ndx} = {int(coef * (1 << 30))}; // {coef}")
   
-  print(f"    int y = {genQmul(1, order)} + C0;")
+  print(f"    int y = {genQmul(inputName, 1, order)} + C0;")
   print()
 
   return fitted
 
 FUNCS = {
-  'sin': ((-1.0, 1.0), lambda x: np.sin(x * 0.5*np.pi), [-1.0, 0.0, 1.0]),
-  'cos': ((0.0, 1.0), lambda x: np.cos(x * 0.5*np.pi), [0.0, 1.0]),
-  'atan': ((0.0, 1.0), lambda x: np.arctan(x), [0.0]),
-  'rcp': ((1.0, 2.0), lambda x: 1.0 / x, [1.0, 2.0]),
-  'rcpm1': ((0.0, 1.0), lambda x: 1.0 / (x + 1), [0.0, 1.0]),
-  'sqrt': ((1.0, 2.0), lambda x: np.sqrt(x), [1.0, 2.0]),
-  'rsqrt': ((1.0, 2.0), lambda x: 1.0 / np.sqrt(x), [1.0, 2.0]),
-  'rsqrtm1': ((0.0, 1.0), lambda x: 1.0 / np.sqrt(x + 1), [0.0, 1.0]),
-  'rsqrt4m1': ((0.0, 3.0), lambda x: 1.0 / np.sqrt(x + 1), [0.0, 3.0]),
-  'log': ((1.0, 2.0), lambda x: np.log(x), [1.0, 2.0]),
-  'logm1': ((0.0, 1.0), lambda x: np.log(x+1), [0.0, 1.0]),
-  'exp2': ((0.0, 1.0), lambda x: np.exp2(x), [0.0, 1.0]),
+  'sin': ((-1.0, 1.0), 'z', lambda x: np.sin(x * 0.5*np.pi), [-1.0, 0.0, 1.0]),
+#  'cos': ((0.0, 1.0), 'z', lambda x: np.cos(x * 0.5*np.pi), [0.0, 1.0]),
+  'atan': ((0.0, 1.0), 'k', lambda x: np.arctan(x), [0.0]),
+  'rcpm1': ((0.0, 1.0), 'k', lambda x: 1.0 / (x + 1), [0.0, 1.0]),
+  'sqrt': ((1.0, 2.0), 'n', lambda x: np.sqrt(x), [1.0, 2.0]),
+  'rsqrtm1': ((0.0, 1.0), 'k', lambda x: 1.0 / np.sqrt(x + 1), [0.0, 1.0]),
+  'logm1': ((0.0, 1.0), 'k', lambda x: np.log(x+1), [0.0, 1.0]),
+  'exp2': ((0.0, 1.0), 'k', lambda x: np.exp2(x), [0.0, 1.0]),
 }
 
 for name in FUNCS.keys():
-#  if name != 'atan':
-#    continue
+  if name != 'logm1':
+    continue
 
   # extract func domain and function
-  (domain, func, fixed) = FUNCS[name]
+  (domain, inputName, func, fixed) = FUNCS[name]
   (mn, mx) = domain
 
   print('')
   print(f'{name}({mn} .. {mx}):')
 
-  for order in [2, 3, 4, 5, 6, 7]:
-    fitted = fitFunc(name, order, func, domain, fixed)
+  for order in [3, 4, 5, 6, 7, 8, 9]:
+    fitted = fitFunc(name, order, func, domain, fixed, inputName)
+    if order >= 9:
+      mne = mn + 0.0001
+      x = mne + (mx - mne) * (np.arange(ERR_SAMPLES * 1.0) / (ERR_SAMPLES - 1))
+      plt.plot(x, (fitted(x) - func(x)) / func(x))
+
+  plt.show()

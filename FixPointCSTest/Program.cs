@@ -100,15 +100,31 @@ namespace FixPointCSTest
         }
     };
 
-    class OpBase
+    class OpFamilyBase
+    {
+    };
+
+    class OpImplBase
     {
         public string   name;
         public int      numBenchmarkIters;
-    };
+    }
 
-    class UnaryOp : OpBase
+    class UnaryOpImpl : OpImplBase
     {
-        public UnaryExecutor            arrayExecute;
+        public UnaryExecutor    arrayExecute;
+
+        public UnaryOpImpl (string name, int numIters, UnaryExecutor arrExec)
+        {
+            this.name               = name;
+            this.numBenchmarkIters  = numIters;
+            this.arrayExecute       = arrExec;
+        }
+    }
+
+    class UnaryOpFamily : OpFamilyBase
+    {
+        public UnaryOpImpl[]            implementations;
         public Func<double, double>     refExecute;
         public UnaryErrorEvaluator      evaluateError;
         public ValueGenerator[]         inputGenerators;
@@ -117,11 +133,18 @@ namespace FixPointCSTest
         // \todo [petri] way to express exact input-output values
         // \todo [petri] way to express monotonicity requirement
 
-        public UnaryOp (string name, int numIters, UnaryExecutor arrExec, Func<double, double> refExec, UnaryErrorEvaluator evaluateError, ValueGenerator[] inputGenerators, double[] basicValues)
+        public UnaryOpFamily(UnaryOpImpl implementation, Func<double, double> refExec, UnaryErrorEvaluator evaluateError, ValueGenerator[] inputGenerators, double[] basicValues)
         {
-            this.name               = name;
-            this.numBenchmarkIters  = numIters;
-            this.arrayExecute       = arrExec;
+            this.implementations    = new UnaryOpImpl[] { implementation };
+            this.refExecute         = refExec;
+            this.evaluateError      = evaluateError;
+            this.inputGenerators    = inputGenerators;
+            this.basicValues        = basicValues;
+        }
+
+        public UnaryOpFamily(UnaryOpImpl[] implementations, Func<double, double> refExec, UnaryErrorEvaluator evaluateError, ValueGenerator[] inputGenerators, double[] basicValues)
+        {
+            this.implementations    = implementations;
             this.refExecute         = refExec;
             this.evaluateError      = evaluateError;
             this.inputGenerators    = inputGenerators;
@@ -129,9 +152,21 @@ namespace FixPointCSTest
         }
     }
 
-    class BinaryOp : OpBase
+    class BinaryOpImpl : OpImplBase
     {
-        public BinaryExecutor               arrayExecute;
+        public BinaryExecutor       arrayExecute;
+
+        public BinaryOpImpl (string name, int numIters, BinaryExecutor arrExec)
+        {
+            this.name               = name;
+            this.numBenchmarkIters  = numIters;
+            this.arrayExecute       = arrExec;
+        }
+    }
+
+    class BinaryOpFamily : OpFamilyBase
+    {
+        public BinaryOpImpl[]               implementations;
         public Func<double, double, double> refExecute;
         public BinaryErrorEvaluator         evaluateError;
         public BinaryInputGenerator[]       inputGenerators;
@@ -140,11 +175,18 @@ namespace FixPointCSTest
         // \todo [petri] way to express exact input-output values
         // \todo [petri] way to express monotonicity requirement
 
-        public BinaryOp(string name, int numIters, BinaryExecutor arrExec, Func<double, double, double> refExec, BinaryErrorEvaluator evaluateError, BinaryInputGenerator[] inputGenerators, Tuple<double, double>[] basicValues)
+        public BinaryOpFamily(BinaryOpImpl implementation, Func<double, double, double> refExec, BinaryErrorEvaluator evaluateError, BinaryInputGenerator[] inputGenerators, Tuple<double, double>[] basicValues)
         {
-            this.name               = name;
-            this.numBenchmarkIters  = numIters;
-            this.arrayExecute       = arrExec;
+            this.implementations    = new BinaryOpImpl[] { implementation };
+            this.refExecute         = refExec;
+            this.evaluateError      = evaluateError;
+            this.inputGenerators    = inputGenerators;
+            this.basicValues        = basicValues;
+        }
+
+        public BinaryOpFamily(BinaryOpImpl[] implementations, Func<double, double, double> refExec, BinaryErrorEvaluator evaluateError, BinaryInputGenerator[] inputGenerators, Tuple<double, double>[] basicValues)
+        {
+            this.implementations    = implementations;
             this.refExecute         = refExec;
             this.evaluateError      = evaluateError;
             this.inputGenerators    = inputGenerators;
@@ -154,8 +196,9 @@ namespace FixPointCSTest
 
     class TestRunner
     {
-        private const int NUM_PRECISION_TESTS = 1024 * 1024;
-        private const int BENCHMARK_CHUNK_SIZE = 128;
+        private const int NUM_PRECISION_ITERS   = 1024;
+        private const int PRECISION_CHUNK_SIZE  = 1024;
+        private const int BENCHMARK_CHUNK_SIZE  = 128;
 
         private static Random rnd = new Random(12345678);
 
@@ -193,9 +236,9 @@ namespace FixPointCSTest
             return str.Substring(0, Math.Min(str.Length, numChars));
         }
 
-        public static void TestUnaryBasicValues(UnaryOp op)
+        public static void TestUnaryBasicValues(UnaryOpFamily opFamily, UnaryOpImpl opImpl)
         {
-            int numValues = op.basicValues.Length;
+            int numValues = opFamily.basicValues.Length;
             if (numValues > 0)
             {
                 F64[] inputs = new F64[numValues];
@@ -204,28 +247,28 @@ namespace FixPointCSTest
 
                 for (int i = 0; i < numValues; i++)
                 {
-                    F64 i0 = F64.FromDouble(op.basicValues[i]);
+                    F64 i0 = F64.FromDouble(opFamily.basicValues[i]);
                     inputs[i] = i0;
-                    reference[i] = op.refExecute(i0.Double);
+                    reference[i] = opFamily.refExecute(i0.Double);
                 }
 
-                op.arrayExecute(numValues, inputs, outputs);
+                opImpl.arrayExecute(numValues, inputs, outputs);
 
-                Console.WriteLine("{0,-16}    {1,16} {2,16} {3,16}", op.name, "reference", "result", "error");
+                Console.WriteLine("{0,-18}  {1,16} {2,16} {3,16}", opImpl.name, "reference", "result", "error");
                 for (int i = 0; i < numValues; i++)
                 {
                     double input = inputs[i].Double;
                     double res = outputs[i].Double;
-                    double err = op.evaluateError(inputs[i], outputs[i], reference[i]);
+                    double err = opFamily.evaluateError(inputs[i], outputs[i], reference[i]);
                     Console.WriteLine("{0} -> {1} {2} {3}", DoubleToString(input, 16), DoubleToString(reference[i], 16), DoubleToString(res, 16), DoubleToString(err, 16));
                 }
                 Console.WriteLine();
             }
         }
 
-        public static void TestBinaryBasicValues(BinaryOp op)
+        public static void TestBinaryBasicValues(BinaryOpFamily opFamily, BinaryOpImpl opImpl)
         {
-            int numValues = op.basicValues.Length;
+            int numValues = opFamily.basicValues.Length;
             if (numValues > 0)
             {
                 F64[] inputs0 = new F64[numValues];
@@ -235,58 +278,64 @@ namespace FixPointCSTest
 
                 for (int i = 0; i < numValues; i++)
                 {
-                    F64 i0 = F64.FromDouble(op.basicValues[i].Item1);
-                    F64 i1 = F64.FromDouble(op.basicValues[i].Item2);
+                    F64 i0 = F64.FromDouble(opFamily.basicValues[i].Item1);
+                    F64 i1 = F64.FromDouble(opFamily.basicValues[i].Item2);
                     inputs0[i] = i0;
                     inputs1[i] = i1;
-                    reference[i] = op.refExecute(i0.Double, i1.Double);
+                    reference[i] = opFamily.refExecute(i0.Double, i1.Double);
                 }
 
-                op.arrayExecute(numValues, inputs0, inputs1, outputs);
+                opImpl.arrayExecute(numValues, inputs0, inputs1, outputs);
 
-                Console.WriteLine("{0,-16}                      {1,16} {2,16} {3,16}", op.name, "reference", "result", "error");
+                Console.WriteLine("{0,-18}                    {1,16} {2,16} {3,16}", opImpl.name, "reference", "result", "error");
                 for (int i = 0; i < numValues; i++)
                 {
                     double input0 = inputs0[i].Double;
                     double input1 = inputs1[i].Double;
                     double res = outputs[i].Double;
-                    double err = op.evaluateError(inputs0[i], inputs1[i], outputs[i], reference[i]);
+                    double err = opFamily.evaluateError(inputs0[i], inputs1[i], outputs[i], reference[i]);
                     Console.WriteLine("{0}, {1} -> {2} {3} {4}", DoubleToString(input0, 16), DoubleToString(input1, 16), DoubleToString(reference[i], 16), DoubleToString(res, 16), DoubleToString(err, 16));
                 }
                 Console.WriteLine();
             }
         }
 
-        public static PrecisionResult TestUnaryPrecision(UnaryOp op)
+        public static PrecisionResult TestUnaryPrecision(UnaryOpFamily opFamily, UnaryOpImpl opImpl)
         {
             int     numTested   = 0;
             double  totalErr    = 0.0;
             double  maxErr      = 0.0;
             F64     worstInput  = F64.Zero;
 
-            foreach (ValueGenerator inputGenerator in op.inputGenerators)
+            foreach (ValueGenerator inputGenerator in opFamily.inputGenerators)
             {
-                F64[] inputs = inputGenerator(rnd, NUM_PRECISION_TESTS).Select(d => F64.FromDouble(d)).ToArray();
-                F64[] outputs = new F64[NUM_PRECISION_TESTS];
-
-                op.arrayExecute(NUM_PRECISION_TESTS, inputs, outputs);
-
-                for (int i = 0; i < NUM_PRECISION_TESTS; i++)
+                for (int iter = 0; iter < NUM_PRECISION_ITERS; iter++)
                 {
-                    double input = inputs[i].Double;
-                    double res = outputs[i].Double;
-                    double reference = op.refExecute(input);
+                    F64[] inputs = inputGenerator(rnd, PRECISION_CHUNK_SIZE).Select(d => F64.FromDouble(d)).ToArray();
+                    F64[] outputs = new F64[PRECISION_CHUNK_SIZE];
 
-                    if (reference >= ValueBounds.NegMax && reference <= ValueBounds.PosMax)
+                    opImpl.arrayExecute(PRECISION_CHUNK_SIZE, inputs, outputs);
+
+                    for (int i = 0; i < PRECISION_CHUNK_SIZE; i++)
                     {
-                        double err = op.evaluateError(inputs[i], outputs[i], reference);
-                        numTested++;
-                        totalErr += err;
+                        double input = inputs[i].Double;
+                        double res = outputs[i].Double;
+                        double reference = opFamily.refExecute(input);
 
-                        if (err >= maxErr)
+                        if (reference >= ValueBounds.NegMax && reference <= ValueBounds.PosMax)
                         {
-                            maxErr = Math.Max(maxErr, err);
-                            worstInput = inputs[i];
+                            double err = opFamily.evaluateError(inputs[i], outputs[i], reference);
+                            if (err >= 0.0)
+                            {
+                                numTested++;
+                                totalErr += err;
+
+                                if (err > maxErr)
+                                {
+                                    maxErr = err;
+                                    worstInput = inputs[i];
+                                }
+                            }
                         }
                     }
                 }
@@ -298,38 +347,44 @@ namespace FixPointCSTest
             return new PrecisionResult(avgErr, maxErr, numBits, new[]{ worstInput });
         }
 
-        public static PrecisionResult TestBinaryPrecision(BinaryOp op)
+        public static PrecisionResult TestBinaryPrecision(BinaryOpFamily opFamily, BinaryOpImpl opImpl)
         {
             int             numTested   = 0;
             double          totalErr    = 0.0;
             double          maxErr      = 0.0;
             Tuple<F64, F64> worstInput  = Tuple.Create(F64.Zero, F64.Zero);
 
-            foreach (BinaryInputGenerator inputGenerator in op.inputGenerators)
+            foreach (BinaryInputGenerator inputGenerator in opFamily.inputGenerators)
             {
-                F64[] inputs0 = inputGenerator.Item1(rnd, NUM_PRECISION_TESTS).Select(d => F64.FromDouble(d)).ToArray();
-                F64[] inputs1 = inputGenerator.Item2(rnd, NUM_PRECISION_TESTS).Select(d => F64.FromDouble(d)).ToArray();
-                F64[] outputs = new F64[NUM_PRECISION_TESTS];
-
-                op.arrayExecute(NUM_PRECISION_TESTS, inputs0, inputs1, outputs);
-
-                for (int i = 0; i < NUM_PRECISION_TESTS; i++)
+                for (int iter = 0; iter < NUM_PRECISION_ITERS; iter++)
                 {
-                    double input0 = inputs0[i].Double;
-                    double input1 = inputs1[i].Double;
-                    double res = outputs[i].Double;
-                    double reference = op.refExecute(input0, input1);
+                    F64[] inputs0 = inputGenerator.Item1(rnd, PRECISION_CHUNK_SIZE).Select(d => F64.FromDouble(d)).ToArray();
+                    F64[] inputs1 = inputGenerator.Item2(rnd, PRECISION_CHUNK_SIZE).Select(d => F64.FromDouble(d)).ToArray();
+                    F64[] outputs = new F64[PRECISION_CHUNK_SIZE];
 
-                    if (reference >= ValueBounds.NegMax && reference <= ValueBounds.PosMax)
+                    opImpl.arrayExecute(PRECISION_CHUNK_SIZE, inputs0, inputs1, outputs);
+
+                    for (int i = 0; i < PRECISION_CHUNK_SIZE; i++)
                     {
-                        double err = op.evaluateError(inputs0[i], inputs1[i], outputs[i], reference);
-                        numTested++;
-                        totalErr += err;
+                        double input0 = inputs0[i].Double;
+                        double input1 = inputs1[i].Double;
+                        double res = outputs[i].Double;
+                        double reference = opFamily.refExecute(input0, input1);
 
-                        if (err >= maxErr)
+                        if (reference >= ValueBounds.NegMax && reference <= ValueBounds.PosMax)
                         {
-                            maxErr = Math.Max(maxErr, err);
-                            worstInput = Tuple.Create(inputs0[i], inputs1[i]);
+                            double err = opFamily.evaluateError(inputs0[i], inputs1[i], outputs[i], reference);
+                            if (err >= 0.0)
+                            {
+                                numTested++;
+                                totalErr += err;
+
+                                if (err > maxErr)
+                                {
+                                    maxErr = err;
+                                    worstInput = Tuple.Create(inputs0[i], inputs1[i]);
+                                }
+                            }
                         }
                     }
                 }
@@ -358,41 +413,41 @@ namespace FixPointCSTest
             return elapsed;
         }
 
-        public static BenchmarkResult BenchmarkUnaryOperation(UnaryOp op)
+        public static BenchmarkResult BenchmarkUnaryOperation(UnaryOpFamily opFamily, UnaryOpImpl opImpl)
         {
             // \todo [petri] use all generators?
-            F64[] inputs = op.inputGenerators[0](rnd, BENCHMARK_CHUNK_SIZE).Select(d => F64.FromDouble(d)).ToArray();
+            F64[] inputs = opFamily.inputGenerators[0](rnd, BENCHMARK_CHUNK_SIZE).Select(d => F64.FromDouble(d)).ToArray();
             F64[] outputs = new F64[BENCHMARK_CHUNK_SIZE];
 
             // Measure execution time.
             double elapsedSeconds = BenchmarkFunction(() =>
             {
-                for (int iter = 0; iter < op.numBenchmarkIters; iter++)
-                    op.arrayExecute(BENCHMARK_CHUNK_SIZE, inputs, outputs);
+                for (int iter = 0; iter < opImpl.numBenchmarkIters; iter++)
+                    opImpl.arrayExecute(BENCHMARK_CHUNK_SIZE, inputs, outputs);
             });
 
             // Return result.
-            long numTotalOps = op.numBenchmarkIters * BENCHMARK_CHUNK_SIZE;
+            long numTotalOps = opImpl.numBenchmarkIters * BENCHMARK_CHUNK_SIZE;
             double opsPerSec = numTotalOps / elapsedSeconds;
             return new BenchmarkResult(opsPerSec, elapsedSeconds);
         }
 
-        public static BenchmarkResult BenchmarkBinaryOperation(BinaryOp op)
+        public static BenchmarkResult BenchmarkBinaryOperation(BinaryOpFamily opFamily, BinaryOpImpl opImpl)
         {
             // \todo [petri] use all generators?
-            F64[] inputs0 = op.inputGenerators[0].Item1(rnd, BENCHMARK_CHUNK_SIZE).Select(d => F64.FromDouble(d)).ToArray();
-            F64[] inputs1 = op.inputGenerators[0].Item2(rnd, BENCHMARK_CHUNK_SIZE).Select(d => F64.FromDouble(d)).ToArray();
+            F64[] inputs0 = opFamily.inputGenerators[0].Item1(rnd, BENCHMARK_CHUNK_SIZE).Select(d => F64.FromDouble(d)).ToArray();
+            F64[] inputs1 = opFamily.inputGenerators[0].Item2(rnd, BENCHMARK_CHUNK_SIZE).Select(d => F64.FromDouble(d)).ToArray();
             F64[] outputs = new F64[BENCHMARK_CHUNK_SIZE];
 
             // Measure execution time.
             double elapsedSeconds = BenchmarkFunction(() =>
             {
-                for (int iter = 0; iter < op.numBenchmarkIters; iter++)
-                    op.arrayExecute(BENCHMARK_CHUNK_SIZE, inputs0, inputs1, outputs);
+                for (int iter = 0; iter < opImpl.numBenchmarkIters; iter++)
+                    opImpl.arrayExecute(BENCHMARK_CHUNK_SIZE, inputs0, inputs1, outputs);
             });
 
             // Return reuslt.
-            long numTotalOps = op.numBenchmarkIters * BENCHMARK_CHUNK_SIZE;
+            long numTotalOps = opImpl.numBenchmarkIters * BENCHMARK_CHUNK_SIZE;
             double opsPerSec = numTotalOps / elapsedSeconds;
             return new BenchmarkResult(opsPerSec, elapsedSeconds);
         }
@@ -403,87 +458,113 @@ namespace FixPointCSTest
                 Console.WriteLine("WARNING: {0} took {1:0.00}s to execute, tweak its iteration count so that it executes in roughly 0.5s", name, benchmark.elapsedSeconds);
 
             if (precision.maxError == 0.0)
-                Console.WriteLine("| {0,16} | {1,10:0.0000} |     exact | {2,16} | {3,16} |", name, benchmark.opsPerSec / 1000000.0, "0.0", "0.0");
+                Console.WriteLine("| {0,18} | {1,10:0.00} |     exact | {2,16} | {3,16} |", name, benchmark.opsPerSec / 1000000.0, "0.0", "0.0");
             else
             {
                 string coordsStr = String.Join(" ", precision.worstInput.Select(v => DoubleToString(v.Double, 16)));
-                Console.WriteLine("| {0,16} | {1,10:0.0000} | {2,9:0.00} | {3} | {4} | {5}", name, benchmark.opsPerSec / 1000000.0, precision.numPrecisionBits, DoubleToString(precision.avgError, 16), DoubleToString(precision.maxError, 16), coordsStr);
+                Console.WriteLine("| {0,18} | {1,10:0.00} | {2,9:0.00} | {3} | {4} | {5}", name, benchmark.opsPerSec / 1000000.0, precision.numPrecisionBits, DoubleToString(precision.maxError, 16), DoubleToString(precision.avgError, 16), coordsStr);
             }
         }
 
-        public static void TestUnaryOperation(UnaryOp op)
+        public static void TestUnaryOperation(UnaryOpFamily opFamily, UnaryOpImpl opImpl)
         {
-            PrecisionResult precision = TestUnaryPrecision(op);
-            BenchmarkResult benchmark = BenchmarkUnaryOperation(op);
-            PrintOperationSummary(op.name, precision, benchmark);
+            PrecisionResult precision = TestUnaryPrecision(opFamily, opImpl);
+            BenchmarkResult benchmark = BenchmarkUnaryOperation(opFamily, opImpl);
+            PrintOperationSummary(opImpl.name, precision, benchmark);
         }
 
-        public static void TestBinaryOperation(BinaryOp op)
+        public static void TestBinaryOperation(BinaryOpFamily opFamily, BinaryOpImpl opImpl)
         {
-            PrecisionResult precision = TestBinaryPrecision(op);
-            BenchmarkResult benchmark = BenchmarkBinaryOperation(op);
-            PrintOperationSummary(op.name, precision, benchmark);
+            PrecisionResult precision = TestBinaryPrecision(opFamily, opImpl);
+            BenchmarkResult benchmark = BenchmarkBinaryOperation(opFamily, opImpl);
+            PrintOperationSummary(opImpl.name, precision, benchmark);
         }
     }
 
     class Program
     {
-        static UnaryErrorEvaluator AbsoluteUnaryErrorEvaluator(double relativeTo = 1.0)
+        static UnaryErrorEvaluator AbsoluteUnaryErrorEvaluator()
         {
             return (F64 input, F64 output, double reference) =>
             {
-                return Math.Abs(output.Double - reference) / relativeTo;
+                return Math.Abs(output.Double - reference);
             };
         }
 
-        static UnaryErrorEvaluator RelativeUnaryErrorEvaluator(double threshold = 1.0 / 65536.0)
+        static UnaryErrorEvaluator RelativeUnaryErrorEvaluator(double ulps = 4.0)
         {
             return (F64 input, F64 output, double reference) =>
             {
-                double absRef = Math.Abs(reference);
+                double minErr = ulps / 4294967296.0;
+                double absRef = Math.Max(Math.Abs(reference), 256.0 / 4294967296.0);
                 double err = Math.Abs(output.Double - reference);
-                if (absRef < threshold)
-                    return err / threshold;
-                else
-                    return err / absRef;
+                return (err >= minErr) ? err / absRef : -1.0;
+                //return Math.Min(err / absRef, minErr);
             };
         }
 
-        static BinaryErrorEvaluator AbsoluteBinaryErrorEvaluator(double relativeTo = 1.0)
+        static BinaryErrorEvaluator AbsoluteBinaryErrorEvaluator()
         {
             return (F64 a, F64 b, F64 output, double reference) =>
             {
-                return Math.Abs(output.Double - reference) / relativeTo;
+                return Math.Abs(output.Double - reference);
             };
         }
 
-        static BinaryErrorEvaluator RelativeBinaryErrorEvaluator(double threshold = 1.0 / 65536.0)
+        static BinaryErrorEvaluator RelativeBinaryErrorEvaluator(double ulps = 4.0)
         {
             return (F64 a, F64 b, F64 output, double reference) =>
             {
-                double relativeTo = Math.Max(threshold, Math.Abs(reference));
+                double minErr = ulps / 4294967296.0;
+                double absRef = Math.Max(Math.Abs(reference), 256 / 4294967296.0);
                 double err = Math.Abs(output.Double - reference);
-                return err / relativeTo;
+                return (err >= minErr) ? err / absRef : -1.0;
             };
         }
 
-        static BinaryErrorEvaluator DivisionErrorEvaluator(double threshold = 1.0 / 65536.0)
+        static UnaryErrorEvaluator SinCosErrorEvaluator()
+        {
+            return (F64 input, F64 output, double reference) =>
+            {
+                double inputScale = Math.Max(1.0, Math.Abs(input.Double) / (2.0 * Math.PI));
+                return Math.Abs(output.Double - reference) / inputScale;
+            };
+        }
+
+        static BinaryErrorEvaluator DivisionErrorEvaluator()
         {
             return (F64 a, F64 b, F64 output, double reference) =>
             {
-                double relativeTo = Math.Max(threshold, Math.Abs(b.Double));
+                const double minErr = 4.0 / 4294967296.0;
+                double absRef = Math.Abs(b.Double);
                 double err = Math.Abs(output.Double - reference);
-                return err / relativeTo;
+                return (err >= minErr) ? err / absRef : -1.0;
             };
         }
 
-        static double[] rcpValues = new double[] {
-            // -1.0,
-            // -128.0,
-            // -220.0,
-            // -250.0,
-            // -255.0,
-            // -255.99966072314,
+        static double[] rcpValues =
+        {
+            -18123044.204260,
+            -196963.62897853,
+            -128.0,
+            -220.0,
+            -250.0,
+            -255.0,
+            -255.99966072314,
+            -1.0,
+            -0.9696,
+            -0.00001838,
+            0.00000123,
+            0.321,
+            1.0,
+            1.125,
+            1.24999989755452,
+            1.25,
+            1.4999,
+            1.5,
+            1.7499,
+            1.75,
+            1.9999,
             0.0000005565656,
             0.03,
             0.125,
@@ -502,7 +583,37 @@ namespace FixPointCSTest
             1644181663.39180,
         };
 
-        static double[] sinCosValues = new double[] {
+        static double[] sqrtValues =
+        {
+            1.0,
+            1.125,
+            1.24999989755452,
+            1.25,
+            1.4999,
+            1.5,
+            1.7499,
+            1.75,
+            1.9999,
+            0.0000005565656,
+            0.03,
+            0.125,
+            0.5,
+            1.0,
+            2.0,
+            3.0,
+            3.999,
+            4.0,
+            7.777,
+            11.12345,
+            12.0,
+            256.0,
+            65535.0,
+            123544.0,
+            1644181663.39180,
+        };
+
+        static double[] sinCosValues =
+        {
             -16.1234,
             -4.444,
             -0.5,
@@ -518,7 +629,8 @@ namespace FixPointCSTest
             16.0 * Math.PI,
         };
 
-        static double[] asinCosValues = new double[] {
+        static double[] asinCosValues =
+        {
             -0.9999972383957,
             -0.99,
             -0.95,
@@ -535,6 +647,7 @@ namespace FixPointCSTest
             -0.11211,
             -0.000014884,
             0.0,
+            0.00000071199610,
             0.00001,
             0.321,
             0.5521,
@@ -543,12 +656,28 @@ namespace FixPointCSTest
             0.9999972383957,
         };
 
-        static OpBase[] operations = new OpBase[]
+        static double[] logValues = 
         {
-            new UnaryOp(
-                "Identity",
-                5000000,
-                (int n, F64[] i0, F64[] o) => { for (int i=0; i<n; i++) { o[i] = i0[i]; } },
+            0.001,
+            0.5,
+            0.98620513221249,
+            0.99994553346186,
+            0.99999295221641,
+            0.99999911873601,
+            0.99999913806095,
+            1.0,
+            1.1234,
+            2.0,
+            2.5252,
+            13.52352,
+            20.5353,
+            129343.34
+        };
+
+        static OpFamilyBase[] operations =
+        {
+            new UnaryOpFamily(
+                new UnaryOpImpl("Identity", 5000000, (int n, F64[] i0, F64[] o) => { for (int i=0; i<n; i++) { o[i] = i0[i]; } }),
                 (double i0) => { return i0; },
                 AbsoluteUnaryErrorEvaluator(),
                 new[] {
@@ -557,322 +686,8 @@ namespace FixPointCSTest
                 rcpValues
             ),
 
-            new UnaryOp(
-                "Ceil()",
-                1000000,
-                (int n, F64[] i0, F64[] o) => { for (int i=0; i<n; i++) { o[i] = i0[i].Ceil(); } },
-                (double i0) => { return Math.Ceiling(i0); },
-                AbsoluteUnaryErrorEvaluator(),
-                new[] {
-                    Input.Uniform(-1.0, 1.0),
-                    Input.Uniform(-1e6, 1e6),
-                    Input.Uniform(ValueBounds.TestNegMax, ValueBounds.TestPosMax)
-                },
-                rcpValues
-            ),
-
-            new UnaryOp(
-                "Floor()",
-                1000000,
-                (int n, F64[] i0, F64[] o) => { for (int i=0; i<n; i++) { o[i] = i0[i].Floor(); } },
-                (double i0) => { return Math.Floor(i0); },
-                AbsoluteUnaryErrorEvaluator(),
-                new[] {
-                    Input.Uniform(-1.0, 1.0),
-                    Input.Uniform(-1e6, 1e6),
-                    Input.Uniform(ValueBounds.TestNegMax, ValueBounds.TestPosMax)
-                },
-                rcpValues
-            ),
-
-            new UnaryOp(
-                "Round()",
-                1000000,
-                (int n, F64[] i0, F64[] o) => { for (int i=0; i<n; i++) { o[i] = i0[i].Round(); } },
-                (double i0) => { return Math.Floor(i0 + 0.5); },
-                AbsoluteUnaryErrorEvaluator(),
-                new[] {
-                    Input.Uniform(-1.0, 1.0),
-                    Input.Uniform(-1e6, 1e6),
-                    Input.Uniform(ValueBounds.TestNegMax, ValueBounds.TestPosMax)
-                },
-                rcpValues
-            ),
-
-            new UnaryOp(
-                "Fract()",
-                1000000,
-                (int n, F64[] i0, F64[] o) => { for (int i=0; i<n; i++) { o[i] = i0[i].Fract(); } },
-                (double i0) => { return i0 - Math.Floor(i0); },
-                AbsoluteUnaryErrorEvaluator(),
-                new[] {
-                    Input.Uniform(-1.0, 1.0),
-                    Input.Uniform(-1e6, 1e6),
-                    Input.Uniform(ValueBounds.TestNegMax, ValueBounds.TestPosMax)
-                },
-                rcpValues
-            ),
-
-            new UnaryOp(
-                "Abs()",
-                1000000,
-                (int n, F64[] i0, F64[] o) => { for (int i=0; i<n; i++) { o[i] = i0[i].Abs(); } },
-                (double i0) => { return Math.Abs(i0); },
-                AbsoluteUnaryErrorEvaluator(),
-                new[] {
-                    Input.Uniform(-1.0, 1.0),
-                    Input.Uniform(-1e6, 1e6),
-                    Input.Uniform(ValueBounds.TestNegMax, ValueBounds.TestPosMax)
-                },
-                rcpValues
-            ),
-
-            new UnaryOp(
-                "Nabs()",
-                1000000,
-                (int n, F64[] i0, F64[] o) => { for (int i=0; i<n; i++) { o[i] = i0[i].Nabs(); } },
-                (double i0) => { return -Math.Abs(i0); },
-                AbsoluteUnaryErrorEvaluator(),
-                new[] {
-                    Input.Uniform(-1.0, 1.0),
-                    Input.Uniform(-1e6, 1e6),
-                    Input.Uniform(ValueBounds.TestNegMax, ValueBounds.TestPosMax)
-                },
-                rcpValues
-            ),
-
-            new UnaryOp(
-                "1/x",
-                100000,
-                (int n, F64[] i0, F64[] o) => { for (int i=0; i<n; i++) { o[i] = F64.One / i0[i]; } },
-                (double i0) => { return 1.0 / i0; },
-                RelativeUnaryErrorEvaluator(),
-                new[] {
-                    Input.Exponential(ValueBounds.TestPosMin, ValueBounds.PosMax),
-                    Input.Exponential(ValueBounds.TestNegMin, ValueBounds.NegMax)
-                },
-                rcpValues
-            ),
-
-            new UnaryOp(
-                "Rcp(x)",
-                100000,
-                (int n, F64[] i0, F64[] o) => { for (int i=0; i<n; i++) { o[i] = i0[i].Rcp(); } },
-                (double i0) => { return 1.0 / i0; },
-                RelativeUnaryErrorEvaluator(),
-                new[] {
-                    Input.Exponential(ValueBounds.TestPosMin, ValueBounds.TestPosMax),
-                    Input.Exponential(ValueBounds.TestNegMin, ValueBounds.TestNegMax)
-                },
-                rcpValues
-            ),
-
-            new UnaryOp(
-                "Sqrt(x)",
-                10000,
-                (int n, F64[] i0, F64[] o) => { for (int i=0; i<n; i++) { o[i] = i0[i].Sqrt(); } },
-                (double i0) => { return Math.Sqrt(i0); },
-                RelativeUnaryErrorEvaluator(),
-                new[] {
-                    Input.Exponential(ValueBounds.TestPosMin, ValueBounds.TestPosMax),
-                    Input.Exponential(ValueBounds.TestNegMin, ValueBounds.TestNegMax)
-                },
-                rcpValues
-            ),
-
-            new UnaryOp(
-                "Rcp(RSqrt(x))",
-                100000,
-                (int n, F64[] i0, F64[] o) => { for (int i=0; i<n; i++) { o[i] = i0[i].RSqrt().Rcp(); } },
-                (double i0) => { return Math.Sqrt(i0); },
-                RelativeUnaryErrorEvaluator(),
-                new[] {
-                    Input.Exponential(ValueBounds.TestPosMin, ValueBounds.TestPosMax)
-                },
-                rcpValues
-            ),
-
-            new UnaryOp(
-                "SqrtFast(x)",
-                100000,
-                (int n, F64[] i0, F64[] o) => { for (int i=0; i<n; i++) { o[i] = i0[i].SqrtFast(); } },
-                (double i0) => { return Math.Sqrt(i0); },
-                RelativeUnaryErrorEvaluator(),
-                new[] {
-                    Input.Exponential(ValueBounds.TestPosMin, ValueBounds.TestPosMax)
-                },
-                rcpValues
-            ),
-
-            new UnaryOp(
-                "RSqrt(x)",
-                500000,
-                (int n, F64[] i0, F64[] o) => { for (int i=0; i<n; i++) { o[i] = i0[i].RSqrt(); } },
-                (double i0) => { return 1.0 / Math.Sqrt(i0); },
-                RelativeUnaryErrorEvaluator(),
-                new[] {
-                    Input.Exponential(ValueBounds.TestPosMin, ValueBounds.TestPosMax)
-                },
-                rcpValues
-            ),
-
-            new UnaryOp(
-                "1/Sqrt(x)",
-                10000,
-                (int n, F64[] i0, F64[] o) => { for (int i=0; i<n; i++) { o[i] = F64.FromInt(1) / i0[i].Sqrt(); } },
-                (double i0) => { return 1.0 / Math.Sqrt(i0); },
-                RelativeUnaryErrorEvaluator(),
-                new[] {
-                    Input.Exponential(ValueBounds.TestPosMin, ValueBounds.TestPosMax)
-                },
-                rcpValues
-            ),
-
-            new UnaryOp(
-                "Rcp(Sqrt(x))",
-                10000,
-                (int n, F64[] i0, F64[] o) => { for (int i=0; i<n; i++) { o[i] = i0[i].Sqrt().Rcp(); } },
-                (double i0) => { return 1.0 / Math.Sqrt(i0); },
-                RelativeUnaryErrorEvaluator(),
-                new[] {
-                    Input.Exponential(ValueBounds.TestPosMin, ValueBounds.TestPosMax)
-                },
-                rcpValues
-            ),
-
-            new UnaryOp(
-                "Exp(x)",
-                500000,
-                (int n, F64[] i0, F64[] o) => { for (int i=0; i<n; i++) { o[i] = i0[i].Exp(); } },
-                (double i0) => { return Math.Exp(i0); },
-                RelativeUnaryErrorEvaluator(),
-                new[] {
-                    Input.Uniform(-10.0, 10.0),
-                    Input.Uniform(-100.0, 100.0),
-                    Input.Exponential(ValueBounds.TestPosMin, 10.0),
-                    Input.Exponential(ValueBounds.TestNegMin, -10.0)
-                },
-                new double[] { 0.5, 1.0, 4.85202256566845 }
-            ),
-
-            new UnaryOp(
-                "Exp2(x)",
-                500000,
-                (int n, F64[] i0, F64[] o) => { for (int i=0; i<n; i++) { o[i] = i0[i].Exp2(); } },
-                (double i0) => { return Math.Pow(2.0, i0); },
-                RelativeUnaryErrorEvaluator(),
-                new[] {
-                    Input.Uniform(-10.0, 10.0),
-                    Input.Uniform(-100.0, 100.0),
-                    Input.Exponential(ValueBounds.TestPosMin, 10.0),
-                    Input.Exponential(ValueBounds.TestNegMin, -10.0)
-                },
-                new double[] { 0.5, 1.0, 6.9999888928141445 }
-            ),
-
-            new UnaryOp(
-                "Log(x)",
-                100000,
-                (int n, F64[] i0, F64[] o) => { for (int i=0; i<n; i++) { o[i] = i0[i].Log(); } },
-                (double i0) => { return Math.Log(i0); },
-                RelativeUnaryErrorEvaluator(),
-                new[] { Input.Exponential(ValueBounds.TestPosMin, ValueBounds.TestPosMax) },
-                new double[] { 0.5, 0.99994553346186, 1.0 }
-            ),
-
-            new UnaryOp(
-                "Log2(x)",
-                100000,
-                (int n, F64[] i0, F64[] o) => { for (int i=0; i<n; i++) { o[i] = i0[i].Log2(); } },
-                (double i0) => { return Math.Log(i0, 2.0); },
-                RelativeUnaryErrorEvaluator(),
-                new[] { Input.Exponential(ValueBounds.TestPosMin, ValueBounds.TestPosMax) },
-                new double[] { 0.5, 0.99994553346186, 1.0 }
-            ),
-
-            new UnaryOp(
-                "Sin(x)",
-                500000,
-                (int n, F64[] i0, F64[] o) => { for (int i=0; i<n; i++) { o[i] = i0[i].Sin(); } },
-                (double i0) => { return Math.Sin(i0); },
-                AbsoluteUnaryErrorEvaluator(),
-                new[]
-                {
-                    Input.Uniform(-10.0, 10.0),
-                    Input.Uniform(-100.0, 100.0),
-                    Input.Uniform(-1e6, 1e6),
-                },
-                sinCosValues
-            ),
-
-            new UnaryOp(
-                "Cos(x)",
-                500000,
-                (int n, F64[] i0, F64[] o) => { for (int i=0; i<n; i++) { o[i] = i0[i].Cos(); } },
-                (double i0) => { return Math.Cos(i0); },
-                AbsoluteUnaryErrorEvaluator(),
-                new[]
-                {
-                    Input.Uniform(-10.0, 10.0),
-                    Input.Uniform(-100.0, 100.0),
-                    Input.Uniform(-1e6, 1e6),
-                },
-                sinCosValues
-            ),
-
-            new UnaryOp(
-                "Tan(x)",
-                100000,
-                (int n, F64[] i0, F64[] o) => { for (int i=0; i<n; i++) { o[i] = i0[i].Tan(); } },
-                (double i0) => { return Math.Tan(i0); },
-                RelativeUnaryErrorEvaluator(),
-                new[] {
-                    Input.Exponential(-0.1, -0.9999),
-                    Input.Uniform(-0.1, 0.1),
-                    Input.Exponential(0.1, 0.9999),
-                },
-                new double[] { 0.5, 1.0 }
-            ),
-
-            new UnaryOp(
-                "Asin(x)",
-                50000,
-                (int n, F64[] i0, F64[] o) => { for (int i=0; i<n; i++) { o[i] = i0[i].Asin(); } },
-                (double i0) => { return Math.Asin(i0); },
-                AbsoluteUnaryErrorEvaluator(),
-                new[] { Input.Uniform(-1.0, 1.0) },
-                asinCosValues
-            ),
-
-            new UnaryOp(
-                "Acos(x)",
-                50000,
-                (int n, F64[] i0, F64[] o) => { for (int i=0; i<n; i++) { o[i] = i0[i].Acos(); } },
-                (double i0) => { return Math.Acos(i0); },
-                AbsoluteUnaryErrorEvaluator(),
-                new[] { Input.Uniform(-1.0, 1.0) },
-                asinCosValues
-            ),
-
-            new UnaryOp(
-                "Atan(x)",
-                100000,
-                (int n, F64[] i0, F64[] o) => { for (int i=0; i<n; i++) { o[i] = i0[i].Atan(); } },
-                (double i0) => { return Math.Atan(i0); },
-                AbsoluteUnaryErrorEvaluator(),
-                new[] {
-                    Input.Uniform(-1.0, 1.0),
-                    Input.Uniform(-1000.0, 1000.0),
-                    Input.Exponential(1.0, ValueBounds.TestPosMax),
-                    Input.Exponential(-1.0, ValueBounds.TestNegMax),
-                },
-                new double[] { 0.5, 1.0 }
-            ),
-
-            new BinaryOp(
-                "a+b",
-                1000000,
-                (int n, F64[] i0, F64[] i1, F64[] o) => { for (int i=0; i<n; i++) { o[i] = i0[i] + i1[i]; } },
+            new BinaryOpFamily(
+                new BinaryOpImpl("a+b", 1000000, (int n, F64[] i0, F64[] i1, F64[] o) => { for (int i=0; i<n; i++) { o[i] = i0[i] + i1[i]; } }),
                 (double i0, double i1) => { return i0 + i1; },
                 AbsoluteBinaryErrorEvaluator(),
                 new[] {
@@ -883,10 +698,8 @@ namespace FixPointCSTest
                 new Tuple<double, double>[] { }
             ),
 
-            new BinaryOp(
-                "a-b",
-                1000000,
-                (int n, F64[] i0, F64[] i1, F64[] o) => { for (int i=0; i<n; i++) { o[i] = i0[i] - i1[i]; } },
+            new BinaryOpFamily(
+                new BinaryOpImpl("a-b", 1000000, (int n, F64[] i0, F64[] i1, F64[] o) => { for (int i=0; i<n; i++) { o[i] = i0[i] - i1[i]; } }),
                 (double i0, double i1) => { return i0 - i1; },
                 AbsoluteBinaryErrorEvaluator(),
                 new[] {
@@ -897,10 +710,8 @@ namespace FixPointCSTest
                 new Tuple<double, double>[] { }
             ),
 
-            new BinaryOp(
-                "a*b",
-                1000000,
-                (int n, F64[] i0, F64[] i1, F64[] o) => { for (int i=0; i<n; i++) { o[i] = i0[i] * i1[i]; } },
+            new BinaryOpFamily(
+                new BinaryOpImpl("a*b", 1000000, (int n, F64[] i0, F64[] i1, F64[] o) => { for (int i=0; i<n; i++) { o[i] = i0[i] * i1[i]; } }),
                 (double i0, double i1) => { return i0 * i1; },
                 RelativeBinaryErrorEvaluator(),
                 new[] {
@@ -911,10 +722,8 @@ namespace FixPointCSTest
                 new Tuple<double, double>[] { }
             ),
 
-            new BinaryOp(
-                "a/b",
-                100000,
-                (int n, F64[] i0, F64[] i1, F64[] o) => { for (int i=0; i<n; i++) { o[i] = i0[i] / i1[i]; } },
+            new BinaryOpFamily(
+                new BinaryOpImpl("a/b", 100000, (int n, F64[] i0, F64[] i1, F64[] o) => { for (int i=0; i<n; i++) { o[i] = i0[i] / i1[i]; } }),
                 (double i0, double i1) => { return i0 / i1; },
                 DivisionErrorEvaluator(),
                 new[] {
@@ -930,10 +739,8 @@ namespace FixPointCSTest
                 }
             ),
 
-            new BinaryOp(
-                "a%b",
-                100000,
-                (int n, F64[] i0, F64[] i1, F64[] o) => { for (int i=0; i<n; i++) { o[i] = i0[i] % i1[i]; } },
+            new BinaryOpFamily(
+                new BinaryOpImpl("a%b", 100000, (int n, F64[] i0, F64[] i1, F64[] o) => { for (int i=0; i<n; i++) { o[i] = i0[i] % i1[i]; } }),
                 (double i0, double i1) => { return i0 % i1; },
                 DivisionErrorEvaluator(),
                 new[] {
@@ -951,10 +758,8 @@ namespace FixPointCSTest
                 }
             ),
 
-            new BinaryOp(
-                "Min(a,b)",
-                1000000,
-                (int n, F64[] i0, F64[] i1, F64[] o) => { for (int i=0; i<n; i++) { o[i] = F64.Min(i0[i], i1[i]); } },
+            new BinaryOpFamily(
+                new BinaryOpImpl("Min(a,b)", 1000000, (int n, F64[] i0, F64[] i1, F64[] o) => { for (int i=0; i<n; i++) { o[i] = F64.Min(i0[i], i1[i]); } }),
                 (double i0, double i1) => { return Math.Min(i0, i1); },
                 AbsoluteBinaryErrorEvaluator(),
                 new[] {
@@ -964,10 +769,8 @@ namespace FixPointCSTest
                 new Tuple<double, double>[] { }
             ),
 
-            new BinaryOp(
-                "Max(a,b)",
-                1000000,
-                (int n, F64[] i0, F64[] i1, F64[] o) => { for (int i=0; i<n; i++) { o[i] = F64.Max(i0[i], i1[i]); } },
+            new BinaryOpFamily(
+                new BinaryOpImpl("Max(a,b)", 1000000, (int n, F64[] i0, F64[] i1, F64[] o) => { for (int i=0; i<n; i++) { o[i] = F64.Max(i0[i], i1[i]); } }),
                 (double i0, double i1) => { return Math.Max(i0, i1); },
                 AbsoluteBinaryErrorEvaluator(),
                 new[] {
@@ -978,16 +781,241 @@ namespace FixPointCSTest
                 new Tuple<double, double>[] { }
             ),
 
-            new BinaryOp(
-                "Pow(a, b)",
-                100000,
-                (int n, F64[] i0, F64[] i1, F64[] o) => { for (int i=0; i<n; i++) { o[i] = F64.Pow(i0[i], i1[i]); } },
+            new UnaryOpFamily(
+                new UnaryOpImpl("Ceil()", 1000000, (int n, F64[] i0, F64[] o) => { for (int i=0; i<n; i++) { o[i] = F64.Ceil(i0[i]); } }),
+                (double i0) => { return Math.Ceiling(i0); },
+                AbsoluteUnaryErrorEvaluator(),
+                new[] {
+                    Input.Uniform(-1.0, 1.0),
+                    Input.Uniform(-1e6, 1e6),
+                    Input.Uniform(ValueBounds.TestNegMax, ValueBounds.TestPosMax)
+                },
+                rcpValues
+            ),
+
+            new UnaryOpFamily(
+                new UnaryOpImpl("Floor()", 1000000, (int n, F64[] i0, F64[] o) => { for (int i=0; i<n; i++) { o[i] = F64.Floor(i0[i]); } }),
+                (double i0) => { return Math.Floor(i0); },
+                AbsoluteUnaryErrorEvaluator(),
+                new[] {
+                    Input.Uniform(-1.0, 1.0),
+                    Input.Uniform(-1e6, 1e6),
+                    Input.Uniform(ValueBounds.TestNegMax, ValueBounds.TestPosMax)
+                },
+                rcpValues
+            ),
+
+            new UnaryOpFamily(
+                new UnaryOpImpl("Round()", 1000000, (int n, F64[] i0, F64[] o) => { for (int i=0; i<n; i++) { o[i] = F64.Round(i0[i]); } }),
+                (double i0) => { return Math.Floor(i0 + 0.5); },
+                AbsoluteUnaryErrorEvaluator(),
+                new[] {
+                    Input.Uniform(-1.0, 1.0),
+                    Input.Uniform(-1e6, 1e6),
+                    Input.Uniform(ValueBounds.TestNegMax, ValueBounds.TestPosMax)
+                },
+                rcpValues
+            ),
+
+            new UnaryOpFamily(
+                new UnaryOpImpl("Fract()", 1000000, (int n, F64[] i0, F64[] o) => { for (int i=0; i<n; i++) { o[i] = F64.Fract(i0[i]); } }),
+                (double i0) => { return i0 - Math.Floor(i0); },
+                AbsoluteUnaryErrorEvaluator(),
+                new[] {
+                    Input.Uniform(-1.0, 1.0),
+                    Input.Uniform(-1e6, 1e6),
+                    Input.Uniform(ValueBounds.TestNegMax, ValueBounds.TestPosMax)
+                },
+                rcpValues
+            ),
+
+            new UnaryOpFamily(
+                new UnaryOpImpl("Abs()", 1000000, (int n, F64[] i0, F64[] o) => { for (int i=0; i<n; i++) { o[i] = F64.Abs(i0[i]); } }),
+                (double i0) => { return Math.Abs(i0); },
+                AbsoluteUnaryErrorEvaluator(),
+                new[] {
+                    Input.Uniform(-1.0, 1.0),
+                    Input.Uniform(-1e6, 1e6),
+                    Input.Uniform(ValueBounds.TestNegMax, ValueBounds.TestPosMax)
+                },
+                rcpValues
+            ),
+
+            new UnaryOpFamily(
+                new UnaryOpImpl("Nabs()", 1000000, (int n, F64[] i0, F64[] o) => { for (int i=0; i<n; i++) { o[i] = F64.Nabs(i0[i]); } }),
+                (double i0) => { return -Math.Abs(i0); },
+                AbsoluteUnaryErrorEvaluator(),
+                new[] {
+                    Input.Uniform(-1.0, 1.0),
+                    Input.Uniform(-1e6, 1e6),
+                    Input.Uniform(ValueBounds.TestNegMax, ValueBounds.TestPosMax)
+                },
+                rcpValues
+            ),
+
+            new UnaryOpFamily(
+                new UnaryOpImpl("1/x", 100000, (int n, F64[] i0, F64[] o) => { for (int i=0; i<n; i++) { o[i] = F64.One / i0[i]; } }),
+                (double i0) => { return 1.0 / i0; },
+                RelativeUnaryErrorEvaluator(),
+                new[] {
+                    Input.Exponential(ValueBounds.TestPosMin, ValueBounds.PosMax),
+                    Input.Exponential(ValueBounds.TestNegMin, ValueBounds.NegMax)
+                },
+                rcpValues
+            ),
+
+            new UnaryOpFamily(
+                new[]
+                {
+                    new UnaryOpImpl("Rcp(x)", 100000, (int n, F64[] i0, F64[] o) => { for (int i=0; i<n; i++) { o[i] = F64.Rcp(i0[i]); } }),
+                    new UnaryOpImpl("RcpFast(x)", 100000, (int n, F64[] i0, F64[] o) => { for (int i=0; i<n; i++) { o[i] = F64.RcpFast(i0[i]); } }),
+                    new UnaryOpImpl("RcpFastest(x)", 100000, (int n, F64[] i0, F64[] o) => { for (int i=0; i<n; i++) { o[i] = F64.RcpFastest(i0[i]); } }),
+                },
+                (double i0) => { return 1.0 / i0; },
+                RelativeUnaryErrorEvaluator(),
+                new[] {
+                    // Input.Exponential(1e-3, 1e3, Input.SignMode.Random),
+                    Input.Exponential(ValueBounds.TestPosMin, ValueBounds.TestPosMax),
+                    Input.Exponential(ValueBounds.TestNegMin, ValueBounds.TestNegMax)
+                },
+                rcpValues
+            ),
+
+            new UnaryOpFamily(
+                new[]
+                {
+                    new UnaryOpImpl("SqrtPrecise(x)", 10000, (int n, F64[] i0, F64[] o) => { for (int i=0; i<n; i++) { o[i] = F64.SqrtPrecise(i0[i]); } }),
+                    new UnaryOpImpl("Sqrt(x)", 100000, (int n, F64[] i0, F64[] o) => { for (int i=0; i<n; i++) { o[i] = F64.Sqrt(i0[i]); } }),
+                    new UnaryOpImpl("SqrtFast(x)", 100000, (int n, F64[] i0, F64[] o) => { for (int i=0; i<n; i++) { o[i] = F64.SqrtFast(i0[i]); } }),
+                    new UnaryOpImpl("SqrtFastest(x)", 100000, (int n, F64[] i0, F64[] o) => { for (int i=0; i<n; i++) { o[i] = F64.SqrtFastest(i0[i]); } }),
+                },
+                (double i0) => { return Math.Sqrt(i0); },
+                RelativeUnaryErrorEvaluator(),
+                new[] {
+                    Input.Exponential(ValueBounds.TestPosMin, ValueBounds.TestPosMax),
+                },
+                sqrtValues
+            ),
+
+            new UnaryOpFamily(
+                new[]
+                {
+                    new UnaryOpImpl("RSqrt(x)", 100000, (int n, F64[] i0, F64[] o) => { for (int i=0; i<n; i++) { o[i] = F64.RSqrt(i0[i]); } }),
+                    new UnaryOpImpl("RSqrtFast(x)", 100000, (int n, F64[] i0, F64[] o) => { for (int i=0; i<n; i++) { o[i] = F64.RSqrtFast(i0[i]); } }), 
+                    new UnaryOpImpl("RSqrtFastest(x)", 100000, (int n, F64[] i0, F64[] o) => { for (int i=0; i<n; i++) { o[i] = F64.RSqrtFastest(i0[i]); } }), 
+                },
+                (double i0) => { return 1.0 / Math.Sqrt(i0); },
+                RelativeUnaryErrorEvaluator(),
+                new[] {
+                    Input.Exponential(ValueBounds.TestPosMin, ValueBounds.TestPosMax)
+                },
+                sqrtValues
+            ),
+
+            // new UnaryOpFamily(
+            //     "1/Sqrt(x)",
+            //     10000,
+            //     (int n, F64[] i0, F64[] o) => { for (int i=0; i<n; i++) { o[i] = F64.FromInt(1) / i0[i].Sqrt(); } },
+            //     (double i0) => { return 1.0 / Math.Sqrt(i0); },
+            //     RelativeUnaryErrorEvaluator(),
+            //     new[] {
+            //         Input.Exponential(ValueBounds.TestPosMin, ValueBounds.TestPosMax)
+            //     },
+            //     sqrtValues
+            // ),
+
+            // new UnaryOpFamily(
+            //     "Rcp(Sqrt(x))",
+            //     10000,
+            //     (int n, F64[] i0, F64[] o) => { for (int i=0; i<n; i++) { o[i] = i0[i].Sqrt().Rcp(); } },
+            //     (double i0) => { return 1.0 / Math.Sqrt(i0); },
+            //     RelativeUnaryErrorEvaluator(),
+            //     new[] {
+            //         Input.Exponential(ValueBounds.TestPosMin, ValueBounds.TestPosMax)
+            //     },
+            //     sqrtValues
+            // ),
+
+            new UnaryOpFamily(
+                new[]
+                {
+                    new UnaryOpImpl("Exp(x)", 500000, (int n, F64[] i0, F64[] o) => { for (int i=0; i<n; i++) { o[i] = F64.Exp(i0[i]); } }),
+                    new UnaryOpImpl("ExpFast(x)", 500000, (int n, F64[] i0, F64[] o) => { for (int i=0; i<n; i++) { o[i] = F64.ExpFast(i0[i]); } }),
+                    new UnaryOpImpl("ExpFastest(x)", 500000, (int n, F64[] i0, F64[] o) => { for (int i=0; i<n; i++) { o[i] = F64.ExpFastest(i0[i]); } }),
+                },
+                (double i0) => { return Math.Exp(i0); },
+                RelativeUnaryErrorEvaluator(),
+                new[] {
+                    Input.Uniform(-10.0, 10.0),
+                    Input.Uniform(-100.0, 100.0),
+                    Input.Exponential(ValueBounds.TestPosMin, 10.0),
+                    Input.Exponential(ValueBounds.TestNegMin, -10.0)
+                },
+                new double[] { -80.561761269578, 0.5, 1.0, 4.85202256566845 }
+            ),
+
+            new UnaryOpFamily(
+                new[]
+                {
+                    new UnaryOpImpl("Exp2(x)", 500000, (int n, F64[] i0, F64[] o) => { for (int i=0; i<n; i++) { o[i] = F64.Exp2(i0[i]); } }),
+                    new UnaryOpImpl("Exp2Fast(x)", 500000, (int n, F64[] i0, F64[] o) => { for (int i=0; i<n; i++) { o[i] = F64.Exp2Fast(i0[i]); } }),
+                    new UnaryOpImpl("Exp2Fastest(x)", 500000, (int n, F64[] i0, F64[] o) => { for (int i=0; i<n; i++) { o[i] = F64.Exp2Fastest(i0[i]); } }),
+                },
+                (double i0) => { return Math.Pow(2.0, i0); },
+                RelativeUnaryErrorEvaluator(),
+                new[] {
+                    Input.Uniform(-10.0, 10.0),
+                    Input.Uniform(-100.0, 100.0),
+                    Input.Exponential(ValueBounds.TestPosMin, 10.0),
+                    Input.Exponential(ValueBounds.TestNegMin, -10.0)
+                },
+                new double[] { 0.5, 1.0, 6.9999888928141445 }
+            ),
+
+            new UnaryOpFamily(
+                new[]
+                {
+                    new UnaryOpImpl("Log(x)", 100000, (int n, F64[] i0, F64[] o) => { for (int i=0; i<n; i++) { o[i] = F64.Log(i0[i]); } }),
+                    new UnaryOpImpl("LogFast(x)", 100000, (int n, F64[] i0, F64[] o) => { for (int i=0; i<n; i++) { o[i] = F64.LogFast(i0[i]); } }),
+                    new UnaryOpImpl("LogFastest(x)", 100000, (int n, F64[] i0, F64[] o) => { for (int i=0; i<n; i++) { o[i] = F64.LogFastest(i0[i]); } }),
+                },
+                (double i0) => { return Math.Log(i0); },
+                RelativeUnaryErrorEvaluator(16.0),
+                new[] {
+                    Input.Exponential(ValueBounds.TestPosMin, ValueBounds.TestPosMax),
+                    Input.Exponential(0.999, 1.001),
+                },
+                logValues
+            ),
+
+            new UnaryOpFamily(
+                new[]
+                {
+                    new UnaryOpImpl("Log2(x)", 100000, (int n, F64[] i0, F64[] o) => { for (int i=0; i<n; i++) { o[i] = F64.Log2(i0[i]); } }),
+                    new UnaryOpImpl("Log2Fast(x)", 100000, (int n, F64[] i0, F64[] o) => { for (int i=0; i<n; i++) { o[i] = F64.Log2Fast(i0[i]); } }),
+                    new UnaryOpImpl("Log2Fastest(x)", 100000, (int n, F64[] i0, F64[] o) => { for (int i=0; i<n; i++) { o[i] = F64.Log2Fastest(i0[i]); } }),
+                },
+                (double i0) => { return Math.Log(i0, 2.0); },
+                RelativeUnaryErrorEvaluator(16.0),
+                new[] {
+                    Input.Exponential(ValueBounds.TestPosMin, ValueBounds.TestPosMax),
+                    Input.Exponential(0.999, 1.001),
+                },
+                logValues
+            ),
+
+            new BinaryOpFamily(
+                new[]
+                {
+                    new BinaryOpImpl("Pow(a, b)", 100000, (int n, F64[] i0, F64[] i1, F64[] o) => { for (int i=0; i<n; i++) { o[i] = F64.Pow(i0[i], i1[i]); } }),
+                    new BinaryOpImpl("PowFast(a, b)", 100000, (int n, F64[] i0, F64[] i1, F64[] o) => { for (int i=0; i<n; i++) { o[i] = F64.PowFast(i0[i], i1[i]); } }),
+                    new BinaryOpImpl("PowFastest(a, b)", 100000, (int n, F64[] i0, F64[] i1, F64[] o) => { for (int i=0; i<n; i++) { o[i] = F64.PowFastest(i0[i], i1[i]); } }),
+                },
                 (double i0, double i1) => { return Math.Pow(i0, i1); },
-                RelativeBinaryErrorEvaluator(1.0 / 256), // \todo [petri] pretty high threshold
+                RelativeBinaryErrorEvaluator(),
                 new[] {
                     Tuple.Create(Input.Exponential(1e-6, 1.0), Input.Exponential(1e-3, 20.0)),
                     Tuple.Create(Input.Exponential(1.0, 16.0), Input.Exponential(1e-3, 1.0)),
-                    // \todo [petri] better inputs
                 },
                 new[] {
                     Tuple.Create(0.03431271179579, 8.52991297887638),
@@ -997,14 +1025,113 @@ namespace FixPointCSTest
                 }
             ),
 
-            new BinaryOp(
-                "Atan2(a, b)",
-                100000,
-                (int n, F64[] i0, F64[] i1, F64[] o) => { for (int i=0; i<n; i++) { o[i] = F64.Atan2(i0[i], i1[i]); } },
+            new UnaryOpFamily(
+                new[]
+                {
+                    new UnaryOpImpl("Sin(x)", 500000, (int n, F64[] i0, F64[] o) => { for (int i=0; i<n; i++) { o[i] = F64.Sin(i0[i]); } }),
+                    new UnaryOpImpl("SinFast(x)", 500000, (int n, F64[] i0, F64[] o) => { for (int i=0; i<n; i++) { o[i] = F64.SinFast(i0[i]); } }),
+                    new UnaryOpImpl("SinFastest(x)", 500000, (int n, F64[] i0, F64[] o) => { for (int i=0; i<n; i++) { o[i] = F64.SinFastest(i0[i]); } }),
+                },
+                (double i0) => { return Math.Sin(i0); },
+                SinCosErrorEvaluator(),
+                new[]
+                {
+                    Input.Uniform(-100.0, 100.0),
+                    Input.Uniform(-1e6, 1e6),
+                },
+                sinCosValues
+            ),
+
+            new UnaryOpFamily(
+                new[]
+                {
+                    new UnaryOpImpl("Cos(x)", 500000, (int n, F64[] i0, F64[] o) => { for (int i=0; i<n; i++) { o[i] = F64.Cos(i0[i]); } }),
+                    new UnaryOpImpl("CosFast(x)", 500000, (int n, F64[] i0, F64[] o) => { for (int i=0; i<n; i++) { o[i] = F64.CosFast(i0[i]); } }),
+                    new UnaryOpImpl("CosFastest(x)", 500000, (int n, F64[] i0, F64[] o) => { for (int i=0; i<n; i++) { o[i] = F64.CosFastest(i0[i]); } }),
+                },
+                (double i0) => { return Math.Cos(i0); },
+                SinCosErrorEvaluator(),
+                new[]
+                {
+                    Input.Uniform(-100.0, 100.0),
+                    Input.Uniform(-1e6, 1e6),
+                },
+                sinCosValues
+            ),
+
+            new UnaryOpFamily(
+                new[]
+                {
+                    new UnaryOpImpl("Tan(x)", 100000, (int n, F64[] i0, F64[] o) => { for (int i=0; i<n; i++) { o[i] = F64.Tan(i0[i]); } }),
+                    new UnaryOpImpl("TanFast(x)", 100000, (int n, F64[] i0, F64[] o) => { for (int i=0; i<n; i++) { o[i] = F64.TanFast(i0[i]); } }),
+                    new UnaryOpImpl("TanFastest(x)", 100000, (int n, F64[] i0, F64[] o) => { for (int i=0; i<n; i++) { o[i] = F64.TanFastest(i0[i]); } }),
+                },
+                (double i0) => { return Math.Tan(i0); },
+                RelativeUnaryErrorEvaluator(16.0),
+                new[] {
+                    Input.Exponential(-0.1, -0.9999),
+                    Input.Uniform(-0.1, 0.1),
+                    Input.Exponential(0.1, 0.9999),
+                },
+                new double[] { 0.5, 1.0 }
+            ),
+
+            new UnaryOpFamily(
+                new[]
+                {
+                    new UnaryOpImpl("Asin(x)", 50000, (int n, F64[] i0, F64[] o) => { for (int i=0; i<n; i++) { o[i] = F64.Asin(i0[i]); } }),
+                    new UnaryOpImpl("AsinFast(x)", 50000, (int n, F64[] i0, F64[] o) => { for (int i=0; i<n; i++) { o[i] = F64.AsinFast(i0[i]); } }),
+                    new UnaryOpImpl("AsinFastest(x)", 50000, (int n, F64[] i0, F64[] o) => { for (int i=0; i<n; i++) { o[i] = F64.AsinFastest(i0[i]); } }),
+                },
+                (double i0) => { return Math.Asin(i0); },
+                AbsoluteUnaryErrorEvaluator(),
+                new[] { Input.Uniform(-1.0, 1.0) },
+                asinCosValues
+            ),
+
+            new UnaryOpFamily(
+                new[]
+                {
+                    new UnaryOpImpl("Acos(x)", 50000, (int n, F64[] i0, F64[] o) => { for (int i=0; i<n; i++) { o[i] = F64.Acos(i0[i]); } }),
+                    new UnaryOpImpl("AcosFast(x)", 50000, (int n, F64[] i0, F64[] o) => { for (int i=0; i<n; i++) { o[i] = F64.AcosFast(i0[i]); } }),
+                    new UnaryOpImpl("AcosFastest(x)", 50000, (int n, F64[] i0, F64[] o) => { for (int i=0; i<n; i++) { o[i] = F64.AcosFastest(i0[i]); } }),
+                },
+                (double i0) => { return Math.Acos(i0); },
+                AbsoluteUnaryErrorEvaluator(),
+                new[] { Input.Uniform(-1.0, 1.0) },
+                asinCosValues
+            ),
+
+            new UnaryOpFamily(
+                new[]
+                {
+                    new UnaryOpImpl("Atan(x)", 100000, (int n, F64[] i0, F64[] o) => { for (int i=0; i<n; i++) { o[i] = F64.Atan(i0[i]); } }),
+                    new UnaryOpImpl("AtanFast(x)", 100000, (int n, F64[] i0, F64[] o) => { for (int i=0; i<n; i++) { o[i] = F64.AtanFast(i0[i]); } }),
+                    new UnaryOpImpl("AtanFastest(x)", 100000, (int n, F64[] i0, F64[] o) => { for (int i=0; i<n; i++) { o[i] = F64.AtanFastest(i0[i]); } }),
+                },
+                (double i0) => { return Math.Atan(i0); },
+                AbsoluteUnaryErrorEvaluator(),
+                new[] {
+                    Input.Uniform(-1.0, 1.0),
+                    Input.Uniform(-1000.0, 1000.0),
+                    Input.Exponential(1.0, ValueBounds.TestPosMax),
+                    Input.Exponential(-1.0, ValueBounds.TestNegMax),
+                },
+                new double[] { 0.5, 1.0 }
+            ),
+
+            new BinaryOpFamily(
+                new[]
+                {
+                    new BinaryOpImpl("Atan2(a, b)", 100000, (int n, F64[] i0, F64[] i1, F64[] o) => { for (int i=0; i<n; i++) { o[i] = F64.Atan2(i0[i], i1[i]); } }),
+                    new BinaryOpImpl("Atan2Fast(a, b)", 100000, (int n, F64[] i0, F64[] i1, F64[] o) => { for (int i=0; i<n; i++) { o[i] = F64.Atan2Fast(i0[i], i1[i]); } }),
+                    new BinaryOpImpl("Atan2Fastest(a, b)", 100000, (int n, F64[] i0, F64[] i1, F64[] o) => { for (int i=0; i<n; i++) { o[i] = F64.Atan2Fastest(i0[i], i1[i]); } }),
+                },
                 (double i0, double i1) => { return Math.Atan2(i0, i1); },
                 AbsoluteBinaryErrorEvaluator(),
                 new[] {
-                    Tuple.Create(Input.Exponential(1e-6, 1.0, Input.SignMode.Random), Input.Exponential(1e-6, 1.0, Input.SignMode.Random)),
+                    Tuple.Create(Input.Exponential(1e-6, 1e3, Input.SignMode.Random), Input.Exponential(1e-3, 1e6, Input.SignMode.Random)),
+                    Tuple.Create(Input.Exponential(1e-3, 1e6, Input.SignMode.Random), Input.Exponential(1e-6, 1e3, Input.SignMode.Random)),
                     Tuple.Create(Input.Exponential(1.0, ValueBounds.TestPosMax, Input.SignMode.Random), Input.Exponential(1.0, ValueBounds.TestPosMax, Input.SignMode.Random)),
                 },
                 new[] {
@@ -1012,33 +1139,32 @@ namespace FixPointCSTest
                     Tuple.Create(0.0, 0.0),
                     Tuple.Create(6.99465692322701, 3.93830072996207),
                 }
-            )
+            ),
         };
-/*
-        private static double[] g_test_vals =
-        {
-            13.0, 1.2,
-            13.2, 2.4,
-            -13.4, 5.5,
-            -13.3, -8.8,
-            19.0, -7.5,
-            13.0, 0.5,
-            13.0, 0.05,
-            1.234, 2.345,
-        };
-*/
+
         static void BasicTests(string testFilter)
         {
             Console.WriteLine("Basic tests:");
 
-            foreach (OpBase op in operations)
+            foreach (OpFamilyBase opFamily in operations)
             {
-                if (op.name.StartsWith(testFilter))
+                if (opFamily is UnaryOpFamily)
                 {
-                    if (op is UnaryOp)
-                        TestRunner.TestUnaryBasicValues((UnaryOp)op);
-                    else if (op is BinaryOp)
-                        TestRunner.TestBinaryBasicValues((BinaryOp)op);
+                    foreach (UnaryOpImpl opImpl in ((UnaryOpFamily)opFamily).implementations)
+                    {
+                        if (opImpl.name.StartsWith(testFilter))
+                            TestRunner.TestUnaryBasicValues((UnaryOpFamily)opFamily, opImpl);
+                    }
+                }
+                else if (opFamily is BinaryOpFamily)
+                {
+                    foreach (BinaryOpImpl opImpl in ((BinaryOpFamily)opFamily).implementations)
+                    {
+                        if (opImpl.name.StartsWith(testFilter))
+                            TestRunner.TestBinaryBasicValues((BinaryOpFamily)opFamily, opImpl);
+
+                    }
+
                 }
             }
         }
@@ -1046,17 +1172,26 @@ namespace FixPointCSTest
         static void TestOperations(string testFilter)
         {
             Console.WriteLine("OPERATIONS SUMMARY:");
-            Console.WriteLine("|        Operation |     Mops/s | Precision |        Max error |        Avg error | Worst input");
-            Console.WriteLine("|------------------|-----------:|----------:|-----------------:|-----------------:|-----------------");
+            Console.WriteLine("|          Operation |     Mops/s | Precision |        Max error |        Avg error | Worst input");
+            Console.WriteLine("|--------------------|-----------:|----------:|-----------------:|-----------------:|-----------------");
 
-            foreach (OpBase op in operations)
+            foreach (OpFamilyBase opFamily in operations)
             {
-                if (op.name.StartsWith(testFilter))
+                if (opFamily is UnaryOpFamily)
                 {
-                    if (op is UnaryOp)
-                        TestRunner.TestUnaryOperation((UnaryOp)op);
-                    else if (op is BinaryOp)
-                        TestRunner.TestBinaryOperation((BinaryOp)op);
+                    foreach (var opImpl in ((UnaryOpFamily)opFamily).implementations)
+                    {
+                        if (opImpl.name.StartsWith(testFilter))
+                            TestRunner.TestUnaryOperation((UnaryOpFamily)opFamily, opImpl);
+                    }
+                }
+                else if (opFamily is BinaryOpFamily)
+                {
+                    foreach (var opImpl in ((BinaryOpFamily)opFamily).implementations)
+                    {
+                        if (opImpl.name.StartsWith(testFilter))
+                            TestRunner.TestBinaryOperation((BinaryOpFamily)opFamily, opImpl);
+                    }
                 }
             }
 
@@ -1069,7 +1204,11 @@ namespace FixPointCSTest
             // Set this to, eg, "Atan2" or "Rcp(x)" to only measure that operation.
             string testFilter = "";
 
-            BasicTests(testFilter);
+            // Run basic tests only if targeting a particular operation.
+            if (testFilter != "")
+                BasicTests(testFilter);
+
+            // Run precision and performance tests.
             TestOperations(testFilter);
 
             /*Console.WriteLine("-ENTER-");

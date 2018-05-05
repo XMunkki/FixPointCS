@@ -88,6 +88,8 @@ namespace GenerateCpp
                 line = ReplaceWholeWordCpp(line, "ulong", "FP_ULONG");
                 line = ReplaceWholeWordCpp(line, "Debug.Assert", "FP_ASSERT");
                 line = ReplaceWholeWordCpp(line, "Math.PI", "FP_PI");
+                line = line.Replace("Util.", "");
+                line = ConvertArrays(line);
                 line = Convert64bitConstants(line);
                 
                 // Add the line
@@ -165,6 +167,11 @@ namespace GenerateCpp
             if (Char.IsLetterOrDigit(c) || c == '_')
                 return false;
             return true;
+        }
+
+        private static string ConvertArrays(string str)
+        {
+            return Regex.Replace(str, "static readonly FP_INT\\[\\] ([a-zA-Z0-9_]+)", "static FP_INT $1[]");
         }
 
         // Converts all 64bit constants into C++ form.
