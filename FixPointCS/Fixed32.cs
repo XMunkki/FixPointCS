@@ -23,9 +23,7 @@
 //
 #if !CPP
 using System;
-using System.Collections.Generic;
 using System.Runtime.CompilerServices;
-using System.Text;
 using System.Diagnostics;
 
 /* Coding style:
@@ -75,8 +73,8 @@ namespace FixPointCS
         public const int PiHalf = (int)(6746518852L >> 16);
         public const int E = (int)(11674931555L >> 16);
 
-        public const int MaxValue = Int32.MaxValue;
-        public const int MinValue = Int32.MinValue;
+        public const int MinValue = -2147483648;
+        public const int MaxValue = 2147483647;
 
         // Private constants
         private const int RCP_LN2       = (int)(0x171547652L >> 16);    // 1.0 / log(2.0) ~= 1.4426950408889634
