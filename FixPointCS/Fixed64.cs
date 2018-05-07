@@ -70,6 +70,24 @@ namespace FixPointCS
             return (int)((long)a * (long)b >> 30);
         }
 
+        [MethodImpl(AggressiveInlining)]
+        public static int ShiftLeft(int v, int shift)
+        {
+            return (shift >= 0) ? (v << shift) : (v >> -shift);
+        }
+
+        [MethodImpl(AggressiveInlining)]
+        public static int ShiftRight(int v, int shift)
+        {
+            return (shift >= 0) ? (v >> shift) : (v << -shift);
+        }
+
+        [MethodImpl(AggressiveInlining)]
+        public static long ShiftRight(long v, int shift)
+        {
+            return (shift >= 0) ? (v >> shift) : (v << -shift);
+        }
+
         // Exp2()
 
 		// Precision: 13.24 bits
@@ -136,6 +154,25 @@ namespace FixPointCS
 			return y;
 		}
 
+		private static readonly int[] RcpPoly2Lut4Table =
+		{
+			763549742, -1049880894, 1073741824,
+			416481677, -885023563, 1054219245,
+			251719695, -723694122, 1014745020,
+			163617802, -593114530, 966367642,
+		};
+
+		// Precision: 10.87 bits
+		[MethodImpl(AggressiveInlining)]
+		public static int RcpPoly2Lut4(int a)
+		{
+			int offset = (a >> 28) * 3;
+			int y = Qmul30(a, RcpPoly2Lut4Table[offset + 0]);
+			y = Qmul30(a, y + RcpPoly2Lut4Table[offset + 1]);
+			y = y + RcpPoly2Lut4Table[offset + 2];
+			return y;
+		}
+
 		private static readonly int[] RcpPoly3Lut4Table =
 		{
 			-678697788, 1018046684, -1071069948, 1073721112,
@@ -153,6 +190,30 @@ namespace FixPointCS
 			y = Qmul30(a, y + RcpPoly3Lut4Table[offset + 1]);
 			y = Qmul30(a, y + RcpPoly3Lut4Table[offset + 2]);
 			y = y + RcpPoly3Lut4Table[offset + 3];
+			return y;
+		}
+
+		private static readonly int[] RcpPoly3Lut8Table =
+		{
+			-845955225, 1057444032, -1073399630, 1073741824,
+			-541722101, 948013678, -1059804015, 1073158016,
+			-362791857, 816281680, -1027194732, 1070443160,
+			-252017723, 693048742, -981321998, 1064728912,
+			-180482222, 586567224, -928375474, 1055934092,
+			-132624303, 497341140, -872848427, 1044399564,
+			-99630687, 423430423, -817605394, 1030622886,
+			-76289140, 362373419, -764330300, 1015116935,
+		};
+
+		// Precision: 18.89 bits
+		[MethodImpl(AggressiveInlining)]
+		public static int RcpPoly3Lut8(int a)
+		{
+			int offset = (a >> 27) * 4;
+			int y = Qmul30(a, RcpPoly3Lut8Table[offset + 0]);
+			y = Qmul30(a, y + RcpPoly3Lut8Table[offset + 1]);
+			y = Qmul30(a, y + RcpPoly3Lut8Table[offset + 2]);
+			y = y + RcpPoly3Lut8Table[offset + 3];
 			return y;
 		}
 
@@ -643,11 +704,12 @@ namespace FixPointCS
         public const long PiHalf = 6746518852L;
         public const long E = 11674931555L;
 
-        public const long MinValue = -9223372036854775808L; // 0x8000000000000000L
-        public const long MaxValue = 0x7FFFFFFFFFFFFFFFL;
+        public const long MinValue = Int64.MinValue;
+        public const long MaxValue = Int64.MaxValue;
 
         // Private constants
-        private const long RCP_LN2 = 0x171547652L; // 1.0 / Math.Log(2.0) ~= 1.4426950408889634
+        private const long RCP_LN2      = 0x171547652L; // 1.0 / log(2.0) ~= 1.4426950408889634
+        private const long RCP_LOG2_E   = 2977044471L;  // 1.0 / log2(e) ~= 0.6931471805599453
 
         /// <summary>
         /// Converts an integer to a fixed-point value.
@@ -670,7 +732,7 @@ namespace FixPointCS
         /// </summary>
         public static long FromFloat(float v)
         {
-            return FromDouble((double)v);
+            return (int)(v * 4294967296.0f);
         }
 
         /// <summary>
@@ -863,6 +925,17 @@ namespace FixPointCS
         }
 
         [MethodImpl(Util.AggressiveInlining)]
+        private static long MulIntLongLong(int a, long b)
+        {
+            Debug.Assert(a >= 0);
+            ulong af = (ulong)a;
+            long bi = b >> Shift;
+            ulong bf = (ulong)(b & FractionMask);
+
+            return (long)((af * bf) >> Shift) + (long)af * bi;
+        }
+
+        [MethodImpl(Util.AggressiveInlining)]
         private static int Nlz(ulong x)
         {
             int n = 0;
@@ -948,7 +1021,7 @@ namespace FixPointCS
         /// <summary>
         /// Divides two FP values.
         /// </summary>
-        public static long Div(long arg_a, long arg_b)
+        public static long DivPrecise(long arg_a, long arg_b)
         {
             long rem;
 #if !CPP
@@ -1159,14 +1232,6 @@ namespace FixPointCS
         }
 
         /// <summary>
-        /// Calculates the reciprocal using precise division.
-        /// </summary>
-        public static long RcpDiv(long a)
-        {
-            return Div(One, a);
-        }
-
-        /// <summary>
         /// Calculates reciprocal approximation.
         /// </summary>
         public static long Rcp(long x)
@@ -1179,17 +1244,17 @@ namespace FixPointCS
             x *= sign;
 
             // Normalize input into [1.0, 2.0( range (convert to s2.30).
-            const int ONE = (1 << 30);
             int offset = 31 - Nlz((ulong)x);
-            int n = (int)(((offset >= 0) ? (x >> offset) : (x << -offset)) >> 2);
-            int k = n - ONE;
+            int n = (int)Util.ShiftRight(x, offset + 2);
+            const int ONE = (1 << 30);
+            Debug.Assert(n >= ONE);
 
             // Polynomial approximation.
-            int res = Util.RcpPoly4Lut8(k);
+            int res = Util.RcpPoly4Lut8(n - ONE);
             long y = (long)(sign * res) << 2;
 
             // Apply exponent, convert back to s32.32.
-            return (offset >= 0) ? (y >> offset) : (y << -offset);
+            return Util.ShiftRight(y, offset);
         }
 
         /// <summary>
@@ -1205,17 +1270,18 @@ namespace FixPointCS
             x *= sign;
 
             // Normalize input into [1.0, 2.0( range (convert to s2.30).
-            const int ONE = (1 << 30);
             int offset = 31 - Nlz((ulong)x);
-            int n = (int)(((offset >= 0) ? (x >> offset) : (x << -offset)) >> 2);
-            int k = n - ONE;
+            int n = (int)Util.ShiftRight(x, offset + 2);
+            const int ONE = (1 << 30);
+            Debug.Assert(n >= ONE);
 
             // Polynomial approximation.
-            int res = Util.RcpPoly6(k);
+            //int res = Util.RcpPoly6(n - ONE);
+            int res = Util.RcpPoly3Lut8(n - ONE);
             long y = (long)(sign * res) << 2;
 
             // Apply exponent, convert back to s32.32.
-            return (offset >= 0) ? (y >> offset) : (y << -offset);
+            return Util.ShiftRight(y, offset);
         }
 
         /// <summary>
@@ -1237,7 +1303,8 @@ namespace FixPointCS
             int k = n - ONE;
 
             // Polynomial approximation.
-            int res = Util.RcpPoly4(k);
+            //int res = Util.RcpPoly4(n - ONE);
+            int res = Util.RcpPoly2Lut4(k);
             long y = (long)(sign * res) << 2;
 
             // Apply exponent, convert back to s32.32.
@@ -1258,7 +1325,7 @@ namespace FixPointCS
             long y = (long)Util.Exp2Poly5(k) << 2;
 
             // Combine integer and fractional result, and convert back to s32.32.
-            int intPart = (int)(x >> 32);
+            int intPart = (int)(x >> Shift);
             return (intPart >= 0) ? (y << intPart) : (y >> -intPart);
         }
 
@@ -1276,7 +1343,7 @@ namespace FixPointCS
             long y = (long)Util.Exp2Poly4(k) << 2;
 
             // Combine integer and fractional result, and convert back to s32.32.
-            int intPart = (int)(x >> 32);
+            int intPart = (int)(x >> Shift);
             return (intPart >= 0) ? (y << intPart) : (y >> -intPart);
         }
 
@@ -1294,7 +1361,7 @@ namespace FixPointCS
             long y = (long)Util.Exp2Poly3(k) << 2;
 
             // Combine integer and fractional result, and convert back to s32.32.
-            int intPart = (int)(x >> 32);
+            int intPart = (int)(x >> Shift);
             return (intPart >= 0) ? (y << intPart) : (y >> -intPart);
         }
 
@@ -1329,7 +1396,6 @@ namespace FixPointCS
             long y = (long)Util.LogPoly5Lut8(n - ONE) << 2;
 
             // Combine integer and fractional parts (into s32.32).
-            const long RCP_LOG2_E = 2977044471L;    // 1.0 / log2(e) ~= 0.6931471805599453
             return (long)offset * RCP_LOG2_E + y;
         }
 
@@ -1344,7 +1410,6 @@ namespace FixPointCS
             long y = (long)Util.LogPoly3Lut8(n - ONE) << 2;
 
             // Combine integer and fractional parts (into s32.32).
-            const long RCP_LOG2_E = 2977044472L;    // 1.0 / log2(e) ~= 0.6931471805599453
             return (long)offset * RCP_LOG2_E + y;
         }
 
@@ -1359,7 +1424,6 @@ namespace FixPointCS
             long y = (long)Util.LogPoly5(n - ONE) << 2;
 
             // Combine integer and fractional parts (into s32.32).
-            const long RCP_LOG2_E = 2977044472L;    // 1.0 / log2(e) ~= 0.6931471805599453
             return (long)offset * RCP_LOG2_E + y;
         }
 
@@ -1591,7 +1655,7 @@ namespace FixPointCS
                 int z = Util.AtanPoly5Lut8(k);
                 long angle = negMask ^ ((long)z << 2);
                 if (x > 0) return angle;
-                if (y > 0) return angle + Pi;
+                if (y >= 0) return angle + Pi;
                 return angle - Pi;
             }
             else
@@ -1645,7 +1709,7 @@ namespace FixPointCS
                 int z = Util.AtanPoly3Lut8(k);
                 long angle = negMask ^ ((long)z << 2);
                 if (x > 0) return angle;
-                if (y > 0) return angle + Pi;
+                if (y >= 0) return angle + Pi;
                 return angle - Pi;
             }
             else
@@ -1699,7 +1763,7 @@ namespace FixPointCS
                 int res = Util.AtanPoly4(z);
                 long angle = negMask ^ ((long)res << 2);
                 if (x > 0) return angle;
-                if (y > 0) return angle + Pi;
+                if (y >= 0) return angle + Pi;
                 return angle - Pi;
             }
             else

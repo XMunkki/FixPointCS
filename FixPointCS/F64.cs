@@ -67,7 +67,7 @@ namespace FixPointCS
         public static F64 operator +(F64 v1, F64 v2) { return FromRaw(v1.raw + v2.raw); }
         public static F64 operator -(F64 v1, F64 v2) { return FromRaw(v1.raw - v2.raw); }
         public static F64 operator *(F64 v1, F64 v2) { return FromRaw(Fixed64.Mul(v1.raw, v2.raw)); }
-        public static F64 operator /(F64 v1, F64 v2) { return FromRaw(Fixed64.Div(v1.raw, v2.raw)); }
+        public static F64 operator /(F64 v1, F64 v2) { return FromRaw(Fixed64.DivPrecise(v1.raw, v2.raw)); }
         public static F64 operator %(F64 v1, F64 v2) { return FromRaw(Fixed64.Mod(v1.raw, v2.raw)); }
 
         public static F64 operator +(F64 v1, int v2) { return FromRaw(v1.raw + Fixed64.FromInt(v2)); }
@@ -77,7 +77,7 @@ namespace FixPointCS
         public static F64 operator *(F64 v1, int v2) { return FromRaw(v1.raw * (long)v2); }
         public static F64 operator *(int v1, F64 v2) { return FromRaw((long)v1 * v2.raw); }
         public static F64 operator /(F64 v1, int v2) { return FromRaw(v1.raw / (long)v2); }
-        public static F64 operator /(int v1, F64 v2) { return FromRaw(Fixed64.Div(Fixed64.FromInt(v1), v2.raw)); }
+        public static F64 operator /(int v1, F64 v2) { return FromRaw(Fixed64.DivPrecise(Fixed64.FromInt(v1), v2.raw)); }
         public static F64 operator %(F64 v1, int v2) { return FromRaw(Fixed64.Mod(v1.raw, Fixed64.FromInt(v2))); }
         public static F64 operator %(int v1, F64 v2) { return FromRaw(Fixed64.Mod(Fixed64.FromInt(v1), v2.raw)); }
 

@@ -606,7 +606,8 @@ namespace Fixed64
     static const FP_LONG MaxValue = INT64_C(0x7FFFFFFFFFFFFFFF);
 
     // Private constants
-    static const FP_LONG RCP_LN2 = INT64_C(0x171547652); // 1.0 / Math.Log(2.0) ~= 1.4426950408889634
+    static const FP_LONG RCP_LN2      = INT64_C(0x171547652); // 1.0 / log(2.0) ~= 1.4426950408889634
+    static const FP_LONG RCP_LOG2_E   = INT64_C(2977044471);  // 1.0 / log2(e) ~= 0.6931471805599453
 
     /// <summary>
     /// Converts an integer to a fixed-point value.
@@ -1268,7 +1269,6 @@ namespace Fixed64
         FP_LONG y = (FP_LONG)LogPoly5Lut8(n - ONE) << 2;
 
         // Combine integer and fractional parts (into s32.32).
-        static const FP_LONG RCP_LOG2_E = INT64_C(2977044471);    // 1.0 / log2(e) ~= 0.6931471805599453
         return (FP_LONG)offset * RCP_LOG2_E + y;
     }
 
@@ -1283,7 +1283,6 @@ namespace Fixed64
         FP_LONG y = (FP_LONG)LogPoly3Lut8(n - ONE) << 2;
 
         // Combine integer and fractional parts (into s32.32).
-        static const FP_LONG RCP_LOG2_E = INT64_C(2977044472);    // 1.0 / log2(e) ~= 0.6931471805599453
         return (FP_LONG)offset * RCP_LOG2_E + y;
     }
 
@@ -1298,7 +1297,6 @@ namespace Fixed64
         FP_LONG y = (FP_LONG)LogPoly5(n - ONE) << 2;
 
         // Combine integer and fractional parts (into s32.32).
-        static const FP_LONG RCP_LOG2_E = INT64_C(2977044472);    // 1.0 / log2(e) ~= 0.6931471805599453
         return (FP_LONG)offset * RCP_LOG2_E + y;
     }
 

@@ -50,6 +50,10 @@ namespace FixPointCS
             this.y = y;
         }
 
+        public static F64Vec2 FromInt(int x, int y) { return new F64Vec2(F64.FromInt(x), F64.FromInt(y)); }
+        public static F64Vec2 FromFloat(float x, float y) { return new F64Vec2(F64.FromFloat(x), F64.FromFloat(y)); }
+        public static F64Vec2 FromDouble(double x, double y) { return new F64Vec2(F64.FromDouble(x), F64.FromDouble(y)); }
+
         // Operators
         public static F64Vec2 operator -(F64Vec2 a) { return new F64Vec2(-a.x, -a.y); }
 
