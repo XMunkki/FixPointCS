@@ -152,25 +152,6 @@ namespace FixPointCS
 			return y;
 		}
 
-		private static readonly int[] RcpPoly2Lut4Table =
-		{
-			763549742, -1049880894, 1073741824,
-			416481677, -885023563, 1054219245,
-			251719695, -723694122, 1014745020,
-			163617802, -593114530, 966367642,
-		};
-
-		// Precision: 10.87 bits
-		[MethodImpl(AggressiveInlining)]
-		public static int RcpPoly2Lut4(int a)
-		{
-			int offset = (a >> 28) * 3;
-			int y = Qmul30(a, RcpPoly2Lut4Table[offset + 0]);
-			y = Qmul30(a, y + RcpPoly2Lut4Table[offset + 1]);
-			y = y + RcpPoly2Lut4Table[offset + 2];
-			return y;
-		}
-
 		private static readonly int[] RcpPoly3Lut4Table =
 		{
 			-678697788, 1018046684, -1071069948, 1073721112,
@@ -188,30 +169,6 @@ namespace FixPointCS
 			y = Qmul30(a, y + RcpPoly3Lut4Table[offset + 1]);
 			y = Qmul30(a, y + RcpPoly3Lut4Table[offset + 2]);
 			y = y + RcpPoly3Lut4Table[offset + 3];
-			return y;
-		}
-
-		private static readonly int[] RcpPoly3Lut8Table =
-		{
-			-845955225, 1057444032, -1073399630, 1073741824,
-			-541722101, 948013678, -1059804015, 1073158016,
-			-362791857, 816281680, -1027194732, 1070443160,
-			-252017723, 693048742, -981321998, 1064728912,
-			-180482222, 586567224, -928375474, 1055934092,
-			-132624303, 497341140, -872848427, 1044399564,
-			-99630687, 423430423, -817605394, 1030622886,
-			-76289140, 362373419, -764330300, 1015116935,
-		};
-
-		// Precision: 18.89 bits
-		[MethodImpl(AggressiveInlining)]
-		public static int RcpPoly3Lut8(int a)
-		{
-			int offset = (a >> 27) * 4;
-			int y = Qmul30(a, RcpPoly3Lut8Table[offset + 0]);
-			y = Qmul30(a, y + RcpPoly3Lut8Table[offset + 1]);
-			y = Qmul30(a, y + RcpPoly3Lut8Table[offset + 2]);
-			y = y + RcpPoly3Lut8Table[offset + 3];
 			return y;
 		}
 
@@ -1274,8 +1231,7 @@ namespace FixPointCS
             Debug.Assert(n >= ONE);
 
             // Polynomial approximation.
-            //int res = Util.RcpPoly6(n - ONE);
-            int res = Util.RcpPoly3Lut8(n - ONE);
+            int res = Util.RcpPoly6(n - ONE);
             long y = (long)(sign * res) << 2;
 
             // Apply exponent, convert back to s32.32.
@@ -1297,16 +1253,15 @@ namespace FixPointCS
             // Normalize input into [1.0, 2.0( range (convert to s2.30).
             const int ONE = (1 << 30);
             int offset = 31 - Nlz((ulong)x);
-            int n = (int)(((offset >= 0) ? (x >> offset) : (x << -offset)) >> 2);
-            int k = n - ONE;
+            int n = (int)Util.ShiftRight(x, offset + 2);
+            //int n = (int)(((offset >= 0) ? (x >> offset) : (x << -offset)) >> 2);
 
             // Polynomial approximation.
-            //int res = Util.RcpPoly4(n - ONE);
-            int res = Util.RcpPoly2Lut4(k);
+            int res = Util.RcpPoly4(n - ONE);
             long y = (long)(sign * res) << 2;
 
             // Apply exponent, convert back to s32.32.
-            return (offset >= 0) ? (y >> offset) : (y << -offset);
+            return Util.ShiftRight(y, offset);
         }
 
         /// <summary>

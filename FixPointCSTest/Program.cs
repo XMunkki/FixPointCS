@@ -356,7 +356,7 @@ namespace FixPointCSTest
         private const int       PRECISION_CHUNK_SIZE        = 1024;
         private const int       BENCHMARK_NUM_REPEATS       = 9;
         private const int       BENCHMARK_NUM_ITERS         = 10000;
-        private const int       BENCHMARK_CHUNK_SIZE        = 512;
+        private const int       BENCHMARK_CHUNK_SIZE        = 128;
         private const double    BENCHMARK_DURATION_SECONDS  = 0.5;
 
         private static Random rnd = new Random(12345678);
