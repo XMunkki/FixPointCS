@@ -987,6 +987,84 @@ namespace FixPointCS
         }
 
         /// <summary>
+        /// Calculates division approximation.
+        /// </summary>
+        public static long Div(long a, long b)
+        {
+            if (b == MinValue)
+                return 0;
+
+            // Handle negative values.
+            int sign = (b < 0) ? -1 : 1;
+            b *= sign;
+
+            // Normalize input into [1.0, 2.0( range (convert to s2.30).
+            int offset = 31 - Nlz((ulong)b);
+            int n = (int)Util.ShiftRight(b, offset + 2);
+            const int ONE = (1 << 30);
+            Debug.Assert(n >= ONE);
+
+            // Polynomial approximation.
+            int res = Util.RcpPoly4Lut8(n - ONE);
+
+            // Apply exponent, convert back to s32.32.
+            long y = MulIntLongLong(res, a) << 2;
+            return Util.ShiftRight(sign * y, offset);
+        }
+
+        /// <summary>
+        /// Calculates division approximation.
+        /// </summary>
+        public static long DivFast(long a, long b)
+        {
+            if (b == MinValue)
+                return 0;
+
+            // Handle negative values.
+            int sign = (b < 0) ? -1 : 1;
+            b *= sign;
+
+            // Normalize input into [1.0, 2.0( range (convert to s2.30).
+            int offset = 31 - Nlz((ulong)b);
+            int n = (int)Util.ShiftRight(b, offset + 2);
+            const int ONE = (1 << 30);
+            Debug.Assert(n >= ONE);
+
+            // Polynomial approximation.
+            int res = Util.RcpPoly6(n - ONE);
+
+            // Apply exponent, convert back to s32.32.
+            long y = MulIntLongLong(res, a) << 2;
+            return Util.ShiftRight(sign * y, offset);
+        }
+
+        /// <summary>
+        /// Calculates division approximation.
+        /// </summary>
+        public static long DivFastest(long a, long b)
+        {
+            if (b == MinValue)
+                return 0;
+
+            // Handle negative values.
+            int sign = (b < 0) ? -1 : 1;
+            b *= sign;
+
+            // Normalize input into [1.0, 2.0( range (convert to s2.30).
+            int offset = 31 - Nlz((ulong)b);
+            int n = (int)Util.ShiftRight(b, offset + 2);
+            const int ONE = (1 << 30);
+            Debug.Assert(n >= ONE);
+
+            // Polynomial approximation.
+            int res = Util.RcpPoly4(n - ONE);
+
+            // Apply exponent, convert back to s32.32.
+            long y = MulIntLongLong(res, a) << 2;
+            return Util.ShiftRight(sign * y, offset);
+        }
+
+        /// <summary>
         /// Divides two FP values and returns the modulus.
         /// </summary>
         public static long Mod(long a, long b)

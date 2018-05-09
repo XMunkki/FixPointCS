@@ -281,6 +281,84 @@ namespace FixPointCS
         }
 
         /// <summary>
+        /// Calculates division approximation.
+        /// </summary>
+        public static int Div(int a, int b)
+        {
+            if (b == MinValue)
+                return 0;
+
+            // Handle negative values.
+            int sign = (b < 0) ? -1 : 1;
+            b *= sign;
+
+            // Normalize input into [1.0, 2.0( range (convert to s2.30).
+            int offset = 29 - Nlz((uint)b);
+            int n = Util.ShiftRight(b, offset - 28);
+            const int ONE = (1 << 30);
+            Debug.Assert(n >= ONE);
+
+            // Polynomial approximation.
+            int res = Util.RcpPoly4Lut8(n - ONE);
+
+            // Multiply by reciprocal, apply exponent, convert back to s16.16.
+            int y = Util.Qmul30(res, a);
+            return Util.ShiftRight(sign * y, offset - 14);
+        }
+
+        /// <summary>
+        /// Calculates division approximation.
+        /// </summary>
+        public static int DivFast(int a, int b)
+        {
+            if (b == MinValue)
+                return 0;
+
+            // Handle negative values.
+            int sign = (b < 0) ? -1 : 1;
+            b *= sign;
+
+            // Normalize input into [1.0, 2.0( range (convert to s2.30).
+            int offset = 29 - Nlz((uint)b);
+            int n = Util.ShiftRight(b, offset - 28);
+            const int ONE = (1 << 30);
+            Debug.Assert(n >= ONE);
+
+            // Polynomial approximation.
+            int res = Util.RcpPoly6(n - ONE);
+
+            // Multiply by reciprocal, apply exponent, convert back to s16.16.
+            int y = Util.Qmul30(res, a);
+            return Util.ShiftRight(sign * y, offset - 14);
+        }
+
+        /// <summary>
+        /// Calculates division approximation.
+        /// </summary>
+        public static int DivFastest(int a, int b)
+        {
+            if (b == MinValue)
+                return 0;
+
+            // Handle negative values.
+            int sign = (b < 0) ? -1 : 1;
+            b *= sign;
+
+            // Normalize input into [1.0, 2.0( range (convert to s2.30).
+            int offset = 29 - Nlz((uint)b);
+            int n = Util.ShiftRight(b, offset - 28);
+            const int ONE = (1 << 30);
+            Debug.Assert(n >= ONE);
+
+            // Polynomial approximation.
+            int res = Util.RcpPoly4(n - ONE);
+
+            // Multiply by reciprocal, apply exponent, convert back to s16.16.
+            int y = Util.Qmul30(res, a);
+            return Util.ShiftRight(sign * y, offset - 14);
+        }
+
+        /// <summary>
         /// Divides two FP values and returns the modulus.
         /// </summary>
         public static int Mod(int a, int b)
@@ -413,7 +491,7 @@ namespace FixPointCS
             int adjust = ((offset & 1) != 0) ? HALF_SQRT2 : ONE;
             offset = offset >> 1;
 
-            // Apply exponent, convert back to s32.32.
+            // Apply exponent, convert back to s16.16.
             int yr = Util.Qmul30(adjust, y);
             return Util.ShiftRight(yr, offset + 21);
         }
@@ -465,7 +543,7 @@ namespace FixPointCS
             int adjust = ((offset & 1) != 0) ? HALF_SQRT2 : ONE;
             offset = offset >> 1;
 
-            // Apply exponent, convert back to s32.32.
+            // Apply exponent, convert back to s16.16.
             int yr = Util.Qmul30(adjust, y);
             return Util.ShiftRight(yr, offset + 21);
         }
@@ -491,7 +569,7 @@ namespace FixPointCS
             // Polynomial approximation.
             int res = Util.RcpPoly4Lut8(n - ONE);
 
-            // Apply exponent, convert back to s32.32.
+            // Apply exponent, convert back to s16.16.
             return Util.ShiftRight(sign * res, offset);
         }
 
@@ -517,7 +595,7 @@ namespace FixPointCS
             int res = Util.RcpPoly6(n - ONE);
             //int res = Util.RcpPoly3Lut8(n - ONE);
 
-            // Apply exponent, convert back to s32.32.
+            // Apply exponent, convert back to s16.16.
             return Util.ShiftRight(sign * res, offset);
         }
 
@@ -543,7 +621,7 @@ namespace FixPointCS
             int res = Util.RcpPoly4(n - ONE);
             //int res = Util.RcpPoly3Lut4(n - ONE);
 
-            // Apply exponent, convert back to s32.32.
+            // Apply exponent, convert back to s16.16.
             return Util.ShiftRight(sign * res, offset);
         }
 
@@ -679,7 +757,7 @@ namespace FixPointCS
             Debug.Assert(n >= ONE);
             int y = Util.Log2Poly4Lut16(n - ONE);
 
-            // Combine integer and fractional parts (into s32.32).
+            // Combine integer and fractional parts (into s16.16).
             return (offset << Shift) + (y >> 14);
         }
 
@@ -695,7 +773,7 @@ namespace FixPointCS
             Debug.Assert(n >= ONE);
             int y = Util.Log2Poly3Lut16(n - ONE);
 
-            // Combine integer and fractional parts (into s32.32).
+            // Combine integer and fractional parts (into s16.16).
             return (offset << Shift) + (y >> 14);
         }
 
@@ -711,7 +789,7 @@ namespace FixPointCS
             Debug.Assert(n >= ONE);
             int y = Util.Log2Poly5(n - ONE);
 
-            // Combine integer and fractional parts (into s32.32).
+            // Combine integer and fractional parts (into s16.16).
             return (offset << Shift) + (y >> 14);
         }
 

@@ -86,6 +86,17 @@ namespace FixPointCSTest
             Random
         }
 
+        static public ValueGenerator Constant(double v)
+        {
+            return (Random rnd, int count) =>
+            {
+                double[] values = new double[count];
+                for (int i = 0; i < count; i++)
+                    values[i] = v;
+                return values;
+            };
+        }
+
         static public ValueGenerator Uniform(double mn, double mx)
         {
             return (Random rnd, int count) =>
@@ -175,6 +186,8 @@ namespace FixPointCSTest
                 return 32;
             else if (type == typeof(F32))
                 return 16;
+            else if (type == typeof(int))
+                return 0;
             else
                 throw new InvalidOperationException("GetTypePrecisionBits(): Unknown type: " + type);
         }
@@ -186,6 +199,13 @@ namespace FixPointCSTest
             );
         }
 
+        public static Operation F64_Int(string name, Action<int, F64[], int[]> execute)
+        {
+            return new Operation(name, new ValueBoundsF64(), new[] { typeof(F64) }, new[] { typeof(int) },
+                (int count, Array[] inputs, Array[] outputs) => { execute(count, (F64[])inputs[0], (int[])outputs[0]); }
+            );
+        }
+
         public static Operation F64_F64_F64(string name, Action<int, F64[], F64[], F64[]> execute)
         {
             return new Operation(name, new ValueBoundsF64(), new[] { typeof(F64), typeof(F64) }, new[] { typeof(F64) }, (int count, Array[] inputs, Array[] outputs) => { execute(count, (F64[])inputs[0], (F64[])inputs[1], (F64[])outputs[0]); });
@@ -194,6 +214,13 @@ namespace FixPointCSTest
         public static Operation F32_F32(string name, Action<int, F32[], F32[]> execute)
         {
             return new Operation(name, new ValueBoundsF32(), new[] { typeof(F32) }, new[] { typeof(F32) }, (int count, Array[] inputs, Array[] outputs) => { execute(count, (F32[])inputs[0], (F32[])outputs[0]); });
+        }
+
+        public static Operation F32_Int(string name, Action<int, F32[], int[]> execute)
+        {
+            return new Operation(name, new ValueBoundsF32(), new[] { typeof(F32) }, new[] { typeof(int) },
+                (int count, Array[] inputs, Array[] outputs) => { execute(count, (F32[])inputs[0], (int[])outputs[0]); }
+            );
         }
 
         public static Operation F32_F32_F32(string name, Action<int, F32[], F32[], F32[]> execute)
@@ -231,6 +258,12 @@ namespace FixPointCSTest
                 F32[] input = (F32[])values;
                 for (int i = 0; i < values.Length; i++)
                     output[i] = input[i].Double;
+            }
+            else if (fromType == typeof(int))
+            {
+                int[] input = (int[])values;
+                for (int i = 0; i < values.Length; i++)
+                    output[i] = (double)input[i];
             }
             else
                 throw new InvalidOperationException("Unsupported type conversion from " + fromType);
@@ -474,6 +507,7 @@ namespace FixPointCSTest
                     OperationError[] errors = opFamily.EvaluateErrors(PRECISION_CHUNK_SIZE, dblInputs, dblOutputs, ulpScale);
 
                     // Compute reference values.
+                    // \todo [petri] also computed in EvaluateErrors() !
                     double[] references = opFamily.ComputeReferences(dblInputs);
 
                     // Compute error stats.
@@ -631,7 +665,7 @@ namespace FixPointCSTest
         {
             return (double a, double b, double output, double reference, double ulpScale) =>
             {
-                const double minErr = 4.0 / 4294967296.0;
+                double minErr = 4.0 * ulpScale;
                 double absRef = Math.Max(Math.Abs(reference), Math.Abs(b));
                 double err = Math.Abs(output - reference);
                 //return (err >= minErr) ? err / absRef : -1.0;
@@ -809,6 +843,48 @@ namespace FixPointCSTest
             ),
 
             new UnaryOpFamily(
+                (double i0) => { return Math.Ceiling(i0); },
+                AbsoluteUnaryErrorEvaluator(),
+                Operation.Multi(
+                    Operation.F64_Int("CeilToInt() F64", (int n, F64[] i0, int[] o) => { for (int i=0; i<n; i++) { o[i] = F64.CeilToInt(i0[i]); } }),
+                    Operation.F32_Int("CeilToInt() F32", (int n, F32[] i0, int[] o) => { for (int i=0; i<n; i++) { o[i] = F32.CeilToInt(i0[i]); } })
+                ),
+                bounds => new[] {
+                    InputGenerator.Unary(Input.Uniform(-1.0, 1.0)),
+                    InputGenerator.Unary(Input.Uniform(-1e5, 1e5)),
+                    InputGenerator.Unary(Input.Uniform(bounds.InputNegMax, bounds.InputPosMax))
+                }
+            ),
+
+            new UnaryOpFamily(
+                (double i0) => { return Math.Floor(i0); },
+                AbsoluteUnaryErrorEvaluator(),
+                Operation.Multi(
+                    Operation.F64_Int("FloorToInt() F64", (int n, F64[] i0, int[] o) => { for (int i=0; i<n; i++) { o[i] = F64.FloorToInt(i0[i]); } }),
+                    Operation.F32_Int("FloorToInt() F32", (int n, F32[] i0, int[] o) => { for (int i=0; i<n; i++) { o[i] = F32.FloorToInt(i0[i]); } })
+                ),
+                bounds => new[] {
+                    InputGenerator.Unary(Input.Uniform(-1.0, 1.0)),
+                    InputGenerator.Unary(Input.Uniform(-1e5, 1e5)),
+                    InputGenerator.Unary(Input.Uniform(bounds.InputNegMax, bounds.InputPosMax))
+                }
+            ),
+
+            new UnaryOpFamily(
+                (double i0) => { return Math.Floor(i0 + 0.5); },
+                AbsoluteUnaryErrorEvaluator(),
+                Operation.Multi(
+                    Operation.F64_Int("RoundToInt() F64", (int n, F64[] i0, int[] o) => { for (int i=0; i<n; i++) { o[i] = F64.RoundToInt(i0[i]); } }),
+                    Operation.F32_Int("RoundToInt() F32", (int n, F32[] i0, int[] o) => { for (int i=0; i<n; i++) { o[i] = F32.RoundToInt(i0[i]); } })
+                ),
+                bounds => new[] {
+                    InputGenerator.Unary(Input.Uniform(-1.0, 1.0)),
+                    InputGenerator.Unary(Input.Uniform(-1e5, 1e5)),
+                    InputGenerator.Unary(Input.Uniform(bounds.InputNegMax, bounds.InputPosMax))
+                }
+            ),
+
+            new UnaryOpFamily(
                 (double i0) => { return Math.Abs(i0); },
                 AbsoluteUnaryErrorEvaluator(),
                 Operation.Multi(
@@ -862,6 +938,25 @@ namespace FixPointCSTest
                 },
                 bounds => new[] {
                     InputGenerator.Unary(Input.Exponential(bounds.InputPosMin, bounds.InputPosMax, Input.SignMode.Random)),
+                }
+            ),
+
+            new BinaryOpFamily(
+                (double i0, double i1) => { return i0 / i1; },
+                DivisionErrorEvaluator(),
+                Operation.Multi(
+                    Operation.F64_F64_F64("Div(a,b) F64", (int n, F64[] i0, F64[] i1, F64[] o) => { for (int i=0; i<n; i++) { o[i] = F64.Div(i0[i], i1[i]); } }),
+                    Operation.F64_F64_F64("DivFast(a,b) F64", (int n, F64[] i0, F64[] i1, F64[] o) => { for (int i=0; i<n; i++) { o[i] = F64.DivFast(i0[i], i1[i]); } }),
+                    Operation.F64_F64_F64("DivFastest(a,b) F64", (int n, F64[] i0, F64[] i1, F64[] o) => { for (int i=0; i<n; i++) { o[i] = F64.DivFastest(i0[i], i1[i]); } }),
+                    Operation.F32_F32_F32("Div(a,b) F32", (int n, F32[] i0, F32[] i1, F32[] o) => { for (int i=0; i<n; i++) { o[i] = F32.Div(i0[i], i1[i]); } }),
+                    Operation.F32_F32_F32("DivFast(a,b) F32", (int n, F32[] i0, F32[] i1, F32[] o) => { for (int i=0; i<n; i++) { o[i] = F32.DivFast(i0[i], i1[i]); } }),
+                    Operation.F32_F32_F32("DivFastest(a,b) F32", (int n, F32[] i0, F32[] i1, F32[] o) => { for (int i=0; i<n; i++) { o[i] = F32.DivFastest(i0[i], i1[i]); } })
+                ),
+                bounds => new[] {
+                    InputGenerator.Binary(Input.Constant(0.06715393066406), Input.Constant(-1.0237274169921)),
+                    InputGenerator.Binary(Input.Uniform(-1000.0, 1000.0), Input.Exponential(1.0, bounds.InputPosMax, Input.SignMode.Random)),
+                    InputGenerator.Binary(Input.Uniform(bounds.InputNegMax, bounds.InputPosMax), Input.Uniform(bounds.InputNegMax, bounds.InputPosMax)),
+                    InputGenerator.Binary(Input.Uniform(999.0, 1000.0), Input.Uniform(-999.0, -1000.0)),
                 }
             ),
 
@@ -1110,7 +1205,6 @@ namespace FixPointCSTest
 
         static void TestOperations(string testFilter)
         {
-            Console.WriteLine("OPERATIONS SUMMARY:");
             Console.WriteLine("|              Operation |     Mops/s | Precision |        Max error |        Avg error | Worst input");
             Console.WriteLine("|------------------------|-----------:|----------:|-----------------:|-----------------:|-----------------");
 
@@ -1118,7 +1212,7 @@ namespace FixPointCSTest
             {
                 foreach (var opImpl in opFamily.operations)
                 {
-                    if (opImpl.Name.StartsWith(testFilter))
+                    if (opImpl.Name.Contains(testFilter))
                         TestRunner.MeasureOperation(opFamily, opImpl);
                 }
             }
@@ -1129,6 +1223,7 @@ namespace FixPointCSTest
         static void Main(string[] args)
         {
             // Run on second core only, set process/thread priority to high.
+            // Produces more stable results from benchmarks.
             Process.GetCurrentProcess().ProcessorAffinity = new IntPtr(2);
             Process.GetCurrentProcess().PriorityClass = ProcessPriorityClass.High;
             Thread.CurrentThread.Priority = ThreadPriority.Highest;
@@ -1137,9 +1232,14 @@ namespace FixPointCSTest
             // Console.WriteLine("{0} vs {1}", F32.Atan2(F32.FromDouble(0.0), F32.FromDouble(-30023.340087890)), Math.Atan2(0.0, -300.0));
             // Console.WriteLine("{0} vs {1}", F64.Atan2(F64.FromDouble(0.0), F64.FromDouble(-30023.340087890)), Math.Atan2(0.0, -300.0));
             // Console.WriteLine("{0} vs {1}", F64.Div(F64.FromDouble(994.866242629709), F64.FromDouble(-1.0099070169962)), 994.866242629709 / -1.0099070169962);
+            // Console.WriteLine("{0}", F64.CeilToInt(F64.FromDouble(-1073741494.0000)));
 
-            // Name prefix of operations to test. Empty matches all operations.
-            // Set this to, eg, "Atan2" or "Rcp(x)" to only measure that operation.
+            // Filter for choosing which tests to run. Empty runs all tests
+            // Examples:
+            // - "Atan2" runs the whole Atan2 family
+            // - "ToInt" runs all the XxxToInt family
+            // - "RcpFast(x) F32"
+            // - "F32" executes all the whole F32 ops
             string testFilter = "";
 
             // Run precision and performance tests.

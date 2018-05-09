@@ -108,6 +108,9 @@ namespace FixPointCS
         public static F64 Floor(F64 a) { return FromRaw(Fixed64.Floor(a.raw)); }
         public static F64 Round(F64 a) { return FromRaw(Fixed64.Round(a.raw)); }
         public static F64 Fract(F64 a) { return FromRaw(Fixed64.Fract(a.raw)); }
+        public static F64 Div(F64 a, F64 b) { return FromRaw(Fixed64.Div(a.raw, b.raw)); }
+        public static F64 DivFast(F64 a, F64 b) { return FromRaw(Fixed64.DivFast(a.raw, b.raw)); }
+        public static F64 DivFastest(F64 a, F64 b) { return FromRaw(Fixed64.DivFastest(a.raw, b.raw)); }
         public static F64 SqrtPrecise(F64 a) { return FromRaw(Fixed64.SqrtPrecise(a.raw)); }
         public static F64 Sqrt(F64 a) { return FromRaw(Fixed64.Sqrt(a.raw)); }
         public static F64 SqrtFast(F64 a) { return FromRaw(Fixed64.SqrtFast(a.raw)); }
