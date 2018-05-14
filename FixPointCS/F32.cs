@@ -28,6 +28,7 @@ namespace FixPointCS
     /// <summary>
     /// Signed 16.16 fixed point value struct.
     /// </summary>
+    [Serializable]
     public struct F32 : IComparable<F32>
     {
         // Constants

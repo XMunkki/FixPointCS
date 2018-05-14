@@ -21,12 +21,14 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 //
+using System;
 
 namespace FixPointCS
 {
     /// <summary>
     /// Vector2 struct with signed 32.32 fixed point components.
     /// </summary>
+    [Serializable]
     public struct F32Vec2
     {
         // Constants
