@@ -51,6 +51,7 @@ namespace FixPointCS
         public F64(int v) { raw = Fixed64.FromInt(v); }
         public F64(float v) { raw = Fixed64.FromFloat(v); }
         public F64(double v) { raw = Fixed64.FromDouble(v); }
+        public F64(F32 v) { raw = (long)v.raw << 16; }
 
         // Conversions
         public static int FloorToInt(F64 a) { return Fixed64.FloorToInt(a.raw); }
@@ -169,20 +170,10 @@ namespace FixPointCS
             return r;
         }
 
-        public static F64 FromInt(int v)
-        {
-            return new F64(v);
-        }
-
-        public static F64 FromFloat(float v)
-        {
-            return new F64(v);
-        }
-
-        public static F64 FromDouble(double v)
-        {
-            return new F64(v);
-        }
+        public static F64 FromInt(int v) { return new F64(v); }
+        public static F64 FromFloat(float v) { return new F64(v); }
+        public static F64 FromDouble(double v) { return new F64(v); }
+        public static F64 FromF32(F32 v) { return new F64(v); }
 
         public override bool Equals(object obj)
         {

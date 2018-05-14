@@ -51,6 +51,7 @@ namespace FixPointCS
         public F32(int v) { raw = Fixed32.FromInt(v); }
         public F32(float v) { raw = Fixed32.FromFloat(v); }
         public F32(double v) { raw = Fixed32.FromDouble(v); }
+        public F32(F64 v) { raw = (int)(v.raw >> 16); }
 
         // Conversions
         public static int FloorToInt(F32 a) { return Fixed32.FloorToInt(a.raw); }
@@ -169,20 +170,10 @@ namespace FixPointCS
             return r;
         }
 
-        public static F32 FromInt(int v)
-        {
-            return new F32(v);
-        }
-
-        public static F32 FromFloat(float v)
-        {
-            return new F32(v);
-        }
-
-        public static F32 FromDouble(double v)
-        {
-            return new F32(v);
-        }
+        public static F32 FromInt(int v) { return new F32(v); }
+        public static F32 FromFloat(float v) { return new F32(v); }
+        public static F32 FromDouble(double v) { return new F32(v); }
+        public static F32 FromF64(F64 v) { return new F32(v); }
 
         public override bool Equals(object obj)
         {
