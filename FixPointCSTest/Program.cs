@@ -1111,7 +1111,7 @@ namespace FixPointCSTest
                 },
                 bounds => new[] {
                     InputGenerator.Unary(Input.Uniform(-100.0, 100.0)),
-                    InputGenerator.Unary(Input.Uniform(-1e5, 1e5)),
+                    InputGenerator.Unary(Input.Uniform(-1e4, 1e4)),
                 }
             ),
 
@@ -1196,8 +1196,8 @@ namespace FixPointCSTest
                     Operation.F32_F32_F32("Atan2Fastest(y,x) F32", (int n, F32[] i0, F32[] i1, F32[] o) => { for (int i=0; i<n; i++) { o[i] = F32.Atan2Fastest(i0[i], i1[i]); } }),
                 },
                 bounds => new[] {
-                    InputGenerator.Binary(Input.Exponential(1e-6, 1e3, Input.SignMode.Random), Input.Exponential(1e-3, 1e5, Input.SignMode.Random)),
-                    InputGenerator.Binary(Input.Exponential(1e-3, 1e5, Input.SignMode.Random), Input.Exponential(1e-6, 1e3, Input.SignMode.Random)),
+                    InputGenerator.Binary(Input.Exponential(1e-6, 1e3, Input.SignMode.Random), Input.Exponential(1e-3, 1e4, Input.SignMode.Random)),
+                    InputGenerator.Binary(Input.Exponential(1e-3, 1e4, Input.SignMode.Random), Input.Exponential(1e-6, 1e3, Input.SignMode.Random)),
                     InputGenerator.Binary(Input.Exponential(1.0, bounds.InputPosMax, Input.SignMode.Random), Input.Exponential(1.0, bounds.InputPosMax, Input.SignMode.Random)),
                 }
             ),
@@ -1233,6 +1233,10 @@ namespace FixPointCSTest
             // Console.WriteLine("{0} vs {1}", F64.Atan2(F64.FromDouble(0.0), F64.FromDouble(-30023.340087890)), Math.Atan2(0.0, -300.0));
             // Console.WriteLine("{0} vs {1}", F64.Div(F64.FromDouble(994.866242629709), F64.FromDouble(-1.0099070169962)), 994.866242629709 / -1.0099070169962);
             // Console.WriteLine("{0}", F64.CeilToInt(F64.FromDouble(-1073741494.0000)));
+            // Console.WriteLine("Cos(): {0} vs {1}", F32.Cos(F32.FromDouble(32766.4527587891)), Math.Cos(32766.4527587891));
+            // Console.WriteLine("Asin(): {0} vs {1}", F32.Asin(F32.FromDouble(0.99998474121093)), Math.Asin(0.99998474121093));
+            // Console.WriteLine("Atan2(): {0} vs {1}", F32.Atan2(F32.FromDouble(-0.0010070800781), F32.FromDouble(-0.0000152587891)), Math.Atan2(-0.0010070800781, -0.0000152587890));
+            // Console.WriteLine();
 
             // Filter for choosing which tests to run. Empty runs all tests
             // Examples:

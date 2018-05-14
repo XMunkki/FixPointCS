@@ -959,9 +959,8 @@ namespace FixPointCS
                 return 0;
             }
 
-            // \note these round negative numbers slightly
-            int nx = x ^ (x >> 31);
-            int ny = y ^ (y >> 31);
+            int nx = Abs(x);
+            int ny = Abs(y);
             int negMask = ((x ^ y) >> 31);
 
             if (nx >= ny)
@@ -1012,9 +1011,8 @@ namespace FixPointCS
                 return 0;
             }
 
-            // \note these round negative numbers slightly
-            int nx = x ^ (x >> 31);
-            int ny = y ^ (y >> 31);
+            int nx = Abs(x);
+            int ny = Abs(y);
             int negMask = ((x ^ y) >> 31);
 
             if (nx >= ny)
@@ -1065,9 +1063,8 @@ namespace FixPointCS
                 return 0;
             }
 
-            // \note these round negative numbers slightly
-            int nx = x ^ (x >> 31);
-            int ny = y ^ (y >> 31);
+            int nx = Abs(x);
+            int ny = Abs(y);
             int negMask = ((x ^ y) >> 31);
 
             if (nx >= ny)
@@ -1090,38 +1087,56 @@ namespace FixPointCS
 
         public static int Asin(int x)
         {
+            // Compute Atan2(x, Sqrt((1+x) * (1-x))), using s32.32.
             Debug.Assert(x >= -One && x <= One);
-            return Atan2(x, Sqrt(Mul(One + x, One - x)));
+            long xx = (long)(One + x) * (long)(One - x);
+            long y = Fixed64.Sqrt(xx);
+            return (int)(Fixed64.Atan2((long)x << 16, y) >> 16);
         }
 
         public static int AsinFast(int x)
         {
+            // Compute Atan2(x, Sqrt((1+x) * (1-x))), using s32.32.
             Debug.Assert(x >= -One && x <= One);
-            return Atan2Fast(x, SqrtFast(Mul(One + x, One - x)));
+            long xx = (long)(One + x) * (long)(One - x);
+            long y = Fixed64.SqrtFast(xx);
+            return (int)(Fixed64.Atan2Fast((long)x << 16, y) >> 16);
         }
 
         public static int AsinFastest(int x)
         {
+            // Compute Atan2(x, Sqrt((1+x) * (1-x))), using s32.32.
             Debug.Assert(x >= -One && x <= One);
-            return Atan2Fastest(x, SqrtFastest(Mul(One + x, One - x)));
+            long xx = (long)(One + x) * (long)(One - x);
+            long y = Fixed64.SqrtFastest(xx);
+            return (int)(Fixed64.Atan2Fastest((long)x << 16, y) >> 16);
         }
 
         public static int Acos(int x)
         {
+            // Compute Atan2(Sqrt((1+x) * (1-x)), x), using s32.32.
             Debug.Assert(x >= -One && x <= One);
-            return Atan2(Sqrt(Mul(One + x, One - x)), x);
+            long xx = (long)(One + x) * (long)(One - x);
+            long y = Fixed64.Sqrt(xx);
+            return (int)(Fixed64.Atan2(y, (long)x << 16) >> 16);
         }
 
         public static int AcosFast(int x)
         {
+            // Compute Atan2(Sqrt((1+x) * (1-x)), x), using s32.32.
             Debug.Assert(x >= -One && x <= One);
-            return Atan2Fast(SqrtFast(Mul(One + x, One - x)), x);
+            long xx = (long)(One + x) * (long)(One - x);
+            long y = Fixed64.SqrtFast(xx);
+            return (int)(Fixed64.Atan2Fast(y, (long)x << 16) >> 16);
         }
 
         public static int AcosFastest(int x)
         {
+            // Compute Atan2(Sqrt((1+x) * (1-x)), x), using s32.32.
             Debug.Assert(x >= -One && x <= One);
-            return Atan2Fastest(SqrtFastest(Mul(One + x, One - x)), x);
+            long xx = (long)(One + x) * (long)(One - x);
+            long y = Fixed64.SqrtFastest(xx);
+            return (int)(Fixed64.Atan2Fastest(y, (long)x << 16) >> 16);
         }
 
         public static int Atan(int x)
