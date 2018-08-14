@@ -687,7 +687,7 @@ namespace FixPointCS
         /// </summary>
         public static long FromFloat(float v)
         {
-            return (int)(v * 4294967296.0f);
+            return (long)(v * 4294967296.0f);
         }
 
         /// <summary>

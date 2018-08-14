@@ -143,24 +143,6 @@ namespace Fixed64
 		return y;
 	}
 
-	static FP_INT RcpPoly2Lut4Table[] =
-	{
-		763549742, -1049880894, 1073741824,
-		416481677, -885023563, 1054219245,
-		251719695, -723694122, 1014745020,
-		163617802, -593114530, 966367642,
-	};
-
-	// Precision: 10.87 bits
-	static FP_INT RcpPoly2Lut4(FP_INT a)
-	{
-		FP_INT offset = (a >> 28) * 3;
-		FP_INT y = Qmul30(a, RcpPoly2Lut4Table[offset + 0]);
-		y = Qmul30(a, y + RcpPoly2Lut4Table[offset + 1]);
-		y = y + RcpPoly2Lut4Table[offset + 2];
-		return y;
-	}
-
 	static FP_INT RcpPoly3Lut4Table[] =
 	{
 		-678697788, 1018046684, -1071069948, 1073721112,
@@ -177,29 +159,6 @@ namespace Fixed64
 		y = Qmul30(a, y + RcpPoly3Lut4Table[offset + 1]);
 		y = Qmul30(a, y + RcpPoly3Lut4Table[offset + 2]);
 		y = y + RcpPoly3Lut4Table[offset + 3];
-		return y;
-	}
-
-	static FP_INT RcpPoly3Lut8Table[] =
-	{
-		-845955225, 1057444032, -1073399630, 1073741824,
-		-541722101, 948013678, -1059804015, 1073158016,
-		-362791857, 816281680, -1027194732, 1070443160,
-		-252017723, 693048742, -981321998, 1064728912,
-		-180482222, 586567224, -928375474, 1055934092,
-		-132624303, 497341140, -872848427, 1044399564,
-		-99630687, 423430423, -817605394, 1030622886,
-		-76289140, 362373419, -764330300, 1015116935,
-	};
-
-	// Precision: 18.89 bits
-	static FP_INT RcpPoly3Lut8(FP_INT a)
-	{
-		FP_INT offset = (a >> 27) * 4;
-		FP_INT y = Qmul30(a, RcpPoly3Lut8Table[offset + 0]);
-		y = Qmul30(a, y + RcpPoly3Lut8Table[offset + 1]);
-		y = Qmul30(a, y + RcpPoly3Lut8Table[offset + 2]);
-		y = y + RcpPoly3Lut8Table[offset + 3];
 		return y;
 	}
 
@@ -686,7 +645,7 @@ namespace Fixed64
     /// </summary>
     static FP_LONG FromFloat(float v)
     {
-        return (FP_INT)(v * 4294967296.0f);
+        return (FP_LONG)(v * 4294967296.0f);
     }
 
     /// <summary>
@@ -965,6 +924,84 @@ namespace Fixed64
     }
 
     /// <summary>
+    /// Calculates division approximation.
+    /// </summary>
+    static FP_LONG Div(FP_LONG a, FP_LONG b)
+    {
+        if (b == MinValue)
+            return 0;
+
+        // Handle negative values.
+        FP_INT sign = (b < 0) ? -1 : 1;
+        b *= sign;
+
+        // Normalize input into [1.0, 2.0( range (convert to s2.30).
+        FP_INT offset = 31 - Nlz((FP_ULONG)b);
+        FP_INT n = (FP_INT)ShiftRight(b, offset + 2);
+        static const FP_INT ONE = (1 << 30);
+        FP_ASSERT(n >= ONE);
+
+        // Polynomial approximation.
+        FP_INT res = RcpPoly4Lut8(n - ONE);
+
+        // Apply exponent, convert back to s32.32.
+        FP_LONG y = MulIntLongLong(res, a) << 2;
+        return ShiftRight(sign * y, offset);
+    }
+
+    /// <summary>
+    /// Calculates division approximation.
+    /// </summary>
+    static FP_LONG DivFast(FP_LONG a, FP_LONG b)
+    {
+        if (b == MinValue)
+            return 0;
+
+        // Handle negative values.
+        FP_INT sign = (b < 0) ? -1 : 1;
+        b *= sign;
+
+        // Normalize input into [1.0, 2.0( range (convert to s2.30).
+        FP_INT offset = 31 - Nlz((FP_ULONG)b);
+        FP_INT n = (FP_INT)ShiftRight(b, offset + 2);
+        static const FP_INT ONE = (1 << 30);
+        FP_ASSERT(n >= ONE);
+
+        // Polynomial approximation.
+        FP_INT res = RcpPoly6(n - ONE);
+
+        // Apply exponent, convert back to s32.32.
+        FP_LONG y = MulIntLongLong(res, a) << 2;
+        return ShiftRight(sign * y, offset);
+    }
+
+    /// <summary>
+    /// Calculates division approximation.
+    /// </summary>
+    static FP_LONG DivFastest(FP_LONG a, FP_LONG b)
+    {
+        if (b == MinValue)
+            return 0;
+
+        // Handle negative values.
+        FP_INT sign = (b < 0) ? -1 : 1;
+        b *= sign;
+
+        // Normalize input into [1.0, 2.0( range (convert to s2.30).
+        FP_INT offset = 31 - Nlz((FP_ULONG)b);
+        FP_INT n = (FP_INT)ShiftRight(b, offset + 2);
+        static const FP_INT ONE = (1 << 30);
+        FP_ASSERT(n >= ONE);
+
+        // Polynomial approximation.
+        FP_INT res = RcpPoly4(n - ONE);
+
+        // Apply exponent, convert back to s32.32.
+        FP_LONG y = MulIntLongLong(res, a) << 2;
+        return ShiftRight(sign * y, offset);
+    }
+
+    /// <summary>
     /// Divides two FP values and returns the modulus.
     /// </summary>
     static FP_LONG Mod(FP_LONG a, FP_LONG b)
@@ -1209,8 +1246,7 @@ namespace Fixed64
         FP_ASSERT(n >= ONE);
 
         // Polynomial approximation.
-        //FP_INT res = RcpPoly6(n - ONE);
-        FP_INT res = RcpPoly3Lut8(n - ONE);
+        FP_INT res = RcpPoly6(n - ONE);
         FP_LONG y = (FP_LONG)(sign * res) << 2;
 
         // Apply exponent, convert back to s32.32.
@@ -1232,16 +1268,15 @@ namespace Fixed64
         // Normalize input into [1.0, 2.0( range (convert to s2.30).
         static const FP_INT ONE = (1 << 30);
         FP_INT offset = 31 - Nlz((FP_ULONG)x);
-        FP_INT n = (FP_INT)(((offset >= 0) ? (x >> offset) : (x << -offset)) >> 2);
-        FP_INT k = n - ONE;
+        FP_INT n = (FP_INT)ShiftRight(x, offset + 2);
+        //FP_INT n = (FP_INT)(((offset >= 0) ? (x >> offset) : (x << -offset)) >> 2);
 
         // Polynomial approximation.
-        //FP_INT res = RcpPoly4(n - ONE);
-        FP_INT res = RcpPoly2Lut4(k);
+        FP_INT res = RcpPoly4(n - ONE);
         FP_LONG y = (FP_LONG)(sign * res) << 2;
 
         // Apply exponent, convert back to s32.32.
-        return (offset >= 0) ? (y >> offset) : (y << -offset);
+        return ShiftRight(y, offset);
     }
 
     /// <summary>
