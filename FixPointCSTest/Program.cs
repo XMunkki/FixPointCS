@@ -969,7 +969,7 @@ namespace FixPointCSTest
                     Operation.F64_F64("Sqrt(x) F64", (int n, F64[] i0, F64[] o) => { for (int i=0; i<n; i++) { o[i] = F64.Sqrt(i0[i]); } }),
                     Operation.F64_F64("SqrtFast(x) F64", (int n, F64[] i0, F64[] o) => { for (int i=0; i<n; i++) { o[i] = F64.SqrtFast(i0[i]); } }),
                     Operation.F64_F64("SqrtFastest(x) F64", (int n, F64[] i0, F64[] o) => { for (int i=0; i<n; i++) { o[i] = F64.SqrtFastest(i0[i]); } }),
-                    // Operation.F32_F32("SqrtPrecise(x) F32", (int n, F32[] i0, F32[] o) => { for (int i=0; i<n; i++) { o[i] = F32.SqrtPrecise(i0[i]); } }),
+                    Operation.F32_F32("SqrtPrecise(x) F32", (int n, F32[] i0, F32[] o) => { for (int i=0; i<n; i++) { o[i] = F32.SqrtPrecise(i0[i]); } }),
                     Operation.F32_F32("Sqrt(x) F32", (int n, F32[] i0, F32[] o) => { for (int i=0; i<n; i++) { o[i] = F32.Sqrt(i0[i]); } }),
                     Operation.F32_F32("SqrtFast(x) F32", (int n, F32[] i0, F32[] o) => { for (int i=0; i<n; i++) { o[i] = F32.SqrtFast(i0[i]); } }),
                     Operation.F32_F32("SqrtFastest(x) F32", (int n, F32[] i0, F32[] o) => { for (int i=0; i<n; i++) { o[i] = F32.SqrtFastest(i0[i]); } }),

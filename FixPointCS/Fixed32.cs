@@ -394,7 +394,10 @@ namespace FixPointCS
         /// <summary>
         /// Calculates the square root of the given number.
         /// </summary>
-/*        public static int SqrtPrecise(int a)
+#if JAVA
+        // \todo [petri] implement Java version
+#else
+        public static int SqrtPrecise(int a)
         {
             // Adapted from https://github.com/chmike/fpsqrt
             if (a < 0)
@@ -414,9 +417,10 @@ namespace FixPointCS
                 r <<= 1;
                 b >>= 1;
             }
-            q >>= 16;
+            q >>= 8;
             return (int)q;
-        }*/
+        }
+#endif
 
         public static int Sqrt(int x)
         {
