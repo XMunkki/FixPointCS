@@ -113,7 +113,7 @@ namespace FixPointCS
         public static F32 Div(F32 a, F32 b) { return FromRaw(Fixed32.Div(a.raw, b.raw)); }
         public static F32 DivFast(F32 a, F32 b) { return FromRaw(Fixed32.DivFast(a.raw, b.raw)); }
         public static F32 DivFastest(F32 a, F32 b) { return FromRaw(Fixed32.DivFastest(a.raw, b.raw)); }
-        // public static F32 SqrtPrecise(F32 a) { return FromRaw(Fixed32.SqrtPrecise(a.raw)); }
+        public static F32 SqrtPrecise(F32 a) { return FromRaw(Fixed32.SqrtPrecise(a.raw)); }
         public static F32 Sqrt(F32 a) { return FromRaw(Fixed32.Sqrt(a.raw)); }
         public static F32 SqrtFast(F32 a) { return FromRaw(Fixed32.SqrtFast(a.raw)); }
         public static F32 SqrtFastest(F32 a) { return FromRaw(Fixed32.SqrtFastest(a.raw)); }
