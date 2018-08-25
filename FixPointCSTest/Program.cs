@@ -433,12 +433,13 @@ namespace FixPointCSTest
             Array[] result = new Array[opImpl.InputTypes.Length];
             for (int ndx = 0; ndx < opImpl.InputTypes.Length; ndx++)
             {
+                ValueGenerator generator = inputGenerator.generators[ndx];
                 Type type = opImpl.InputTypes[ndx];
-                F64[] values = inputGenerator.generators[ndx](rnd, count).Select(d => F64.FromDouble(d)).ToArray();
+
                 if (type == typeof(F64))
-                    result[ndx] = values;
+                    result[ndx] = generator(rnd, count).Select(d => F64.FromDouble(d)).ToArray();
                 else if (type == typeof(F32))
-                    result[ndx] = values.Select(v => F32.FromRaw((int)(v.raw >> 16))).ToArray();
+                    result[ndx] = generator(rnd, count).Select(d => F32.FromDouble(d)).ToArray();
                 else
                     throw new InvalidOperationException("Unknown input data type: " + type);
             }
@@ -1235,7 +1236,7 @@ namespace FixPointCSTest
             // Console.WriteLine("{0}", F64.CeilToInt(F64.FromDouble(-1073741494.0000)));
             // Console.WriteLine("Cos(): {0} vs {1}", F32.Cos(F32.FromDouble(32766.4527587891)), Math.Cos(32766.4527587891));
             // Console.WriteLine("Asin(): {0} vs {1}", F32.Asin(F32.FromDouble(0.99998474121093)), Math.Asin(0.99998474121093));
-            // Console.WriteLine("Atan2(): {0} vs {1}", F32.Atan2(F32.FromDouble(-0.0010070800781), F32.FromDouble(-0.0000152587891)), Math.Atan2(-0.0010070800781, -0.0000152587890));
+            // Console.WriteLine("Atan2(): {0} vs {1}", F32.Atan2(F32.FromDouble(-4.4691772460937), F32.FromDouble(-3.9427642822265)), Math.Atan2(-4.4691772460937, -3.9427642822265));
             // Console.WriteLine();
 
             // Filter for choosing which tests to run. Empty runs all tests
