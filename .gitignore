@@ -1,5 +1,6 @@
 .vs
 *.user
+*.class
 Cpp/x64
 FixPointCS/obj
 FixPointCS/bin

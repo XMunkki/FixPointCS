@@ -2,17 +2,17 @@
 // FixPointCS
 //
 // Copyright(c) 2018 Jere Sanisalo, Petri Kero
-// 
+//
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
 // in the Software without restriction, including without limitation the rights
 // to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be included in all
 // copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -21,14 +21,18 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 //
-#if !CPP
-using System;
-using System.Runtime.CompilerServices;
-using System.Diagnostics;
 
+// PREFIX
+#if CPP
+#elif JAVA
+package fixpointcs;
+
+import java.lang.Long;
+import java.lang.Double;
+#else // C#
 /* Coding style:
  * 
- * In order to keep the generated C++ code working, here are some generic
+ * In order to keep the transpiled C++/Java code working, here are some generic
  * coding guidelines.
  * 
  * All 64bit constants should be of the form " -1234L" or " 0x1234L" (so start
@@ -40,18 +44,30 @@ using System.Diagnostics;
  * 
  * Minimize the use of system libraries.
  * 
- * You can use "#if CPP" else "#if !CPP" to block out code that's C# or C++
- * only. Currently the generator preprocessor is really ad-hoc and gets mixed
- * up by any other #if:s, #else:s or #endif:s.
+ * There is a very limited preprocessor, which accepts "#if <LANG>",
+ * "#elif <LANG>", "#else", as well as "#if !TRANSPILE" directives. No nested
+ * directives are allowed.
  * 
  * Use up-to C# 3 features to keep the library compatible with older versions
  * of Unity.
  */
+using System;
+using System.Runtime.CompilerServices;
+using System.Diagnostics;
+#endif
 
+#if !TRANSPILE
 namespace FixPointCS
 {
+#endif
+
+#if CPP
+#else
     static class Util
     {
+#endif
+
+#if !TRANSPILE
         // Backwards compatible way to use MethodImplOptions.AggressiveInlining
         public const MethodImplOptions AggressiveInlining = (MethodImplOptions)256;
 #endif
@@ -84,6 +100,16 @@ namespace FixPointCS
         public static long ShiftRight(long v, int shift)
         {
             return (shift >= 0) ? (v >> shift) : (v << -shift);
+        }
+
+        [MethodImpl(AggressiveInlining)]
+        public static long LogicalShiftRight(long v, int shift)
+        {
+#if JAVA
+            return v >>> shift;
+#else
+            return (long)((ulong)v >> shift);
+#endif
         }
 
         // Exp2()
@@ -633,7 +659,8 @@ namespace FixPointCS
 			y = y + AtanPoly3Lut8Table[offset + 3];
 			return y;
 		}
-#if !CPP
+#if CPP
+#else
     }
 
     /// <summary>
@@ -733,7 +760,13 @@ namespace FixPointCS
         /// <summary>
         /// Converts the value to a human readable string.
         /// </summary>
-#if !CPP
+#if CPP
+#elif JAVA
+        public static String ToString(long v)
+        {
+            return Double.toString(ToDouble(v));
+        }
+#else
         public static string ToString(long v)
         {
             return ToDouble(v).ToString();
@@ -840,56 +873,37 @@ namespace FixPointCS
         /// </summary>
         public static long Mul(long a, long b)
         {
-            /*ulong alow = (ulong)(a & FP_Mask_Fract);
-            long ahigh = a >> FP_Shift;
-            ulong blow = (ulong)(b & FP_Mask_Fract);
-            long bhigh = b >> FP_Shift;
-
-            ulong lowlow = alow * blow;
-            long lowhigh = (long)(uint)alow * bhigh;
-            long highlow = ahigh * (long)(uint)blow;
-            long highhigh = ahigh * bhigh;
-
-            long lo_res = (long)(lowlow >> 32);
-            long mid_res1 = lowhigh;
-            long mid_res2 = highlow;
-            long hi_res = highhigh << 32;
-
-            return lo_res + mid_res1 + mid_res2 + hi_res;*/
-
             long ai = a >> Shift;
-            ulong af = (ulong)(a & FractionMask);
+            long af = (a & FractionMask);
             long bi = b >> Shift;
-            ulong bf = (ulong)(b & FractionMask);
-
-            return
-                (long)((af * bf) >> Shift) +
-                ai * b +
-                (long)af * bi;
+            long bf = (b & FractionMask);
+            return Util.LogicalShiftRight(af * bf, Shift) + ai * b + af * bi;
         }
 
         [MethodImpl(Util.AggressiveInlining)]
         private static int MulIntLongLow(int a, long b)
         {
             Debug.Assert(a >= 0);
-            ulong af = (ulong)a;
-            long bi = b >> Shift;
-            ulong bf = (ulong)(b & FractionMask);
-
-            return (int)((long)((af * bf) >> Shift) + (long)af * bi);
+            int bi = (int)(b >> Shift);
+            long bf = b & FractionMask;
+            return (int)Util.LogicalShiftRight(a * bf, Shift) + a * bi;
         }
 
         [MethodImpl(Util.AggressiveInlining)]
         private static long MulIntLongLong(int a, long b)
         {
             Debug.Assert(a >= 0);
-            ulong af = (ulong)a;
             long bi = b >> Shift;
-            ulong bf = (ulong)(b & FractionMask);
-
-            return (long)((af * bf) >> Shift) + (long)af * bi;
+            long bf = b & FractionMask;
+            return Util.LogicalShiftRight(a * bf, Shift) + a * bi;
         }
 
+#if JAVA
+        private static int Nlz(long x)
+        {
+            return Long.numberOfLeadingZeros(x);
+        }
+#else
         [MethodImpl(Util.AggressiveInlining)]
         private static int Nlz(ulong x)
         {
@@ -903,12 +917,12 @@ namespace FixPointCS
             if (x == 0) return 64;
             return n;
         }
-
-#if !CPP
-        private static long DivRem(long arg_a, long arg_b, out long rem)
-#else
-        private static long DivRem(long arg_a, long arg_b, long &rem)
 #endif
+
+#if JAVA
+        // \todo [petri] implement Java version!
+#else
+        private static long DivRem(long arg_a, long arg_b, out long rem)
         {
             // From http://www.hackersdelight.org/hdcodetxt/divlu.c.txt
 
@@ -979,12 +993,9 @@ namespace FixPointCS
         public static long DivPrecise(long arg_a, long arg_b)
         {
             long rem;
-#if !CPP
             return DivRem(arg_a, arg_b, out rem);
-#else
-            return DivRem(arg_a, arg_b, rem);
-#endif
         }
+#endif
 
         /// <summary>
         /// Calculates division approximation.
@@ -1069,16 +1080,6 @@ namespace FixPointCS
         /// </summary>
         public static long Mod(long a, long b)
         {
-            /*long d = Div(a, b);
-            int di = ToInt(d);
-            long ret = a - (di * b);
-             * 
-            // Sign difference?
-            if ((a ^ b) < 0)
-                return ret - b;
-            return ret;*/
-
-            //long di = Div(a, b) >> FP_Shift;
             long di = a / b;
             long ret = a - (di * b);
             return ret;
@@ -1087,6 +1088,9 @@ namespace FixPointCS
         /// <summary>
         /// Calculates the square root of the given number.
         /// </summary>
+#if JAVA
+        // \todo [petri] implement Java version!
+#else
         public static long SqrtPrecise(long a)
         {
             // Adapted from https://github.com/chmike/fpsqrt
@@ -1110,6 +1114,7 @@ namespace FixPointCS
             q >>= 16;
             return (long)q;
         }
+#endif
 
         public static long Sqrt(long x)
         {
@@ -1856,7 +1861,13 @@ namespace FixPointCS
         {
             return Atan2Fastest(x, One);
         }
-#if !CPP
-    }
-}
+#if CPP
+#else
+    } // Fixed64
 #endif
+
+#if !TRANSPILE
+} // namespace
+#endif
+
+// SUFFIX

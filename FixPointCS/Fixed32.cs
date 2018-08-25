@@ -2,17 +2,17 @@
 // FixPointCS
 //
 // Copyright(c) 2018 Jere Sanisalo, Petri Kero
-// 
+//
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
 // in the Software without restriction, including without limitation the rights
 // to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be included in all
 // copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -21,14 +21,18 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 //
-#if !CPP
-using System;
-using System.Runtime.CompilerServices;
-using System.Diagnostics;
 
+// PREFIX
+#if CPP
+#elif JAVA
+package fixpointcs;
+
+import java.lang.Integer;
+import java.lang.Double;
+#else // C#
 /* Coding style:
  * 
- * In order to keep the generated C++ code working, here are some generic
+ * In order to keep the transpiled C++/Java code working, here are some generic
  * coding guidelines.
  * 
  * All 64bit constants should be of the form " -1234L" or " 0x1234L" (so start
@@ -40,22 +44,28 @@ using System.Diagnostics;
  * 
  * Minimize the use of system libraries.
  * 
- * You can use "#if CPP" else "#if !CPP" to block out code that's C# or C++
- * only. Currently the generator preprocessor is really ad-hoc and gets mixed
- * up by any other #if:s, #else:s or #endif:s.
+ * There is a very limited preprocessor, which accepts "#if <LANG>",
+ * "#elif <LANG>", "#else", as well as "#if !TRANSPILE" directives. No nested
+ * directives are allowed.
  * 
  * Use up-to C# 3 features to keep the library compatible with older versions
  * of Unity.
  */
+using System;
+using System.Runtime.CompilerServices;
+using System.Diagnostics;
+#endif
 
+#if !TRANSPILE
 namespace FixPointCS
 {
+#endif
+
     /// <summary>
     /// Direct fixed point (signed 16.16) functions.
     /// </summary>
     public static class Fixed32
     {
-#endif
         public const int Shift = 16;
         public const int FractionMask = (1 << Shift) - 1;
         public const int IntegerMask = ~FractionMask;
@@ -148,7 +158,13 @@ namespace FixPointCS
         /// <summary>
         /// Converts the value to a human readable string.
         /// </summary>
-#if !CPP
+#if CPP
+#elif JAVA
+        public static String ToString(int v)
+        {
+            return Double.toString(ToDouble(v));
+        }
+#else
         public static string ToString(int v)
         {
             return ToDouble(v).ToString();
@@ -258,6 +274,12 @@ namespace FixPointCS
             return (int)(((long)a * (long)b) >> Shift);
         }
 
+#if JAVA
+        private static int Nlz(int x)
+        {
+            return Integer.numberOfLeadingZeros(x);
+        }
+#else
         [MethodImpl(Util.AggressiveInlining)]
         private static int Nlz(uint x)
         {
@@ -270,6 +292,7 @@ namespace FixPointCS
             if (x == 0) return 32;
             return n;
         }
+#endif
 
         /// <summary>
         /// Divides two FP values.
@@ -1153,7 +1176,13 @@ namespace FixPointCS
         {
             return Atan2Fastest(x, One);
         }
-#if !CPP
-    }
-}
+#if CPP
+#else
+    } // Fixed32
 #endif
+
+#if !TRANSPILE
+} // namespace
+#endif
+
+// SUFFIX

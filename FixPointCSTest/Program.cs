@@ -1245,7 +1245,8 @@ namespace FixPointCSTest
             // - "ToInt" runs all the XxxToInt family
             // - "RcpFast(x) F32"
             // - "F32" executes all the whole F32 ops
-            string testFilter = "";
+            //string testFilter = "a*b";
+            string testFilter = "Div";
 
             // Run precision and performance tests.
             TestOperations(testFilter);
