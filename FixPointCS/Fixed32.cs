@@ -311,6 +311,8 @@ namespace FixPointCS
             if (b == MinValue)
                 return 0;
 
+            return (int)(((long)a << 16) / b);
+/*
             // Handle negative values.
             int sign = (b < 0) ? -1 : 1;
             b *= sign;
@@ -327,6 +329,7 @@ namespace FixPointCS
             // Multiply by reciprocal, apply exponent, convert back to s16.16.
             int y = Util.Qmul30(res, a);
             return Util.ShiftRight(sign * y, offset - 14);
+*/
         }
 
         /// <summary>
@@ -850,13 +853,10 @@ namespace FixPointCS
             return ExpFastest(Mul(exponent, LogFastest(x)));
         }
 
-        public static int Sin(int x)
+        [MethodImpl(Util.AggressiveInlining)]
+        private static int UnitSin(int z)
         {
             // See: http://www.coranac.com/2009/07/sines/
-
-            // Map [0, 2pi] to [0, 4] (as s2.30).
-            // This also wraps the values into one period.
-            int z = Mul(RCP_TWO_PI, x);
 
             // Handle quadrants 1 and 2 by mirroring the [1, 3] range to [-1, 1] (by calculating 2 - z).
             // The if condition uses the fact that for the quadrants of interest are 0b01 and 0b10 (top two bits are different).
@@ -871,17 +871,14 @@ namespace FixPointCS
             int zz = Util.Qmul30(z, z);
             int res = Util.Qmul30(Util.SinPoly4(zz), z);
 
-            // Convert back to s16.16.
-            return res >> 14;
+            // Return as s2.30.
+            return res;
         }
 
-        public static int SinFast(int x)
+        [MethodImpl(Util.AggressiveInlining)]
+        private static int UnitSinFast(int z)
         {
             // See: http://www.coranac.com/2009/07/sines/
-
-            // Map [0, 2pi] to [0, 4] (as s2.30).
-            // This also wraps the values into one period.
-            int z = Mul(RCP_TWO_PI, x);
 
             // Handle quadrants 1 and 2 by mirroring the [1, 3] range to [-1, 1] (by calculating 2 - z).
             // The if condition uses the fact that for the quadrants of interest are 0b01 and 0b10 (top two bits are different).
@@ -896,17 +893,14 @@ namespace FixPointCS
             int zz = Util.Qmul30(z, z);
             int res = Util.Qmul30(Util.SinPoly3(zz), z);
 
-            // Convert back to s16.16.
-            return res >> 14;
+            // Return as s2.30.
+            return res;
         }
 
-        public static int SinFastest(int x)
+        [MethodImpl(Util.AggressiveInlining)]
+        private static int UnitSinFastest(int z)
         {
             // See: http://www.coranac.com/2009/07/sines/
-
-            // Map [0, 2pi] to [0, 4] (as s2.30).
-            // This also wraps the values into one period.
-            int z = Mul(RCP_TWO_PI, x);
 
             // Handle quadrants 1 and 2 by mirroring the [1, 3] range to [-1, 1] (by calculating 2 - z).
             // The if condition uses the fact that for the quadrants of interest are 0b01 and 0b10 (top two bits are different).
@@ -921,8 +915,38 @@ namespace FixPointCS
             int zz = Util.Qmul30(z, z);
             int res = Util.Qmul30(Util.SinPoly2(zz), z);
 
-            // Convert back to s16.16.
-            return res >> 14;
+            // Return as s2.30.
+            return res;
+        }
+
+        public static int Sin(int x)
+        {
+            // Map [0, 2pi] to [0, 4] (as s2.30).
+            // This also wraps the values into one period.
+            int z = Mul(RCP_TWO_PI, x);
+
+            // Compute sin from s2.30 and convert back to s16.16.
+            return UnitSin(z) >> 14;
+        }
+
+        public static int SinFast(int x)
+        {
+            // Map [0, 2pi] to [0, 4] (as s2.30).
+            // This also wraps the values into one period.
+            int z = Mul(RCP_TWO_PI, x);
+
+            // Compute sin from s2.30 and convert back to s16.16.
+            return UnitSinFast(z) >> 14;
+        }
+
+        public static int SinFastest(int x)
+        {
+            // Map [0, 2pi] to [0, 4] (as s2.30).
+            // This also wraps the values into one period.
+            int z = Mul(RCP_TWO_PI, x);
+
+            // Compute sin from s2.30 and convert back to s16.16.
+            return UnitSinFastest(z) >> 14;
         }
 
         public static int Cos(int x)
@@ -942,17 +966,26 @@ namespace FixPointCS
 
         public static int Tan(int x)
         {
-            return Mul(Sin(x), Rcp(Cos(x)));
+            int z = Mul(RCP_TWO_PI, x);
+            int sinX = UnitSin(z);
+            int cosX = UnitSin(z + (1 << 30));
+            return Div(sinX, cosX);
         }
 
         public static int TanFast(int x)
         {
-            return Mul(SinFast(x), RcpFast(CosFast(x)));
+            int z = Mul(RCP_TWO_PI, x);
+            int sinX = UnitSinFast(z);
+            int cosX = UnitSinFast(z + (1 << 30));
+            return DivFast(sinX, cosX);
         }
 
         public static int TanFastest(int x)
         {
-            return Mul(SinFastest(x), RcpFastest(CosFastest(x)));
+            int z = Mul(RCP_TWO_PI, x);
+            int sinX = UnitSinFastest(z);
+            int cosX = UnitSinFastest(z + (1 << 30));
+            return DivFastest(sinX, cosX);
         }
 
         private static int Atan2Div(int y, int x)
