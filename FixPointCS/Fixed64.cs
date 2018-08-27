@@ -665,6 +665,7 @@ namespace FixPointCS
         // Private constants
         private const long RCP_LN2      = 0x171547652L; // 1.0 / log(2.0) ~= 1.4426950408889634
         private const long RCP_LOG2_E   = 2977044471L;  // 1.0 / log2(e) ~= 0.6931471805599453
+        private const int  RCP_HALF_PI  = 683565276; // 1.0 / (4.0 * 0.5 * Math.PI);  // the 4.0 factor converts directly to s2.30
 
         /// <summary>
         /// Converts an integer to a fixed-point value.
@@ -1536,14 +1537,10 @@ namespace FixPointCS
             return ExpFastest(Mul(exponent, LogFastest(x)));
         }
 
-        public static long Sin(long x)
+        [MethodImpl(Util.AggressiveInlining)]
+        private static int UnitSin(int z)
         {
             // See: http://www.coranac.com/2009/07/sines/
-
-            // Map [0, 2pi] to [0, 4] (as s2.30).
-            // This also wraps the values into one period.
-            const int RCP_HALF_PI = 683565276; // 1.0 / (4.0 * 0.5 * Math.PI);  // the 4.0 factor converts directly to s2.30
-            int z = MulIntLongLow(RCP_HALF_PI, x);
 
             // Handle quadrants 1 and 2 by mirroring the [1, 3] range to [-1, 1] (by calculating 2 - z).
             // The if condition uses the fact that for the quadrants of interest are 0b01 and 0b10 (top two bits are different).
@@ -1558,18 +1555,14 @@ namespace FixPointCS
             int zz = Util.Qmul30(z, z);
             int res = Util.Qmul30(Util.SinPoly4(zz), z);
 
-            // Convert back to s32.32.
-            return (long)res << 2;
+            // Return s2.30 value.
+            return res;
         }
 
-        public static long SinFast(long x)
+        [MethodImpl(Util.AggressiveInlining)]
+        private static int UnitSinFast(int z)
         {
             // See: http://www.coranac.com/2009/07/sines/
-
-            // Map [0, 2pi] to [0, 4] (as s2.30).
-            // This also wraps the values into one period.
-            const int RCP_HALF_PI = 683565276; // 1.0 / (4.0 * 0.5 * Math.PI);  // the 4.0 factor converts directly to s2.30
-            int z = MulIntLongLow(RCP_HALF_PI, x);
 
             // Handle quadrants 1 and 2 by mirroring the [1, 3] range to [-1, 1] (by calculating 2 - z).
             // The if condition uses the fact that for the quadrants of interest are 0b01 and 0b10 (top two bits are different).
@@ -1584,18 +1577,14 @@ namespace FixPointCS
             int zz = Util.Qmul30(z, z);
             int res = Util.Qmul30(Util.SinPoly3(zz), z);
 
-            // Convert back to s32.32.
-            return (long)res << 2;
+            // Return s2.30 value.
+            return res;
         }
 
-        public static long SinFastest(long x)
+        [MethodImpl(Util.AggressiveInlining)]
+        private static int UnitSinFastest(int z)
         {
             // See: http://www.coranac.com/2009/07/sines/
-
-            // Map [0, 2pi] to [0, 4] (as s2.30).
-            // This also wraps the values into one period.
-            const int RCP_HALF_PI = 683565276; // 1.0 / (4.0 * 0.5 * Math.PI);  // the 4.0 factor converts directly to s2.30
-            int z = MulIntLongLow(RCP_HALF_PI, x);
 
             // Handle quadrants 1 and 2 by mirroring the [1, 3] range to [-1, 1] (by calculating 2 - z).
             // The if condition uses the fact that for the quadrants of interest are 0b01 and 0b10 (top two bits are different).
@@ -1610,8 +1599,38 @@ namespace FixPointCS
             int zz = Util.Qmul30(z, z);
             int res = Util.Qmul30(Util.SinPoly2(zz), z);
 
-            // Convert back to s32.32.
-            return (long)res << 2;
+            // Return s2.30 value.
+            return res;
+        }
+
+        public static long Sin(long x)
+        {
+            // Map [0, 2pi] to [0, 4] (as s2.30).
+            // This also wraps the values into one period.
+            int z = MulIntLongLow(RCP_HALF_PI, x);
+
+            // Compute sine and convert to s32.32.
+            return (long)UnitSin(z) << 2;
+        }
+
+        public static long SinFast(long x)
+        {
+            // Map [0, 2pi] to [0, 4] (as s2.30).
+            // This also wraps the values into one period.
+            int z = MulIntLongLow(RCP_HALF_PI, x);
+
+            // Compute sine and convert to s32.32.
+            return (long)UnitSinFast(z) << 2;
+        }
+
+        public static long SinFastest(long x)
+        {
+            // Map [0, 2pi] to [0, 4] (as s2.30).
+            // This also wraps the values into one period.
+            int z = MulIntLongLow(RCP_HALF_PI, x);
+
+            // Compute sine and convert to s32.32.
+            return (long)UnitSinFastest(z) << 2;
         }
 
         public static long Cos(long x)
@@ -1631,17 +1650,26 @@ namespace FixPointCS
 
         public static long Tan(long x)
         {
-            return Mul(Sin(x), Rcp(Cos(x)));
+            int z = MulIntLongLow(RCP_HALF_PI, x);
+            long sinX = (long)UnitSin(z) << 32;
+            long cosX = (long)UnitSin(z + (1 << 30)) << 32;
+            return Div(sinX, cosX);
         }
 
         public static long TanFast(long x)
         {
-            return Mul(SinFast(x), RcpFast(CosFast(x)));
+            int z = MulIntLongLow(RCP_HALF_PI, x);
+            long sinX = (long)UnitSinFast(z) << 32;
+            long cosX = (long)UnitSinFast(z + (1 << 30)) << 32;
+            return DivFast(sinX, cosX);
         }
 
         public static long TanFastest(long x)
         {
-            return Mul(SinFastest(x), RcpFastest(CosFastest(x)));
+            int z = MulIntLongLow(RCP_HALF_PI, x);
+            long sinX = (long)UnitSinFastest(z) << 32;
+            long cosX = (long)UnitSinFastest(z + (1 << 30)) << 32;
+            return DivFastest(sinX, cosX);
         }
 
         private static int Atan2Div(long y, long x)
