@@ -37,7 +37,7 @@ namespace Transpiler
         {
             // Generate C++ files
             GenerateCpp.ConvertFile("../../../FixPointCS/Fixed64.cs", "../../../Cpp/Fixed64.h");
-            GenerateCpp.ConvertFile("../../../FixPointCS/Fixed32.cs", "../../../Cpp/Fixed32.h");
+            //GenerateCpp.ConvertFile("../../../FixPointCS/Fixed32.cs", "../../../Cpp/Fixed32.h");
 
             // Generate Java files
             GenerateJava.ConvertFile("../../../FixPointCS/Fixed64.cs", "../../../Java/Fixed64.java");
