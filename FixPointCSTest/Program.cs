@@ -1304,9 +1304,9 @@ namespace FixPointCSTest
             Console.WriteLine();
         }
 
-        static void TestDeterminism(string testFilter)
+        static void GenerateDeterminismTests(string testFilter)
         {
-            Console.WriteLine("Generating determinism hashes..");
+            Console.WriteLine("Generating determinism test cases..");
 
             using (StreamWriter file = new StreamWriter("../../../Java/DeterminismTest.java"))
             {
@@ -1341,182 +1341,6 @@ namespace FixPointCSTest
             }
         }
 
-        struct F32Vec3
-        {
-            int X;
-            int Y;
-            int Z;
-
-            public F32Vec3(int x, int y, int z)
-            {
-                X = x;
-                Y = y;
-                Z = z;
-            }
-
-            public static F32Vec3 FromInt(int x, int y, int z)
-            {
-                return new F32Vec3(Fixed32.FromInt(x), Fixed32.FromInt(y), Fixed32.FromInt(z));
-            }
-
-            public F32Vec3 Normalize()
-            {
-                int sqrLen = Fixed32.Mul(X, X) + Fixed32.Mul(Y, Y) + Fixed32.Mul(Z, Z);
-                int ooLen = Fixed32.RSqrt(sqrLen);
-                return new F32Vec3(
-                    Fixed32.Mul(ooLen, X),
-                    Fixed32.Mul(ooLen, Y),
-                    Fixed32.Mul(ooLen, Z));
-            }
-
-            public F32Vec3 NormalizeFastest()
-            {
-                int sqrLen = Fixed32.Mul(X, X) + Fixed32.Mul(Y, Y) + Fixed32.Mul(Z, Z);
-                int ooLen = Fixed32.RSqrtFastest(sqrLen);
-                return new F32Vec3(
-                    Fixed32.Mul(ooLen, X),
-                    Fixed32.Mul(ooLen, Y),
-                    Fixed32.Mul(ooLen, Z));
-            }
-        }
-
-        static void TimeIt(string title, int numIters, Action action)
-        {
-            // Figure out how many loops to run
-            double fastest = double.PositiveInfinity;
-            for (int iter = 0; iter < 15; iter++)
-            {
-                var watch = System.Diagnostics.Stopwatch.StartNew();
-                action();
-                fastest = Math.Min(fastest, watch.ElapsedMilliseconds);
-            }
-            Console.WriteLine("{0}: {1:0.00}Mops/s", title, numIters / (fastest / 1000.0) / 1000000.0);
-        }
-
-#if false
-        static void CompareBenchmark()
-        {
-            const int NUM_ITERS = 10000000;
-
-            TimeIt("24-bit sqrt", NUM_ITERS, () =>
-            {
-                F32 s = F32.Div(F32.FromInt(5), F32.FromInt(3));
-                F32 sum = F32.Zero;
-                for (int i = 0; i < NUM_ITERS; i++)
-                    sum += F32.Sqrt(s);
-            });
-
-            TimeIt("pointy sqrt", NUM_ITERS, () =>
-            {
-                FixedPointy.Fix s = new FixedPointy.Fix(5 << 16) / new FixedPointy.Fix(3 << 16);
-                FixedPointy.Fix sum = new FixedPointy.Fix(0);
-                for (int i = 0; i < NUM_ITERS; i++)
-                    sum = sum + FixedPointy.FixMath.Sqrt(s);
-            });
-
-            TimeIt("24-bit normalize", NUM_ITERS, () =>
-            {
-                F32Vec3 vec = F32Vec3.FromInt(2, 4, 6);
-                for (int i = 0; i < NUM_ITERS; i++)
-                    vec = vec.Normalize();
-            });
-
-            TimeIt("10-bit normalize", NUM_ITERS, () =>
-            {
-                F32Vec3 vec = F32Vec3.FromInt(2, 4, 6);
-                for (int i = 0; i < NUM_ITERS; i++)
-                    vec = vec.NormalizeFastest();
-            });
-
-            TimeIt("pointy normalize", NUM_ITERS, () =>
-            {
-                FixedPointy.FixVec3 vec = new FixedPointy.FixVec3(new FixedPointy.Fix(2 << 16), new FixedPointy.Fix(4 << 16), new FixedPointy.Fix(6 << 16));
-                for (int i = 0; i < NUM_ITERS; i++)
-                    vec = vec.Normalize();
-            });
-
-            TimeIt("24-bit exp", NUM_ITERS, () =>
-            {
-                F32 s = F32.Div(F32.FromInt(5), F32.FromInt(3));
-                F32 sum = F32.Zero;
-                for (int i = 0; i < NUM_ITERS; i++)
-                    sum += F32.Exp(s);
-            });
-
-            TimeIt("pointy exp", NUM_ITERS, () =>
-            {
-                FixedPointy.Fix s = new FixedPointy.Fix(5 << 16) / new FixedPointy.Fix(3 << 16);
-                FixedPointy.Fix sum = new FixedPointy.Fix(0);
-                for (int i = 0; i < NUM_ITERS; i++)
-                    sum = sum + FixedPointy.FixMath.Exp(s);
-            });
-
-            TimeIt("24-bit log2", NUM_ITERS, () =>
-            {
-                F32 s = F32.Div(F32.FromInt(5), F32.FromInt(3));
-                F32 sum = F32.Zero;
-                for (int i = 0; i < NUM_ITERS; i++)
-                    sum += F32.Log(s);
-            });
-
-            TimeIt("pointy log2", NUM_ITERS, () =>
-            {
-                FixedPointy.Fix s = new FixedPointy.Fix(5 << 16) / new FixedPointy.Fix(3 << 16);
-                FixedPointy.Fix sum = new FixedPointy.Fix(0);
-                for (int i = 0; i < NUM_ITERS; i++)
-                    sum = sum + FixedPointy.FixMath.Log(s);
-            });
-
-            TimeIt("24-bit sin", NUM_ITERS, () =>
-            {
-                F32 s = F32.FromInt(5);
-                F32 sum = F32.Zero;
-                for (int i = 0; i < NUM_ITERS; i++)
-                    sum += F32.Sin(s);
-            });
-
-            TimeIt("10-bit sin", NUM_ITERS, () =>
-            {
-                F32 s = F32.FromInt(5);
-                F32 sum = F32.Zero;
-                for (int i = 0; i < NUM_ITERS; i++)
-                    sum += F32.SinFastest(s);
-            });
-
-            TimeIt("pointy sin", NUM_ITERS, () =>
-            {
-                FixedPointy.Fix s = new FixedPointy.Fix(5 << 16);
-                FixedPointy.Fix sum = new FixedPointy.Fix(0);
-                for (int i = 0; i < NUM_ITERS; i++)
-                    sum = sum + FixedPointy.FixMath.Sin(s);
-            });
-
-            TimeIt("24-bit tan", NUM_ITERS, () =>
-            {
-                F32 s = F32.FromInt(5);
-                F32 sum = F32.Zero;
-                for (int i = 0; i < NUM_ITERS; i++)
-                    sum += F32.Tan(s);
-            });
-
-            TimeIt("10-bit tan", NUM_ITERS, () =>
-            {
-                F32 s = F32.FromInt(5);
-                F32 sum = F32.Zero;
-                for (int i = 0; i < NUM_ITERS; i++)
-                    sum += F32.TanFastest(s);
-            });
-
-            TimeIt("pointy tan", NUM_ITERS, () =>
-            {
-                FixedPointy.Fix s = new FixedPointy.Fix(5 << 16);
-                FixedPointy.Fix sum = new FixedPointy.Fix(0);
-                for (int i = 0; i < NUM_ITERS; i++)
-                    sum = sum + FixedPointy.FixMath.Tan(s);
-            });
-        }
-#endif
-
         static void Main(string[] args)
         {
             // Run on second core only, set process/thread priority to high.
@@ -1537,6 +1361,9 @@ namespace FixPointCSTest
             // Console.WriteLine("Atan2(): {0} vs {1}", F32.Atan2(F32.FromDouble(-4.4691772460937), F32.FromDouble(-3.9427642822265)), Math.Atan2(-4.4691772460937, -3.9427642822265));
             // Console.WriteLine();
 
+            // Determinism testing
+            GenerateDeterminismTests("");
+
             // Filter for choosing which tests to run. Empty runs all tests
             // Examples:
             // - "Atan2" runs the whole Atan2 family
@@ -1546,10 +1373,7 @@ namespace FixPointCSTest
             string testFilter = "";
 
             // Run precision and performance tests.
-            //TestOperations(testFilter);
-
-            // Determinism testing
-            TestDeterminism("Div");
+            TestOperations(testFilter);
 
             /*Console.WriteLine("-ENTER-");
             Console.ReadLine();*/

@@ -949,13 +949,11 @@ namespace FixPointCS
             long vn1 = v >>> 32; // Break the divisor into two 32-bit digits
             long vn0 = v & 0xffffffffL;
 
-            long un32 = (u1 << s) | (u0 >>> (64 - s)) & (-s >>> 63);
+            long un32 = (u1 << s) | (u0 >>> (64 - s)) & (-(long)s >> 63);
             long un10 = u0 << s; // Shift dividend left
 
             long un1 = un10 >>> 32; // Break the right half of dividend into two digits
             long un0 = un10 & 0xffffffffL;
-
-            return un0;
 
             // Compute the first quotient digit, q1
             long q1 = Long.divideUnsigned(un32, vn1);

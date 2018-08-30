@@ -863,8 +863,6 @@ namespace Fixed64
         FP_ULONG un1 = un10 >> 32; // Break the right half of dividend into two digits
         FP_ULONG un0 = un10 & INT64_C(0xffffffff);
 
-        return (FP_LONG)un0;
-
         // Compute the first quotient digit, q1
         FP_ULONG q1 = un32 / vn1;
         FP_ULONG rhat = un32 - q1 * vn1;
