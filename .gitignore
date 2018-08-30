@@ -1,9 +1,10 @@
 .vs
 *.user
+*.class
 Cpp/x64
 FixPointCS/obj
 FixPointCS/bin
 FixPointCSTest/obj
 FixPointCSTest/bin
-GenerateCpp/obj
-GenerateCpp/bin
+Transpiler/obj
+Transpiler/bin

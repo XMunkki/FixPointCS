@@ -1,4 +1,4 @@
-﻿//
+//
 // FixPointCS
 //
 // Copyright(c) 2018 Jere Sanisalo, Petri Kero
@@ -23,30 +23,25 @@
 //
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
-using System.Numerics;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using FixPointCS;
 
-namespace FixPointCSTest
+namespace Transpiler
 {
-    public static class FPBigInt
+    class Program
     {
-        public static long Mul(long a, long b)
+        static void Main(string[] args)
         {
-            var ba = new BigInteger(a);
-            var bb = new BigInteger(b);
-            var r = (ba * bb) >> Fixed64.Shift;
-            return (long)r;
-        }
+            // Generate C++ files
+            GenerateCpp.ConvertFile("../../../FixPointCS/Fixed64.cs", "../../../Cpp/Fixed64.h");
+            //GenerateCpp.ConvertFile("../../../FixPointCS/Fixed32.cs", "../../../Cpp/Fixed32.h");
 
-        public static long Div(long a, long b)
-        {
-            var ba = new BigInteger(a);
-            var bb = new BigInteger(b);
-            var r = (ba << Fixed64.Shift) / bb;
-            return (long)r;
+            // Generate Java files
+            GenerateJava.ConvertFile("../../../FixPointCS/Fixed64.cs", "../../../Java/Fixed64.java");
+            GenerateJava.ConvertFile("../../../FixPointCS/Fixed32.cs", "../../../Java/Fixed32.java");
         }
     }
 }

@@ -6,8 +6,8 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{FAA807BE-4DA8-4A03-9C65-22AC74A83C92}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>GenerateCpp</RootNamespace>
-    <AssemblyName>GenerateCpp</AssemblyName>
+    <RootNamespace>Transpiler</RootNamespace>
+    <AssemblyName>Transpiler</AssemblyName>
     <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -83,6 +83,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="GenerateCpp.cs" />
+    <Compile Include="GenerateJava.cs" />
+    <Compile Include="Util.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

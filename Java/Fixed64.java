@@ -16,9 +16,9 @@
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY INT64_C(C)AIM, DAMAGES OR OTHER
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER INT64_C(DEA)INGS IN THE
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 //
 
@@ -27,71 +27,53 @@
 //
 // Generated from Fixed64.cs, part of the FixPointCS project (MIT license).
 //
-#pragma once
-#ifndef __FIXED64_H
-#define __FIXED64_H
 
-// Include numeric types
-#include <stdint.h>
+package fixpointcs;
 
-// If FP_ASSERT is not custom-defined, then use the standard one
-#ifndef FP_ASSERT
-#   include <assert.h>
-#   define FP_ASSERT(x) assert(x)
-#endif
+import java.lang.Long;
+import java.lang.Double;
 
-namespace Fixed64
+
+class Util
 {
-    typedef int FP_INT;
-    typedef unsigned int FP_UINT;
-    typedef int64_t FP_LONG;
-    typedef uint64_t FP_ULONG;
-
-    static_assert(sizeof(FP_INT) == 4, "Wrong bytesize for FP_INT");
-    static_assert(sizeof(FP_UINT) == 4, "Wrong bytesize for FP_UINT");
-    static_assert(sizeof(FP_LONG) == 8, "Wrong bytesize for FP_LONG");
-    static_assert(sizeof(FP_ULONG) == 8, "Wrong bytesize for FP_ULONG");
 
 
-
-
-
-    static FP_INT Qmul29(FP_INT a, FP_INT b)
+    public static int Qmul29(int a, int b)
     {
-        return (FP_INT)((FP_LONG)a * (FP_LONG)b >> 29);
+        return (int)((long)a * (long)b >> 29);
     }
 
-    static FP_INT Qmul30(FP_INT a, FP_INT b)
+    public static int Qmul30(int a, int b)
     {
-        return (FP_INT)((FP_LONG)a * (FP_LONG)b >> 30);
+        return (int)((long)a * (long)b >> 30);
     }
 
-    static FP_INT ShiftLeft(FP_INT v, FP_INT shift)
+    public static int ShiftLeft(int v, int shift)
     {
         return (shift >= 0) ? (v << shift) : (v >> -shift);
     }
 
-    static FP_INT ShiftRight(FP_INT v, FP_INT shift)
+    public static int ShiftRight(int v, int shift)
     {
         return (shift >= 0) ? (v >> shift) : (v << -shift);
     }
 
-    static FP_LONG ShiftRight(FP_LONG v, FP_INT shift)
+    public static long ShiftRight(long v, int shift)
     {
         return (shift >= 0) ? (v >> shift) : (v << -shift);
     }
 
-    static FP_LONG LogicalShiftRight(FP_LONG v, FP_INT shift)
+    public static long LogicalShiftRight(long v, int shift)
     {
-        return (FP_LONG)((FP_ULONG)v >> shift);
+        return v >>> shift;
     }
 
     // Exp2()
 
 	// Precision: 13.24 bits
-	static FP_INT Exp2Poly3(FP_INT a)
+	public static int Exp2Poly3(int a)
 	{
-		FP_INT y = Qmul30(a, 84039593); // 0.0782679701835315868647357253725971674790033117245148781445598202137415363194904317749528903660739148499430948967629357887
+		int y = Qmul30(a, 84039593); // 0.0782679701835315868647357253725971674790033117245148781445598202137415363194904317749528903660739148499430948967629357887
 		y = Qmul30(a, y + 242996024); // 0.226307682289372255347421644246257966273699535419878898050811760122384683941875786929647503217974831952486347597791720611
 		y = Qmul30(a, y + 746706207); // 0.695424347527096157787842630381144866247297152855606223804628419663873779738633781295399606415951253197570557505445343601
 		y = y + 1073741824;
@@ -99,9 +81,9 @@ namespace Fixed64
 	}
 
 	// Precision: 18.19 bits
-	static FP_INT Exp2Poly4(FP_INT a)
+	public static int Exp2Poly4(int a)
 	{
-		FP_INT y = Qmul30(a, 14555373); // 0.0135557472348149177040307931905578544538124307723745221579881209426474911809748672636364432116420009120178935332926148611
+		int y = Qmul30(a, 14555373); // 0.0135557472348149177040307931905578544538124307723745221579881209426474911809748672636364432116420009120178935332926148611
 		y = Qmul30(a, y + 55869331); // 0.0520323690084328924674487312215472415900450170687696511359785661622616863440911035364584944748959228308174520922142865995
 		y = Qmul30(a, y + 259179547); // 0.241379762937091639018661074809242143033914474070411268883151785382581196588939527676019951096295687987322799846420118765
 		y = Qmul30(a, y + 744137573); // 0.693032120819660550809859400778652760922228078088444557822881527512509625885994501523885111217166388269841854528072979774
@@ -110,9 +92,9 @@ namespace Fixed64
 	}
 
 	// Precision: 23.37 bits
-	static FP_INT Exp2Poly5(FP_INT a)
+	public static int Exp2Poly5(int a)
 	{
-		FP_INT y = Qmul30(a, 2017903); // 0.00187931864849444079178064366523643962831734445578833344828943266930262096728457318136293441770024748382988959051143223706
+		int y = Qmul30(a, 2017903); // 0.00187931864849444079178064366523643962831734445578833344828943266930262096728457318136293441770024748382988959051143223706
 		y = Qmul30(a, y + 9654007); // 0.0089909950956369787948425038952611903126353369666002380364841111113291819538448433335270460143993823536893996134420311419
 		y = Qmul30(a, y + 59934847); // 0.0558186759615980431203104787377782200574008231751237416643519892213181468390965300572726745159591410385167709971364406724
 		y = Qmul30(a, y + 257869054); // 0.240159271464382269128561549965297376067896183861587452990582800168980375711748974675500420263841816476095364031528449763
@@ -124,9 +106,9 @@ namespace Fixed64
     // Rcp()
 
 	// Precision: 11.33 bits
-	static FP_INT RcpPoly4(FP_INT a)
+	public static int RcpPoly4(int a)
 	{
-		FP_INT y = Qmul30(a, 166123244); // 0.154714327545457094588979713106287560782537959277436051827019427328357322113481152734370734443893548182187731839301875899
+		int y = Qmul30(a, 166123244); // 0.154714327545457094588979713106287560782537959277436051827019427328357322113481152734370734443893548182187731839301875899
 		y = Qmul30(a, y + -581431354); // -0.54150014640909983106142899587200646273888285747102618139456799564925062739718403457029757055362741863765712410515426083
 		y = Qmul30(a, y + 939345296); // 0.874833479742433164394762329205339796072216190804359514727901328982583960730517367903630903886960751970990489874952162084
 		y = Qmul30(a, y + -1060908097); // -0.988047660878790427922313046439620894115871292610769385160352760661690655446814486067704067777226881515521097609099777152
@@ -135,9 +117,9 @@ namespace Fixed64
 	}
 
 	// Precision: 16.53 bits
-	static FP_INT RcpPoly6(FP_INT a)
+	public static int RcpPoly6(int a)
 	{
-		FP_INT y = Qmul30(a, 77852993); // 0.0725062501842326696626758301282171253618850679805450684783331254738896577827939599454470990870969993306249485759929666981
+		int y = Qmul30(a, 77852993); // 0.0725062501842326696626758301282171253618850679805450684783331254738896577827939599454470990870969993306249485759929666981
 		y = Qmul30(a, y + -350338469); // -0.326278125829047013482041235576977064128482805912452808152499064632503460022572819754511945891936496987812268591968349959
 		y = Qmul30(a, y + 723231606); // 0.673561921455982545223734340382301840739167811454662043292934558465813280438563313561682188125190962075365760110255605888
 		y = Qmul30(a, y + -974250754); // -0.907341721411285515029553588773713935349385980480415781958608445152553325879092398556945676696228380651281188866035287881
@@ -147,7 +129,7 @@ namespace Fixed64
 		return y;
 	}
 
-	static FP_INT RcpPoly3Lut4Table[] =
+	private static final int[] RcpPoly3Lut4Table =
 	{
 		-678697788, 1018046684, -1071069948, 1073721112,
 		-302893157, 757232894, -1008066289, 1068408287,
@@ -156,17 +138,17 @@ namespace Fixed64
 	};
 
 	// Precision: 15.66 bits
-	static FP_INT RcpPoly3Lut4(FP_INT a)
+	public static int RcpPoly3Lut4(int a)
 	{
-		FP_INT offset = (a >> 28) * 4;
-		FP_INT y = Qmul30(a, RcpPoly3Lut4Table[offset + 0]);
+		int offset = (a >> 28) * 4;
+		int y = Qmul30(a, RcpPoly3Lut4Table[offset + 0]);
 		y = Qmul30(a, y + RcpPoly3Lut4Table[offset + 1]);
 		y = Qmul30(a, y + RcpPoly3Lut4Table[offset + 2]);
 		y = y + RcpPoly3Lut4Table[offset + 3];
 		return y;
 	}
 
-	static FP_INT RcpPoly4Lut8Table[] =
+	private static final int[] RcpPoly4Lut8Table =
 	{
 		796773553, -1045765287, 1072588028, -1073726795, 1073741824,
 		456453183, -884378041, 1042385791, -1071088216, 1073651788,
@@ -179,10 +161,10 @@ namespace Fixed64
 	};
 
 	// Precision: 24.07 bits
-	static FP_INT RcpPoly4Lut8(FP_INT a)
+	public static int RcpPoly4Lut8(int a)
 	{
-		FP_INT offset = (a >> 27) * 5;
-		FP_INT y = Qmul30(a, RcpPoly4Lut8Table[offset + 0]);
+		int offset = (a >> 27) * 5;
+		int y = Qmul30(a, RcpPoly4Lut8Table[offset + 0]);
 		y = Qmul30(a, y + RcpPoly4Lut8Table[offset + 1]);
 		y = Qmul30(a, y + RcpPoly4Lut8Table[offset + 2]);
 		y = Qmul30(a, y + RcpPoly4Lut8Table[offset + 3]);
@@ -193,9 +175,9 @@ namespace Fixed64
     // Sqrt()
 
 	// Precision: 13.36 bits
-	static FP_INT SqrtPoly3(FP_INT a)
+	public static int SqrtPoly3(int a)
 	{
-		FP_INT y = Qmul30(a, 26809804); // 0.0249685755493961204934845015323729712245958715357182065425848552518546416164312449413742280712638308483065114885417147904
+		int y = Qmul30(a, 26809804); // 0.0249685755493961204934845015323729712245958715357182065425848552518546416164312449413742280712638308483065114885417147904
 		y = Qmul30(a, y + -116435772); // -0.108439263715492087333244576730247754908569708153374339944951137491994192013534152641012071161185446185655458733810736431
 		y = Qmul30(a, y + 534384395); // 0.497684250539191015641448799407572862253645711994604206579046020230872028859209946550025377417563188072362793476181318665
 		y = y + 1073741824; // 1.0
@@ -203,9 +185,9 @@ namespace Fixed64
 	}
 
 	// Precision: 16.50 bits
-	static FP_INT SqrtPoly4(FP_INT a)
+	public static int SqrtPoly4(int a)
 	{
-		FP_INT y = Qmul30(a, -11559524); // -0.0107656468280005064933278905326776959702034851444407595549875999349858889266381514341825269487372902092181743561671344361
+		int y = Qmul30(a, -11559524); // -0.0107656468280005064933278905326776959702034851444407595549875999349858889266381514341825269487372902092181743561671344361
 		y = Qmul30(a, y + 49235626); // 0.0458542501550120083313075597659725264999808459122954966477604412728019257521420334516113399358029950852981420572751187192
 		y = Qmul30(a, y + -129356986); // -0.120473082434524586846319215086079446047783981719931015048359535322204769538816469963000080874223090148906445903268633479
 		y = Qmul30(a, y + 536439312); // 0.499598041480608133810028270062482694087678496329024351132266431975121211175419626795958802214798958007840324433072946221
@@ -213,7 +195,7 @@ namespace Fixed64
 		return y;
 	}
 
-	static FP_INT SqrtPoly3Lut8Table[] =
+	private static final int[] SqrtPoly3Lut8Table =
 	{
 		57835763, -133550637, 536857054, 1073741824,
 		43771091, -128445855, 536217068, 1073769530,
@@ -226,10 +208,10 @@ namespace Fixed64
 	};
 
 	// Precision: 23.56 bits
-	static FP_INT SqrtPoly3Lut8(FP_INT a)
+	public static int SqrtPoly3Lut8(int a)
 	{
-		FP_INT offset = (a >> 27) * 4;
-		FP_INT y = Qmul30(a, SqrtPoly3Lut8Table[offset + 0]);
+		int offset = (a >> 27) * 4;
+		int y = Qmul30(a, SqrtPoly3Lut8Table[offset + 0]);
 		y = Qmul30(a, y + SqrtPoly3Lut8Table[offset + 1]);
 		y = Qmul30(a, y + SqrtPoly3Lut8Table[offset + 2]);
 		y = y + SqrtPoly3Lut8Table[offset + 3];
@@ -239,9 +221,9 @@ namespace Fixed64
     // RSqrt()
 
 	// Precision: 10.55 bits
-	static FP_INT RSqrtPoly3(FP_INT a)
+	public static int RSqrtPoly3(int a)
 	{
-		FP_INT y = Qmul30(a, -91950555); // -0.0856356289309618075724442347978716997984112060739604608172096078728382955692378474864988406402256175535135909431476122756
+		int y = Qmul30(a, -91950555); // -0.0856356289309618075724442347978716997984112060739604608172096078728382955692378474864988406402256175535135909431476122756
 		y = Qmul30(a, y + 299398639); // 0.278836710932968623313626076681628936089988230155462820435332822241435754263689225928134347217644388668377307808008581711
 		y = Qmul30(a, y + -521939780); // -0.486094300815459291340337479778908197006741086393028323029783345373231219463397859016441739413597984747356793749404820923
 		y = y + 1073741824; // 1.0
@@ -249,9 +231,9 @@ namespace Fixed64
 	}
 
 	// Precision: 16.08 bits
-	static FP_INT RSqrtPoly5(FP_INT a)
+	public static int RSqrtPoly5(int a)
 	{
-		FP_INT y = Qmul30(a, -34036183); // -0.0316986662178132948125724057457789067274319219669948992806572724657733410288354401675056668794389506376695226173434879395
+		int y = Qmul30(a, -34036183); // -0.0316986662178132948125724057457789067274319219669948992806572724657733410288354401675056668794389506376695226173434879395
 		y = Qmul30(a, y + 140361627); // 0.130721952132469025002475913996909202114937889568059538633961150597311078891698356228999013320515864372663894767082977274
 		y = Qmul30(a, y + -276049470); // -0.257091104134768572313864227992129218223743238765168155465701243532365537275047394354439662434976402678179717893043406024
 		y = Qmul30(a, y + 391366758); // 0.364488696521754181874287383887070965401384329257252476170774837632778316357675818762347533724407215505228711973415321601
@@ -260,7 +242,7 @@ namespace Fixed64
 		return y;
 	}
 
-	static FP_INT RSqrtPoly3Lut16Table[] =
+	private static final int[] RSqrtPoly3Lut16Table =
 	{
 		-301579590, 401404709, -536857690, 1073741824,
 		-245423010, 391086820, -536203235, 1073727515,
@@ -281,10 +263,10 @@ namespace Fixed64
 	};
 
 	// Precision: 24.59 bits
-	static FP_INT RSqrtPoly3Lut16(FP_INT a)
+	public static int RSqrtPoly3Lut16(int a)
 	{
-		FP_INT offset = (a >> 26) * 4;
-		FP_INT y = Qmul30(a, RSqrtPoly3Lut16Table[offset + 0]);
+		int offset = (a >> 26) * 4;
+		int y = Qmul30(a, RSqrtPoly3Lut16Table[offset + 0]);
 		y = Qmul30(a, y + RSqrtPoly3Lut16Table[offset + 1]);
 		y = Qmul30(a, y + RSqrtPoly3Lut16Table[offset + 2]);
 		y = y + RSqrtPoly3Lut16Table[offset + 3];
@@ -294,9 +276,9 @@ namespace Fixed64
     // Log()
 
 	// Precision: 12.18 bits
-	static FP_INT LogPoly5(FP_INT a)
+	public static int LogPoly5(int a)
 	{
-		FP_INT y = Qmul30(a, 34835446); // 0.0324430374324099257645920506145091908173169505782530351933872568452187970039716570286755191899094832608276898590172296967
+		int y = Qmul30(a, 34835446); // 0.0324430374324099257645920506145091908173169505782530351933872568452187970039716570286755191899094832608276898590172296967
 		y = Qmul30(a, y + -149023176); // -0.138788648453891138663259214948877985710758551758834443319382469349215457727435900740974302256302169487791331019735819359
 		y = Qmul30(a, y + 315630515); // 0.293953823490661881198275484636301174125635657531784266710660462843103551518793294127904893642006610982580864921150987405
 		y = Qmul30(a, y + -530763208); // -0.494311758014893283441267083938639942320000878038159975670627731298854764041757060977673894877216298188619864197654458825
@@ -304,7 +286,7 @@ namespace Fixed64
 		return y;
 	}
 
-	static FP_INT LogPoly3Lut4Table[] =
+	private static final int[] LogPoly3Lut4Table =
 	{
 		270509931, -528507852, 1073614348, 0,
 		139305305, -442070189, 1053671695, 1633382,
@@ -313,17 +295,17 @@ namespace Fixed64
 	};
 
 	// Precision: 12.51 bits
-	static FP_INT LogPoly3Lut4(FP_INT a)
+	public static int LogPoly3Lut4(int a)
 	{
-		FP_INT offset = (a >> 28) * 4;
-		FP_INT y = Qmul30(a, LogPoly3Lut4Table[offset + 0]);
+		int offset = (a >> 28) * 4;
+		int y = Qmul30(a, LogPoly3Lut4Table[offset + 0]);
 		y = Qmul30(a, y + LogPoly3Lut4Table[offset + 1]);
 		y = Qmul30(a, y + LogPoly3Lut4Table[offset + 2]);
 		y = y + LogPoly3Lut4Table[offset + 3];
 		return y;
 	}
 
-	static FP_INT LogPoly3Lut8Table[] =
+	private static final int[] LogPoly3Lut8Table =
 	{
 		309628536, -534507419, 1073724054, 0,
 		215207992, -502390266, 1069897914, 160852,
@@ -336,17 +318,17 @@ namespace Fixed64
 	};
 
 	// Precision: 15.35 bits
-	static FP_INT LogPoly3Lut8(FP_INT a)
+	public static int LogPoly3Lut8(int a)
 	{
-		FP_INT offset = (a >> 27) * 4;
-		FP_INT y = Qmul30(a, LogPoly3Lut8Table[offset + 0]);
+		int offset = (a >> 27) * 4;
+		int y = Qmul30(a, LogPoly3Lut8Table[offset + 0]);
 		y = Qmul30(a, y + LogPoly3Lut8Table[offset + 1]);
 		y = Qmul30(a, y + LogPoly3Lut8Table[offset + 2]);
 		y = y + LogPoly3Lut8Table[offset + 3];
 		return y;
 	}
 
-	static FP_INT LogPoly5Lut8Table[] =
+	private static final int[] LogPoly5Lut8Table =
 	{
 		166189159, -263271008, 357682461, -536867223, 1073741814, 0,
 		91797130, -221452381, 347549389, -535551692, 1073651718, 2559,
@@ -359,10 +341,10 @@ namespace Fixed64
 	};
 
 	// Precision: 26.22 bits
-	static FP_INT LogPoly5Lut8(FP_INT a)
+	public static int LogPoly5Lut8(int a)
 	{
-		FP_INT offset = (a >> 27) * 6;
-		FP_INT y = Qmul30(a, LogPoly5Lut8Table[offset + 0]);
+		int offset = (a >> 27) * 6;
+		int y = Qmul30(a, LogPoly5Lut8Table[offset + 0]);
 		y = Qmul30(a, y + LogPoly5Lut8Table[offset + 1]);
 		y = Qmul30(a, y + LogPoly5Lut8Table[offset + 2]);
 		y = Qmul30(a, y + LogPoly5Lut8Table[offset + 3]);
@@ -374,9 +356,9 @@ namespace Fixed64
     // Log2()
 
 	// Precision: 12.29 bits
-	static FP_INT Log2Poly5(FP_INT a)
+	public static int Log2Poly5(int a)
 	{
-		FP_INT y = Qmul30(a, 47840369); // 0.0445548155276207896995334754162140597637031202974591126199168774393873986289641382244343408731171726931757539068975485089
+		int y = Qmul30(a, 47840369); // 0.0445548155276207896995334754162140597637031202974591126199168774393873986289641382244343408731171726931757539068975485089
 		y = Qmul30(a, y + -208941842); // -0.194592255208938416591621284205816720732140050852301947258138293025978577320103558315407526014074332839410207729682281855
 		y = Qmul30(a, y + 450346773); // 0.419418116511448143225544710148490988337404380945888758986024844824480954559055561814904948371254539592688384332290775469
 		y = Qmul30(a, y + -764275149); // -0.711786700405071059895411856470396704111669190613765834655920030051222814749610509844938951593547905280264475803542602324
@@ -384,7 +366,7 @@ namespace Fixed64
 		return y;
 	}
 
-	static FP_INT Log2Poly4Lut4Table[] =
+	private static final int[] Log2Poly4Lut4Table =
 	{
 		-262388804, 497357316, -773551400, 1549073482, 0,
 		-109627834, 364448809, -727169110, 1541348674, 512282,
@@ -393,10 +375,10 @@ namespace Fixed64
 	};
 
 	// Precision: 17.47 bits
-	static FP_INT Log2Poly4Lut4(FP_INT a)
+	public static int Log2Poly4Lut4(int a)
 	{
-		FP_INT offset = (a >> 28) * 5;
-		FP_INT y = Qmul30(a, Log2Poly4Lut4Table[offset + 0]);
+		int offset = (a >> 28) * 5;
+		int y = Qmul30(a, Log2Poly4Lut4Table[offset + 0]);
 		y = Qmul30(a, y + Log2Poly4Lut4Table[offset + 1]);
 		y = Qmul30(a, y + Log2Poly4Lut4Table[offset + 2]);
 		y = Qmul30(a, y + Log2Poly4Lut4Table[offset + 3]);
@@ -404,7 +386,7 @@ namespace Fixed64
 		return y;
 	}
 
-	static FP_INT Log2Poly5Lut4Table[] =
+	private static final int[] Log2Poly5Lut4Table =
 	{
 		188232988, -362436158, 514145569, -774469188, 1549081618, 0,
 		63930491, -229184904, 452495120, -759064000, 1547029186, 114449,
@@ -413,10 +395,10 @@ namespace Fixed64
 	};
 
 	// Precision: 21.93 bits
-	static FP_INT Log2Poly5Lut4(FP_INT a)
+	public static int Log2Poly5Lut4(int a)
 	{
-		FP_INT offset = (a >> 28) * 6;
-		FP_INT y = Qmul30(a, Log2Poly5Lut4Table[offset + 0]);
+		int offset = (a >> 28) * 6;
+		int y = Qmul30(a, Log2Poly5Lut4Table[offset + 0]);
 		y = Qmul30(a, y + Log2Poly5Lut4Table[offset + 1]);
 		y = Qmul30(a, y + Log2Poly5Lut4Table[offset + 2]);
 		y = Qmul30(a, y + Log2Poly5Lut4Table[offset + 3]);
@@ -425,7 +407,7 @@ namespace Fixed64
 		return y;
 	}
 
-	static FP_INT Log2Poly3Lut8Table[] =
+	private static final int[] Log2Poly3Lut8Table =
 	{
 		446326382, -771076074, 1549055308, 0,
 		310260104, -724673704, 1543514571, 233309,
@@ -438,17 +420,17 @@ namespace Fixed64
 	};
 
 	// Precision: 15.82 bits
-	static FP_INT Log2Poly3Lut8(FP_INT a)
+	public static int Log2Poly3Lut8(int a)
 	{
-		FP_INT offset = (a >> 27) * 4;
-		FP_INT y = Qmul30(a, Log2Poly3Lut8Table[offset + 0]);
+		int offset = (a >> 27) * 4;
+		int y = Qmul30(a, Log2Poly3Lut8Table[offset + 0]);
 		y = Qmul30(a, y + Log2Poly3Lut8Table[offset + 1]);
 		y = Qmul30(a, y + Log2Poly3Lut8Table[offset + 2]);
 		y = y + Log2Poly3Lut8Table[offset + 3];
 		return y;
 	}
 
-	static FP_INT Log2Poly3Lut16Table[] =
+	private static final int[] Log2Poly3Lut16Table =
 	{
 		479498023, -773622327, 1549078527, 0,
 		395931761, -759118188, 1548197526, 18808,
@@ -469,17 +451,17 @@ namespace Fixed64
 	};
 
 	// Precision: 18.77 bits
-	static FP_INT Log2Poly3Lut16(FP_INT a)
+	public static int Log2Poly3Lut16(int a)
 	{
-		FP_INT offset = (a >> 26) * 4;
-		FP_INT y = Qmul30(a, Log2Poly3Lut16Table[offset + 0]);
+		int offset = (a >> 26) * 4;
+		int y = Qmul30(a, Log2Poly3Lut16Table[offset + 0]);
 		y = Qmul30(a, y + Log2Poly3Lut16Table[offset + 1]);
 		y = Qmul30(a, y + Log2Poly3Lut16Table[offset + 2]);
 		y = y + Log2Poly3Lut16Table[offset + 3];
 		return y;
 	}
 
-	static FP_INT Log2Poly4Lut16Table[] =
+	private static final int[] Log2Poly4Lut16Table =
 	{
 		-349683705, 514860252, -774521507, 1549081965, 0,
 		-271658431, 496776802, -772844764, 1549008620, 1259,
@@ -500,10 +482,10 @@ namespace Fixed64
 	};
 
 	// Precision: 25.20 bits
-	static FP_INT Log2Poly4Lut16(FP_INT a)
+	public static int Log2Poly4Lut16(int a)
 	{
-		FP_INT offset = (a >> 26) * 5;
-		FP_INT y = Qmul30(a, Log2Poly4Lut16Table[offset + 0]);
+		int offset = (a >> 26) * 5;
+		int y = Qmul30(a, Log2Poly4Lut16Table[offset + 0]);
 		y = Qmul30(a, y + Log2Poly4Lut16Table[offset + 1]);
 		y = Qmul30(a, y + Log2Poly4Lut16Table[offset + 2]);
 		y = Qmul30(a, y + Log2Poly4Lut16Table[offset + 3]);
@@ -514,18 +496,18 @@ namespace Fixed64
     // Sin()
 
 	// Precision: 12.55 bits
-	static FP_INT SinPoly2(FP_INT a)
+	public static int SinPoly2(int a)
 	{
-		FP_INT y = Qmul30(a, 78160664); // 0.072792791246675240806633584756838912025391316324690126147664432597740012658387971002826696503964998382073099859493224924
+		int y = Qmul30(a, 78160664); // 0.072792791246675240806633584756838912025391316324690126147664432597740012658387971002826696503964998382073099859493224924
 		y = Qmul30(a, y + -691048553); // -0.643589118041571860037955276396590354123911419602492412009771153095258421228154501762591444328997849123819708031503216569
 		y = y + 1686629713; // 1.57079632679489661923132169163975144209852010327780228586210672049751840856976653075976474782503285074174660817200999164
 		return y;
 	}
 
 	// Precision: 19.56 bits
-	static FP_INT SinPoly3(FP_INT a)
+	public static int SinPoly3(int a)
 	{
-		FP_INT y = Qmul30(a, -4685819); // -0.00436400981703153243210864997931625819052350492882668525242722064533389220603470732171385204753335364507030843902034709469
+		int y = Qmul30(a, -4685819); // -0.00436400981703153243210864997931625819052350492882668525242722064533389220603470732171385204753335364507030843902034709469
 		y = Qmul30(a, y + 85358772); // 0.0794965509242783578799016950654626792792298788902324903830739535612665082075477776612291621671450318813032241372211405835
 		y = Qmul30(a, y + -693560840); // -0.645928867902143444679114736725897863187226477239208090992753453413451024571279601099280057944644528977979523870210785134
 		y = y + 1686629713; // 1.57079632679489661923132169163975144209852010327780228586210672049751840856976653075976474782503285074174660817200999164
@@ -533,9 +515,9 @@ namespace Fixed64
 	}
 
 	// Precision: 27.13 bits
-	static FP_INT SinPoly4(FP_INT a)
+	public static int SinPoly4(int a)
 	{
-		FP_INT y = Qmul30(a, 162679); // 0.000151506641710145430212560273580165931825591912723771559939880958777921352896251494433561036087921925941339032487946104446
+		int y = Qmul30(a, 162679); // 0.000151506641710145430212560273580165931825591912723771559939880958777921352896251494433561036087921925941339032487946104446
 		y = Qmul30(a, y + -5018587); // -0.0046739239118693360423625115440933405485555388758012378155538229669555462190128366781129325889847935291248353457031014355
 		y = Qmul30(a, y + 85566362); // 0.0796898846149471415166275702814129714699583291426024010731469442497475447581642697337742897122044339073717901878121832219
 		y = Qmul30(a, y + -693598342); // -0.645963794139684570135799310650651238951748485457327220679639722739088328461814215309859665984340413045934902046607019536
@@ -546,16 +528,16 @@ namespace Fixed64
     // Atan()
 
 	// Precision: 11.51 bits
-	static FP_INT AtanPoly4(FP_INT a)
+	public static int AtanPoly4(int a)
 	{
-		FP_INT y = Qmul30(a, 160726798); // 0.149688495302819745936382180128149414212975169816783327757105073455364913850052796368792673611118203908491930788482514717
+		int y = Qmul30(a, 160726798); // 0.149688495302819745936382180128149414212975169816783327757105073455364913850052796368792673611118203908491930788482514717
 		y = Qmul30(a, y + -389730008); // -0.3629643552067315751294669187222720090413427534177140297655271624082990667114095804438257977266614399793827935382192301
 		y = Qmul30(a, y + -1791887); // -0.00166882600835556487643157555251563341464517039273944961175492629580374127544152356827950414733023151629754542508176777682
 		y = Qmul30(a, y + 1074109956); // 1.00034284930971570368517715996651394929230510383744660686391316332569199570835055730032133459840273458272542980313905982
 		return y;
 	}
 
-	static FP_INT AtanPoly5Lut8Table[] =
+	private static final int[] AtanPoly5Lut8Table =
 	{
 		204464916, 1544566, -357994250, 1395, 1073741820, 0,
 		119369854, 56362968, -372884915, 2107694, 1073588633, 4534,
@@ -569,10 +551,10 @@ namespace Fixed64
 	};
 
 	// Precision: 28.06 bits
-	static FP_INT AtanPoly5Lut8(FP_INT a)
+	public static int AtanPoly5Lut8(int a)
 	{
-		FP_INT offset = (a >> 27) * 6;
-		FP_INT y = Qmul30(a, AtanPoly5Lut8Table[offset + 0]);
+		int offset = (a >> 27) * 6;
+		int y = Qmul30(a, AtanPoly5Lut8Table[offset + 0]);
 		y = Qmul30(a, y + AtanPoly5Lut8Table[offset + 1]);
 		y = Qmul30(a, y + AtanPoly5Lut8Table[offset + 2]);
 		y = Qmul30(a, y + AtanPoly5Lut8Table[offset + 3]);
@@ -581,7 +563,7 @@ namespace Fixed64
 		return y;
 	}
 
-	static FP_INT AtanPoly3Lut8Table[] =
+	private static final int[] AtanPoly3Lut8Table =
 	{
 		-351150132, -463916, 1073745980, 0,
 		-289359685, -24349242, 1076929105, -145366,
@@ -595,92 +577,99 @@ namespace Fixed64
     };
 
 	// Precision: 17.98 bits
-	static FP_INT AtanPoly3Lut8(FP_INT a)
+	public static int AtanPoly3Lut8(int a)
 	{
-		FP_INT offset = (a >> 27) * 4;
-		FP_INT y = Qmul30(a, AtanPoly3Lut8Table[offset + 0]);
+		int offset = (a >> 27) * 4;
+		int y = Qmul30(a, AtanPoly3Lut8Table[offset + 0]);
 		y = Qmul30(a, y + AtanPoly3Lut8Table[offset + 1]);
 		y = Qmul30(a, y + AtanPoly3Lut8Table[offset + 2]);
 		y = y + AtanPoly3Lut8Table[offset + 3];
 		return y;
 	}
-    static const FP_INT Shift = 32;
-    static const FP_LONG FractionMask = ( INT64_C(1) << Shift ) - 1; // Space before INT64_C(1) needed because of hacky C++ code generator
-    static const FP_LONG IntegerMask = ~FractionMask;
+}
+
+/// <summary>
+/// Direct fixed point (signed 32.32) functions.
+/// </summary>
+public class Fixed64
+{
+    public static final int Shift = 32;
+    public static final long FractionMask = ( 1L << Shift ) - 1; // Space before 1L needed because of hacky C++ code generator
+    public static final long IntegerMask = ~FractionMask;
 
     // Constants
-    static const FP_LONG Zero = INT64_C(0);
-    static const FP_LONG Neg1 = INT64_C(-1) << Shift;
-    static const FP_LONG One = INT64_C(1) << Shift;
-    static const FP_LONG Two = INT64_C(2) << Shift;
-    static const FP_LONG Three = INT64_C(3) << Shift;
-    static const FP_LONG Four = INT64_C(4) << Shift;
-    static const FP_LONG Half = One >> 1;
-    static const FP_LONG Pi = INT64_C(13493037705); //(FP_LONG)(Math.PI * 65536.0) << 16;
-    static const FP_LONG Pi2 = INT64_C(26986075409);
-    static const FP_LONG PiHalf = INT64_C(6746518852);
-    static const FP_LONG E = INT64_C(11674931555);
+    public static final long Zero = 0L;
+    public static final long Neg1 = -1L << Shift;
+    public static final long One = 1L << Shift;
+    public static final long Two = 2L << Shift;
+    public static final long Three = 3L << Shift;
+    public static final long Four = 4L << Shift;
+    public static final long Half = One >> 1;
+    public static final long Pi = 13493037705L; //(long)(Math.PI * 65536.0) << 16;
+    public static final long Pi2 = 26986075409L;
+    public static final long PiHalf = 6746518852L;
+    public static final long E = 11674931555L;
 
-    static const FP_LONG MinValue = INT64_C(-9223372036854775808);
-    static const FP_LONG MaxValue = INT64_C(9223372036854775807);
+    public static final long MinValue = -9223372036854775808L;
+    public static final long MaxValue = 9223372036854775807L;
 
     // Private constants
-    static const FP_LONG RCP_LN2      = INT64_C(0x171547652); // 1.0 / log(2.0) ~= 1.4426950408889634
-    static const FP_LONG RCP_LOG2_E   = INT64_C(2977044471);  // 1.0 / log2(e) ~= 0.6931471805599453
-    static const FP_INT  RCP_HALF_PI  = 683565276; // 1.0 / (4.0 * 0.5 * Math.PI);  // the 4.0 factor converts directly to s2.30
+    private static final long RCP_LN2      = 0x171547652L; // 1.0 / log(2.0) ~= 1.4426950408889634
+    private static final long RCP_LOG2_E   = 2977044471L;  // 1.0 / log2(e) ~= 0.6931471805599453
+    private static final int  RCP_HALF_PI  = 683565276; // 1.0 / (4.0 * 0.5 * Math.PI);  // the 4.0 factor converts directly to s2.30
 
     /// <summary>
     /// Converts an integer to a fixed-point value.
     /// </summary>
-    static FP_LONG FromInt(FP_INT v)
+    public static long FromInt(int v)
     {
-        return (FP_LONG)v << Shift;
+        return (long)v << Shift;
     }
 
     /// <summary>
     /// Converts a double to a fixed-point value.
     /// </summary>
-    static FP_LONG FromDouble(double v)
+    public static long FromDouble(double v)
     {
-        return (FP_LONG)(v * 4294967296.0);
+        return (long)(v * 4294967296.0);
     }
 
     /// <summary>
     /// Converts a float to a fixed-point value.
     /// </summary>
-    static FP_LONG FromFloat(float v)
+    public static long FromFloat(float v)
     {
-        return (FP_LONG)(v * 4294967296.0f);
+        return (long)(v * 4294967296.0f);
     }
 
     /// <summary>
     /// Converts a fixed-point value into an integer by rounding it up to nearest integer.
     /// </summary>
-    static FP_INT CeilToInt(FP_LONG v)
+    public static int CeilToInt(long v)
     {
-        return (FP_INT)((v + (One - 1)) >> Shift);
+        return (int)((v + (One - 1)) >> Shift);
     }
 
     /// <summary>
     /// Converts a fixed-point value into an integer by rounding it down to nearest integer.
     /// </summary>
-    static FP_INT FloorToInt(FP_LONG v)
+    public static int FloorToInt(long v)
     {
-        return (FP_INT)(v >> Shift);
+        return (int)(v >> Shift);
     }
 
     /// <summary>
     /// Converts a fixed-point value into an integer by rounding it to nearest integer.
     /// </summary>
-    static FP_INT RoundToInt(FP_LONG v)
+    public static int RoundToInt(long v)
     {
-        return (FP_INT)((v + Half) >> Shift);
+        return (int)((v + Half) >> Shift);
     }
 
     /// <summary>
     /// Converts a fixed-point value into a double.
     /// </summary>
-    static double ToDouble(FP_LONG v)
+    public static double ToDouble(long v)
     {
         return (double)v * (1.0 / 4294967296.0);
     }
@@ -688,7 +677,7 @@ namespace Fixed64
     /// <summary>
     /// Converts a FP value into a float.
     /// </summary>
-    static float ToFloat(FP_LONG v)
+    public static float ToFloat(long v)
     {
         return (float)v * (1.0f / 4294967296.0f);
     }
@@ -696,11 +685,15 @@ namespace Fixed64
     /// <summary>
     /// Converts the value to a human readable string.
     /// </summary>
+    public static String ToString(long v)
+    {
+        return Double.toString(ToDouble(v));
+    }
 
     /// <summary>
     /// Returns the absolute (positive) value of x.
     /// </summary>
-    static FP_LONG Abs(FP_LONG x)
+    public static long Abs(long x)
     {
         // \note fails with LONG_MIN
         // \note for some reason this is twice as fast as (x > 0) ? x : -x
@@ -710,7 +703,7 @@ namespace Fixed64
     /// <summary>
     /// Negative absolute value (returns -abs(x)).
     /// </summary>
-    static FP_LONG Nabs(FP_LONG x)
+    public static long Nabs(long x)
     {
         return (x > 0) ? -x : x;
     }
@@ -718,7 +711,7 @@ namespace Fixed64
     /// <summary>
     /// Round up to nearest integer.
     /// </summary>
-    static FP_LONG Ceil(FP_LONG x)
+    public static long Ceil(long x)
     {
         return (x + FractionMask) & IntegerMask;
     }
@@ -726,7 +719,7 @@ namespace Fixed64
     /// <summary>
     /// Round down to nearest integer.
     /// </summary>
-    static FP_LONG Floor(FP_LONG x)
+    public static long Floor(long x)
     {
         return x & IntegerMask;
     }
@@ -734,7 +727,7 @@ namespace Fixed64
     /// <summary>
     /// Round to nearest integer.
     /// </summary>
-    static FP_LONG Round(FP_LONG x)
+    public static long Round(long x)
     {
         return (x + Half) & IntegerMask;
     }
@@ -742,7 +735,7 @@ namespace Fixed64
     /// <summary>
     /// Returns the fractional part of x. Equal to 'x - floor(x)'.
     /// </summary>
-    static FP_LONG Fract(FP_LONG x)
+    public static long Fract(long x)
     {
         return x & FractionMask;
     }
@@ -750,7 +743,7 @@ namespace Fixed64
     /// <summary>
     /// Returns the minimum of the two values.
     /// </summary>
-    static FP_LONG Min(FP_LONG a, FP_LONG b)
+    public static long Min(long a, long b)
     {
         return (a < b) ? a : b;
     }
@@ -758,7 +751,7 @@ namespace Fixed64
     /// <summary>
     /// Returns the maximum of the two values.
     /// </summary>
-    static FP_LONG Max(FP_LONG a, FP_LONG b)
+    public static long Max(long a, long b)
     {
         return (a > b) ? a : b;
     }
@@ -766,7 +759,7 @@ namespace Fixed64
     /// <summary>
     /// Returns the sign of the value (-1 if negative, 0 if zero, 1 if positive).
     /// </summary>
-    static FP_INT Sign(FP_LONG x)
+    public static int Sign(long x)
     {
         if (x == 0) return 0;
         return (x < 0) ? -1 : 1;
@@ -775,7 +768,7 @@ namespace Fixed64
     /// <summary>
     /// Adds the two FP numbers together.
     /// </summary>
-    static FP_LONG Add(FP_LONG a, FP_LONG b)
+    public static long Add(long a, long b)
     {
         return a + b;
     }
@@ -783,7 +776,7 @@ namespace Fixed64
     /// <summary>
     /// Subtracts the two FP numbers from each other.
     /// </summary>
-    static FP_LONG Sub(FP_LONG a, FP_LONG b)
+    public static long Sub(long a, long b)
     {
         return a - b;
     }
@@ -791,218 +784,210 @@ namespace Fixed64
     /// <summary>
     /// Multiplies two FP values together.
     /// </summary>
-    static FP_LONG Mul(FP_LONG a, FP_LONG b)
+    public static long Mul(long a, long b)
     {
-        FP_LONG ai = a >> Shift;
-        FP_LONG af = (a & FractionMask);
-        FP_LONG bi = b >> Shift;
-        FP_LONG bf = (b & FractionMask);
-        return LogicalShiftRight(af * bf, Shift) + ai * b + af * bi;
+        long ai = a >> Shift;
+        long af = (a & FractionMask);
+        long bi = b >> Shift;
+        long bf = (b & FractionMask);
+        return Util.LogicalShiftRight(af * bf, Shift) + ai * b + af * bi;
     }
 
-    static FP_INT MulIntLongLow(FP_INT a, FP_LONG b)
+    private static int MulIntLongLow(int a, long b)
     {
-        FP_ASSERT(a >= 0);
-        FP_INT bi = (FP_INT)(b >> Shift);
-        FP_LONG bf = b & FractionMask;
-        return (FP_INT)LogicalShiftRight(a * bf, Shift) + a * bi;
+        assert(a >= 0);
+        int bi = (int)(b >> Shift);
+        long bf = b & FractionMask;
+        return (int)Util.LogicalShiftRight(a * bf, Shift) + a * bi;
     }
 
-    static FP_LONG MulIntLongLong(FP_INT a, FP_LONG b)
+    private static long MulIntLongLong(int a, long b)
     {
-        FP_ASSERT(a >= 0);
-        FP_LONG bi = b >> Shift;
-        FP_LONG bf = b & FractionMask;
-        return LogicalShiftRight(a * bf, Shift) + a * bi;
+        assert(a >= 0);
+        long bi = b >> Shift;
+        long bf = b & FractionMask;
+        return Util.LogicalShiftRight(a * bf, Shift) + a * bi;
     }
 
-    static FP_INT Nlz(FP_ULONG x)
+    private static int Nlz(long x)
     {
-        FP_INT n = 0;
-        if (x <= INT64_C(0x00000000FFFFFFFF)) { n = n + 32; x = x << 32; }
-        if (x <= INT64_C(0x0000FFFFFFFFFFFF)) { n = n + 16; x = x << 16; }
-        if (x <= INT64_C(0x00FFFFFFFFFFFFFF)) { n = n + 8; x = x << 8; }
-        if (x <= INT64_C(0x0FFFFFFFFFFFFFFF)) { n = n + 4; x = x << 4; }
-        if (x <= INT64_C(0x3FFFFFFFFFFFFFFF)) { n = n + 2; x = x << 2; }
-        if (x <= INT64_C(0x7FFFFFFFFFFFFFFF)) { n = n + 1; }
-        if (x == 0) return 64;
-        return n;
+        return Long.numberOfLeadingZeros(x);
     }
 
     /// <summary>
     /// Divides two FP values.
     /// </summary>
-    static FP_LONG DivPrecise(FP_LONG arg_a, FP_LONG arg_b)
+    public static long DivPrecise(long arg_a, long arg_b)
     {
         // From http://www.hackersdelight.org/hdcodetxt/divlu.c.txt
 
-        FP_LONG sign_dif = arg_a ^ arg_b;
+        long sign_dif = arg_a ^ arg_b;
 
-        static const FP_ULONG b = INT64_C(0x100000000); // Number base (32 bits)
-        FP_ULONG abs_arg_a = (FP_ULONG)((arg_a < 0) ? -arg_a : arg_a);
-        FP_ULONG u1 = abs_arg_a >> 32;
-        FP_ULONG u0 = abs_arg_a << 32;
-        FP_ULONG v = (FP_ULONG)((arg_b < 0) ? -arg_b : arg_b);
+        final long b = 0x100000000L; // Number base (32 bits)
+        long abs_arg_a = (arg_a < 0) ? -arg_a : arg_a;
+        long u1 = abs_arg_a >>> 32;
+        long u0 = abs_arg_a << 32;
+        long v = (arg_b < 0) ? -arg_b : arg_b;
 
         // Overflow?
-        if (u1 >= v)
+        if (Long.compareUnsigned(u1, v) >= 0) // u1 >= v
         {
             //rem = 0;
-            return INT64_C(0x7fffffffffffffff);
+            return 0x7fffffffffffffffL;
         }
 
         // Shift amount for norm
-        FP_INT s = Nlz(v); // 0 <= s <= 63
+        int s = Nlz(v); // 0 <= s <= 63
         v = v << s; // Normalize the divisor
-        FP_ULONG vn1 = v >> 32; // Break the divisor into two 32-bit digits
-        FP_ULONG vn0 = v & INT64_C(0xffffffff);
+        long vn1 = v >>> 32; // Break the divisor into two 32-bit digits
+        long vn0 = v & 0xffffffffL;
 
-        FP_ULONG un32 = (u1 << s) | (u0 >> (64 - s)) & (FP_ULONG)((FP_LONG)-s >> 63);
-        FP_ULONG un10 = u0 << s; // Shift dividend left
+        long un32 = (u1 << s) | (u0 >>> (64 - s)) & (-(long)s >> 63);
+        long un10 = u0 << s; // Shift dividend left
 
-        FP_ULONG un1 = un10 >> 32; // Break the right half of dividend into two digits
-        FP_ULONG un0 = un10 & INT64_C(0xffffffff);
+        long un1 = un10 >>> 32; // Break the right half of dividend into two digits
+        long un0 = un10 & 0xffffffffL;
 
         // Compute the first quotient digit, q1
-        FP_ULONG q1 = un32 / vn1;
-        FP_ULONG rhat = un32 - q1 * vn1;
+        long q1 = Long.divideUnsigned(un32, vn1);
+        long rhat = un32 - q1 * vn1;
         do
         {
-            if ((q1 >= b) || ((q1 * vn0) > (b * rhat + un1)))
+            if ((Long.compareUnsigned(q1, b) >= 0) || (Long.compareUnsigned(q1 * vn0, b * rhat + un1) > 0))
             {
                 q1 = q1 - 1;
                 rhat = rhat + vn1;
             }
             else break;
-        } while (rhat < b);
+        } while (Long.compareUnsigned(rhat, b) < 0);
 
-        FP_ULONG un21 = un32 * b + un1 - q1 * v; // Multiply and subtract
+        long un21 = un32 * b + un1 - q1 * v; // Multiply and subtract
 
         // Compute the second quotient digit, q0
-        FP_ULONG q0 = un21 / vn1;
+        long q0 = Long.divideUnsigned(un21, vn1);
         rhat = un21 - q0 * vn1;
         do
         {
-            if ((q0 >= b) || ((q0 * vn0) > (b * rhat + un0)))
+            if ((Long.compareUnsigned(q0, b) >= 0) || (Long.compareUnsigned(q0 * vn0, b * rhat + un0) > 0))
             {
                 q0 = q0 - 1;
                 rhat = rhat + vn1;
             }
             else break;
-        } while (rhat < b);
+        } while (Long.compareUnsigned(rhat, b) < 0);
 
         // Calculate the remainder
-        // FP_ULONG r = (un21 * b + un0 - q0 * v) >> s;
-        // rem = (FP_LONG)r;
+        // ulong r = (un21 * b + un0 - q0 * v) >>> s;
+        // rem = (long)r;
 
-        FP_ULONG ret = q1 * b + q0;
-        return (sign_dif < 0) ? -(FP_LONG)ret : (FP_LONG)ret;
+        long ret = q1 * b + q0;
+        return (sign_dif < 0) ? -ret : ret;
     }
 
     /// <summary>
     /// Calculates division approximation.
     /// </summary>
-    static FP_LONG Div(FP_LONG a, FP_LONG b)
+    public static long Div(long a, long b)
     {
         if (b == MinValue)
             return 0;
 
         // Handle negative values.
-        FP_INT sign = (b < 0) ? -1 : 1;
+        int sign = (b < 0) ? -1 : 1;
         b *= sign;
 
         // Normalize input into [1.0, 2.0( range (convert to s2.30).
-        FP_INT offset = 31 - Nlz((FP_ULONG)b);
-        FP_INT n = (FP_INT)ShiftRight(b, offset + 2);
-        static const FP_INT ONE = (1 << 30);
-        FP_ASSERT(n >= ONE);
+        int offset = 31 - Nlz(b);
+        int n = (int)Util.ShiftRight(b, offset + 2);
+        final int ONE = (1 << 30);
+        assert(n >= ONE);
 
         // Polynomial approximation.
-        FP_INT res = RcpPoly4Lut8(n - ONE);
+        int res = Util.RcpPoly4Lut8(n - ONE);
 
         // Apply exponent, convert back to s32.32.
-        FP_LONG y = MulIntLongLong(res, a) << 2;
-        return ShiftRight(sign * y, offset);
+        long y = MulIntLongLong(res, a) << 2;
+        return Util.ShiftRight(sign * y, offset);
     }
 
     /// <summary>
     /// Calculates division approximation.
     /// </summary>
-    static FP_LONG DivFast(FP_LONG a, FP_LONG b)
+    public static long DivFast(long a, long b)
     {
         if (b == MinValue)
             return 0;
 
         // Handle negative values.
-        FP_INT sign = (b < 0) ? -1 : 1;
+        int sign = (b < 0) ? -1 : 1;
         b *= sign;
 
         // Normalize input into [1.0, 2.0( range (convert to s2.30).
-        FP_INT offset = 31 - Nlz((FP_ULONG)b);
-        FP_INT n = (FP_INT)ShiftRight(b, offset + 2);
-        static const FP_INT ONE = (1 << 30);
-        FP_ASSERT(n >= ONE);
+        int offset = 31 - Nlz(b);
+        int n = (int)Util.ShiftRight(b, offset + 2);
+        final int ONE = (1 << 30);
+        assert(n >= ONE);
 
         // Polynomial approximation.
-        FP_INT res = RcpPoly6(n - ONE);
+        int res = Util.RcpPoly6(n - ONE);
 
         // Apply exponent, convert back to s32.32.
-        FP_LONG y = MulIntLongLong(res, a) << 2;
-        return ShiftRight(sign * y, offset);
+        long y = MulIntLongLong(res, a) << 2;
+        return Util.ShiftRight(sign * y, offset);
     }
 
     /// <summary>
     /// Calculates division approximation.
     /// </summary>
-    static FP_LONG DivFastest(FP_LONG a, FP_LONG b)
+    public static long DivFastest(long a, long b)
     {
         if (b == MinValue)
             return 0;
 
         // Handle negative values.
-        FP_INT sign = (b < 0) ? -1 : 1;
+        int sign = (b < 0) ? -1 : 1;
         b *= sign;
 
         // Normalize input into [1.0, 2.0( range (convert to s2.30).
-        FP_INT offset = 31 - Nlz((FP_ULONG)b);
-        FP_INT n = (FP_INT)ShiftRight(b, offset + 2);
-        static const FP_INT ONE = (1 << 30);
-        FP_ASSERT(n >= ONE);
+        int offset = 31 - Nlz(b);
+        int n = (int)Util.ShiftRight(b, offset + 2);
+        final int ONE = (1 << 30);
+        assert(n >= ONE);
 
         // Polynomial approximation.
-        FP_INT res = RcpPoly4(n - ONE);
+        int res = Util.RcpPoly4(n - ONE);
 
         // Apply exponent, convert back to s32.32.
-        FP_LONG y = MulIntLongLong(res, a) << 2;
-        return ShiftRight(sign * y, offset);
+        long y = MulIntLongLong(res, a) << 2;
+        return Util.ShiftRight(sign * y, offset);
     }
 
     /// <summary>
     /// Divides two FP values and returns the modulus.
     /// </summary>
-    static FP_LONG Mod(FP_LONG a, FP_LONG b)
+    public static long Mod(long a, long b)
     {
-        FP_LONG di = a / b;
-        FP_LONG ret = a - (di * b);
+        long di = a / b;
+        long ret = a - (di * b);
         return ret;
     }
 
     /// <summary>
     /// Calculates the square root of the given number.
     /// </summary>
-    static FP_LONG SqrtPrecise(FP_LONG a)
+    public static long SqrtPrecise(long a)
     {
         // Adapted from https://github.com/chmike/fpsqrt
         if (a < 0)
             return -1;
 
-        FP_ULONG r = (FP_ULONG)a;
-        FP_ULONG b = INT64_C(0x4000000000000000);
-        FP_ULONG q = INT64_C(0);
-        while (b > INT64_C(0x40))
+        long r = a;
+        long b = 0x4000000000000000L;
+        long q = 0;
+        while (b > 0x40)
         {
-            FP_ULONG t = q + b;
-            if (r >= t)
+            long t = q + b;
+            if (Long.compareUnsigned(r, t) >= 0)
             {
                 r -= t;
                 q = t + b;
@@ -1010,411 +995,411 @@ namespace Fixed64
             r <<= 1;
             b >>= 1;
         }
-        q >>= 16;
-        return (FP_LONG)q;
+        q >>>= 16;
+        return q;
     }
 
-    static FP_LONG Sqrt(FP_LONG x)
+    public static long Sqrt(long x)
     {
         // Return 0 for all non-positive values.
         if (x <= 0)
             return 0;
 
         // Constants (s2.30).
-        static const FP_INT ONE = (1 << 30);
-        static const FP_INT SQRT2 = 1518500249; // sqrt(2.0)
+        final int ONE = (1 << 30);
+        final int SQRT2 = 1518500249; // sqrt(2.0)
 
         // Normalize input into [1.0, 2.0( range (as s2.30).
-        FP_INT offset = 31 - Nlz((FP_ULONG)x);
-        FP_INT n = (FP_INT)(((offset >= 0) ? (x >> offset) : (x << -offset)) >> 2);
-        FP_ASSERT(n >= ONE);
-        FP_INT y = SqrtPoly3Lut8(n - ONE);
+        int offset = 31 - Nlz(x);
+        int n = (int)(((offset >= 0) ? (x >> offset) : (x << -offset)) >> 2);
+        assert(n >= ONE);
+        int y = Util.SqrtPoly3Lut8(n - ONE);
 
         // Divide offset by 2 (to get sqrt), compute adjust value for odd exponents.
-        FP_INT adjust = ((offset & 1) != 0) ? SQRT2 : ONE;
+        int adjust = ((offset & 1) != 0) ? SQRT2 : ONE;
         offset = offset >> 1;
 
         // Apply exponent, convert back to s32.32.
-        FP_LONG yr = (FP_LONG)Qmul30(adjust, y) << 2;
+        long yr = (long)Util.Qmul30(adjust, y) << 2;
         return (offset >= 0) ? (yr << offset) : (yr >> -offset);
     }
 
-    static FP_LONG SqrtFast(FP_LONG x)
+    public static long SqrtFast(long x)
     {
         // Return 0 for all non-positive values.
         if (x <= 0)
             return 0;
 
         // Constants (s2.30).
-        static const FP_INT ONE = (1 << 30);
-        static const FP_INT SQRT2 = 1518500249; // sqrt(2.0)
+        final int ONE = (1 << 30);
+        final int SQRT2 = 1518500249; // sqrt(2.0)
 
         // Normalize input into [1.0, 2.0( range (as s2.30).
-        FP_INT offset = 31 - Nlz((FP_ULONG)x);
-        FP_INT n = (FP_INT)(((offset >= 0) ? (x >> offset) : (x << -offset)) >> 2);
-        FP_ASSERT(n >= ONE);
-        FP_INT y = SqrtPoly4(n - ONE);
+        int offset = 31 - Nlz(x);
+        int n = (int)(((offset >= 0) ? (x >> offset) : (x << -offset)) >> 2);
+        assert(n >= ONE);
+        int y = Util.SqrtPoly4(n - ONE);
 
         // Divide offset by 2 (to get sqrt), compute adjust value for odd exponents.
-        FP_INT adjust = ((offset & 1) != 0) ? SQRT2 : ONE;
+        int adjust = ((offset & 1) != 0) ? SQRT2 : ONE;
         offset = offset >> 1;
 
         // Apply exponent, convert back to s32.32.
-        FP_LONG yr = (FP_LONG)Qmul30(adjust, y) << 2;
+        long yr = (long)Util.Qmul30(adjust, y) << 2;
         return (offset >= 0) ? (yr << offset) : (yr >> -offset);
     }
 
-    static FP_LONG SqrtFastest(FP_LONG x)
+    public static long SqrtFastest(long x)
     {
         // Return 0 for all non-positive values.
         if (x <= 0)
             return 0;
 
         // Constants (s2.30).
-        static const FP_INT ONE = (1 << 30);
-        static const FP_INT SQRT2 = 1518500249; // sqrt(2.0)
+        final int ONE = (1 << 30);
+        final int SQRT2 = 1518500249; // sqrt(2.0)
 
         // Normalize input into [1.0, 2.0( range (as s2.30).
-        FP_INT offset = 31 - Nlz((FP_ULONG)x);
-        FP_INT n = (FP_INT)(((offset >= 0) ? (x >> offset) : (x << -offset)) >> 2);
-        FP_ASSERT(n >= ONE);
-        FP_INT y = SqrtPoly3(n - ONE);
+        int offset = 31 - Nlz(x);
+        int n = (int)(((offset >= 0) ? (x >> offset) : (x << -offset)) >> 2);
+        assert(n >= ONE);
+        int y = Util.SqrtPoly3(n - ONE);
 
         // Divide offset by 2 (to get sqrt), compute adjust value for odd exponents.
-        FP_INT adjust = ((offset & 1) != 0) ? SQRT2 : ONE;
+        int adjust = ((offset & 1) != 0) ? SQRT2 : ONE;
         offset = offset >> 1;
 
         // Apply exponent, convert back to s32.32.
-        FP_LONG yr = (FP_LONG)Qmul30(adjust, y) << 2;
+        long yr = (long)Util.Qmul30(adjust, y) << 2;
         return (offset >= 0) ? (yr << offset) : (yr >> -offset);
     }
 
     /// <summary>
     /// Calculates the reciprocal square root.
     /// </summary>
-    static FP_LONG RSqrt(FP_LONG x)
+    public static long RSqrt(long x)
     {
-        FP_ASSERT(x > 0);
+        assert(x > 0);
 
         // Constants (s2.30).
-        static const FP_INT ONE = (1 << 30);
-        static const FP_INT HALF_SQRT2 = 759250125; // 0.5 * sqrt(2.0)
+        final int ONE = (1 << 30);
+        final int HALF_SQRT2 = 759250125; // 0.5 * sqrt(2.0)
 
         // Normalize input into [1.0, 2.0( range (as s2.30).
-        FP_INT offset = 31 - Nlz((FP_ULONG)x);
-        FP_INT n = (FP_INT)(((offset >= 0) ? (x >> offset) : (x << -offset)) >> 2);
-        FP_ASSERT(n >= ONE);
-        FP_INT y = RSqrtPoly3Lut16(n - ONE);
+        int offset = 31 - Nlz(x);
+        int n = (int)(((offset >= 0) ? (x >> offset) : (x << -offset)) >> 2);
+        assert(n >= ONE);
+        int y = Util.RSqrtPoly3Lut16(n - ONE);
 
         // Divide offset by 2 (to get sqrt), compute adjust value for odd exponents.
-        FP_INT adjust = ((offset & 1) != 0) ? HALF_SQRT2 : ONE;
+        int adjust = ((offset & 1) != 0) ? HALF_SQRT2 : ONE;
         offset = offset >> 1;
 
         // Apply exponent, convert back to s32.32.
-        FP_LONG yr = (FP_LONG)Qmul30(adjust, y) << 2;
+        long yr = (long)Util.Qmul30(adjust, y) << 2;
         return (offset >= 0) ? (yr >> offset) : (yr << -offset);
     }
 
     /// <summary>
     /// Calculates the reciprocal square root.
     /// </summary>
-    static FP_LONG RSqrtFast(FP_LONG x)
+    public static long RSqrtFast(long x)
     {
-        FP_ASSERT(x > 0);
+        assert(x > 0);
 
         // Constants (s2.30).
-        static const FP_INT ONE = (1 << 30);
-        static const FP_INT HALF_SQRT2 = 759250125; // 0.5 * sqrt(2.0)
+        final int ONE = (1 << 30);
+        final int HALF_SQRT2 = 759250125; // 0.5 * sqrt(2.0)
 
         // Normalize input into [1.0, 2.0( range (as s2.30).
-        FP_INT offset = 31 - Nlz((FP_ULONG)x);
-        FP_INT n = (FP_INT)(((offset >= 0) ? (x >> offset) : (x << -offset)) >> 2);
-        FP_ASSERT(n >= ONE);
-        FP_INT y = RSqrtPoly5(n - ONE);
+        int offset = 31 - Nlz(x);
+        int n = (int)(((offset >= 0) ? (x >> offset) : (x << -offset)) >> 2);
+        assert(n >= ONE);
+        int y = Util.RSqrtPoly5(n - ONE);
 
         // Divide offset by 2 (to get sqrt), compute adjust value for odd exponents.
-        FP_INT adjust = ((offset & 1) != 0) ? HALF_SQRT2 : ONE;
+        int adjust = ((offset & 1) != 0) ? HALF_SQRT2 : ONE;
         offset = offset >> 1;
 
         // Apply exponent, convert back to s32.32.
-        FP_LONG yr = (FP_LONG)Qmul30(adjust, y) << 2;
+        long yr = (long)Util.Qmul30(adjust, y) << 2;
         return (offset >= 0) ? (yr >> offset) : (yr << -offset);
     }
 
     /// <summary>
     /// Calculates the reciprocal square root.
     /// </summary>
-    static FP_LONG RSqrtFastest(FP_LONG x)
+    public static long RSqrtFastest(long x)
     {
-        FP_ASSERT(x > 0);
+        assert(x > 0);
 
         // Constants (s2.30).
-        static const FP_INT ONE = (1 << 30);
-        static const FP_INT HALF_SQRT2 = 759250125; // 0.5 * sqrt(2.0)
+        final int ONE = (1 << 30);
+        final int HALF_SQRT2 = 759250125; // 0.5 * sqrt(2.0)
 
         // Normalize input into [1.0, 2.0( range (as s2.30).
-        FP_INT offset = 31 - Nlz((FP_ULONG)x);
-        FP_INT n = (FP_INT)(((offset >= 0) ? (x >> offset) : (x << -offset)) >> 2);
-        FP_ASSERT(n >= ONE);
-        FP_INT y = RSqrtPoly3(n - ONE);
+        int offset = 31 - Nlz(x);
+        int n = (int)(((offset >= 0) ? (x >> offset) : (x << -offset)) >> 2);
+        assert(n >= ONE);
+        int y = Util.RSqrtPoly3(n - ONE);
 
         // Divide offset by 2 (to get sqrt), compute adjust value for odd exponents.
-        FP_INT adjust = ((offset & 1) != 0) ? HALF_SQRT2 : ONE;
+        int adjust = ((offset & 1) != 0) ? HALF_SQRT2 : ONE;
         offset = offset >> 1;
 
         // Apply exponent, convert back to s32.32.
-        FP_LONG yr = (FP_LONG)Qmul30(adjust, y) << 2;
+        long yr = (long)Util.Qmul30(adjust, y) << 2;
         return (offset >= 0) ? (yr >> offset) : (yr << -offset);
     }
 
     /// <summary>
     /// Calculates reciprocal approximation.
     /// </summary>
-    static FP_LONG Rcp(FP_LONG x)
+    public static long Rcp(long x)
     {
         if (x == MinValue)
             return 0;
 
         // Handle negative values.
-        FP_INT sign = (x < 0) ? -1 : 1;
+        int sign = (x < 0) ? -1 : 1;
         x *= sign;
 
         // Normalize input into [1.0, 2.0( range (convert to s2.30).
-        FP_INT offset = 31 - Nlz((FP_ULONG)x);
-        FP_INT n = (FP_INT)ShiftRight(x, offset + 2);
-        static const FP_INT ONE = (1 << 30);
-        FP_ASSERT(n >= ONE);
+        int offset = 31 - Nlz(x);
+        int n = (int)Util.ShiftRight(x, offset + 2);
+        final int ONE = (1 << 30);
+        assert(n >= ONE);
 
         // Polynomial approximation.
-        FP_INT res = RcpPoly4Lut8(n - ONE);
-        FP_LONG y = (FP_LONG)(sign * res) << 2;
+        int res = Util.RcpPoly4Lut8(n - ONE);
+        long y = (long)(sign * res) << 2;
 
         // Apply exponent, convert back to s32.32.
-        return ShiftRight(y, offset);
+        return Util.ShiftRight(y, offset);
     }
 
     /// <summary>
     /// Calculates reciprocal approximation.
     /// </summary>
-    static FP_LONG RcpFast(FP_LONG x)
+    public static long RcpFast(long x)
     {
         if (x == MinValue)
             return 0;
 
         // Handle negative values.
-        FP_INT sign = (x < 0) ? -1 : 1;
+        int sign = (x < 0) ? -1 : 1;
         x *= sign;
 
         // Normalize input into [1.0, 2.0( range (convert to s2.30).
-        FP_INT offset = 31 - Nlz((FP_ULONG)x);
-        FP_INT n = (FP_INT)ShiftRight(x, offset + 2);
-        static const FP_INT ONE = (1 << 30);
-        FP_ASSERT(n >= ONE);
+        int offset = 31 - Nlz(x);
+        int n = (int)Util.ShiftRight(x, offset + 2);
+        final int ONE = (1 << 30);
+        assert(n >= ONE);
 
         // Polynomial approximation.
-        FP_INT res = RcpPoly6(n - ONE);
-        FP_LONG y = (FP_LONG)(sign * res) << 2;
+        int res = Util.RcpPoly6(n - ONE);
+        long y = (long)(sign * res) << 2;
 
         // Apply exponent, convert back to s32.32.
-        return ShiftRight(y, offset);
+        return Util.ShiftRight(y, offset);
     }
 
     /// <summary>
     /// Calculates reciprocal approximation.
     /// </summary>
-    static FP_LONG RcpFastest(FP_LONG x)
+    public static long RcpFastest(long x)
     {
         if (x == MinValue)
             return 0;
 
         // Handle negative values.
-        FP_INT sign = (x < 0) ? -1 : 1;
+        int sign = (x < 0) ? -1 : 1;
         x *= sign;
 
         // Normalize input into [1.0, 2.0( range (convert to s2.30).
-        static const FP_INT ONE = (1 << 30);
-        FP_INT offset = 31 - Nlz((FP_ULONG)x);
-        FP_INT n = (FP_INT)ShiftRight(x, offset + 2);
-        //FP_INT n = (FP_INT)(((offset >= 0) ? (x >> offset) : (x << -offset)) >> 2);
+        final int ONE = (1 << 30);
+        int offset = 31 - Nlz(x);
+        int n = (int)Util.ShiftRight(x, offset + 2);
+        //int n = (int)(((offset >= 0) ? (x >> offset) : (x << -offset)) >> 2);
 
         // Polynomial approximation.
-        FP_INT res = RcpPoly4(n - ONE);
-        FP_LONG y = (FP_LONG)(sign * res) << 2;
+        int res = Util.RcpPoly4(n - ONE);
+        long y = (long)(sign * res) << 2;
 
         // Apply exponent, convert back to s32.32.
-        return ShiftRight(y, offset);
+        return Util.ShiftRight(y, offset);
     }
 
     /// <summary>
     /// Calculates the base 2 exponent.
     /// </summary>
-    static FP_LONG Exp2(FP_LONG x)
+    public static long Exp2(long x)
     {
         // Handle values that would under or overflow.
         if (x >= 32 * One) return MaxValue;
         if (x <= -32 * One) return 0;
 
         // Compute exp2 for fractional part.
-        FP_INT k = (FP_INT)((x & FractionMask) >> 2);
-        FP_LONG y = (FP_LONG)Exp2Poly5(k) << 2;
+        int k = (int)((x & FractionMask) >> 2);
+        long y = (long)Util.Exp2Poly5(k) << 2;
 
         // Combine integer and fractional result, and convert back to s32.32.
-        FP_INT intPart = (FP_INT)(x >> Shift);
+        int intPart = (int)(x >> Shift);
         return (intPart >= 0) ? (y << intPart) : (y >> -intPart);
     }
 
     /// <summary>
     /// Calculates the base 2 exponent.
     /// </summary>
-    static FP_LONG Exp2Fast(FP_LONG x)
+    public static long Exp2Fast(long x)
     {
         // Handle values that would under or overflow.
         if (x >= 32 * One) return MaxValue;
         if (x <= -32 * One) return 0;
 
         // Compute exp2 for fractional part.
-        FP_INT k = (FP_INT)((x & FractionMask) >> 2);
-        FP_LONG y = (FP_LONG)Exp2Poly4(k) << 2;
+        int k = (int)((x & FractionMask) >> 2);
+        long y = (long)Util.Exp2Poly4(k) << 2;
 
         // Combine integer and fractional result, and convert back to s32.32.
-        FP_INT intPart = (FP_INT)(x >> Shift);
+        int intPart = (int)(x >> Shift);
         return (intPart >= 0) ? (y << intPart) : (y >> -intPart);
     }
 
     /// <summary>
     /// Calculates the base 2 exponent.
     /// </summary>
-    static FP_LONG Exp2Fastest(FP_LONG x)
+    public static long Exp2Fastest(long x)
     {
         // Handle values that would under or overflow.
         if (x >= 32 * One) return MaxValue;
         if (x <= -32 * One) return 0;
 
         // Compute exp2 for fractional part.
-        FP_INT k = (FP_INT)((x & FractionMask) >> 2);
-        FP_LONG y = (FP_LONG)Exp2Poly3(k) << 2;
+        int k = (int)((x & FractionMask) >> 2);
+        long y = (long)Util.Exp2Poly3(k) << 2;
 
         // Combine integer and fractional result, and convert back to s32.32.
-        FP_INT intPart = (FP_INT)(x >> Shift);
+        int intPart = (int)(x >> Shift);
         return (intPart >= 0) ? (y << intPart) : (y >> -intPart);
     }
 
-    static FP_LONG Exp(FP_LONG x)
+    public static long Exp(long x)
     {
         // e^x == 2^(x / ln(2))
         return Exp2(Mul(x, RCP_LN2));
     }
 
-    static FP_LONG ExpFast(FP_LONG x)
+    public static long ExpFast(long x)
     {
         // e^x == 2^(x / ln(2))
         return Exp2Fast(Mul(x, RCP_LN2));
     }
 
-    static FP_LONG ExpFastest(FP_LONG x)
+    public static long ExpFastest(long x)
     {
         // e^x == 2^(x / ln(2))
         return Exp2Fastest(Mul(x, RCP_LN2));
     }
 
-    static FP_LONG Log(FP_LONG x)
+    public static long Log(long x)
     {
         // Natural logarithm (base e).
-        FP_ASSERT(x > 0);
+        assert(x > 0);
 
         // Normalize value to range [1.0, 2.0( as s2.30 and extract exponent.
-        static const FP_INT ONE = (1 << 30);
-        FP_INT offset = 31 - Nlz((FP_ULONG)x);
-        FP_INT n = (FP_INT)(((offset >= 0) ? (x >> offset) : (x << -offset)) >> 2);
-        FP_ASSERT(n >= ONE);
-        FP_LONG y = (FP_LONG)LogPoly5Lut8(n - ONE) << 2;
+        final int ONE = (1 << 30);
+        int offset = 31 - Nlz(x);
+        int n = (int)(((offset >= 0) ? (x >> offset) : (x << -offset)) >> 2);
+        assert(n >= ONE);
+        long y = (long)Util.LogPoly5Lut8(n - ONE) << 2;
 
         // Combine integer and fractional parts (into s32.32).
-        return (FP_LONG)offset * RCP_LOG2_E + y;
+        return (long)offset * RCP_LOG2_E + y;
     }
 
-    static FP_LONG LogFast(FP_LONG x)
+    public static long LogFast(long x)
     {
         // Normalize value to range [1.0, 2.0( as s2.30 and extract exponent.
-        FP_ASSERT(x > 0);
-        static const FP_INT ONE = (1 << 30);
-        FP_INT offset = 31 - Nlz((FP_ULONG)x);
-        FP_INT n = (FP_INT)(((offset >= 0) ? (x >> offset) : (x << -offset)) >> 2);
-        FP_ASSERT(n >= ONE);
-        FP_LONG y = (FP_LONG)LogPoly3Lut8(n - ONE) << 2;
+        assert(x > 0);
+        final int ONE = (1 << 30);
+        int offset = 31 - Nlz(x);
+        int n = (int)(((offset >= 0) ? (x >> offset) : (x << -offset)) >> 2);
+        assert(n >= ONE);
+        long y = (long)Util.LogPoly3Lut8(n - ONE) << 2;
 
         // Combine integer and fractional parts (into s32.32).
-        return (FP_LONG)offset * RCP_LOG2_E + y;
+        return (long)offset * RCP_LOG2_E + y;
     }
 
-    static FP_LONG LogFastest(FP_LONG x)
+    public static long LogFastest(long x)
     {
         // Normalize value to range [1.0, 2.0( as s2.30 and extract exponent.
-        FP_ASSERT(x > 0);
-        static const FP_INT ONE = (1 << 30);
-        FP_INT offset = 31 - Nlz((FP_ULONG)x);
-        FP_INT n = (FP_INT)(((offset >= 0) ? (x >> offset) : (x << -offset)) >> 2);
-        FP_ASSERT(n >= ONE);
-        FP_LONG y = (FP_LONG)LogPoly5(n - ONE) << 2;
+        assert(x > 0);
+        final int ONE = (1 << 30);
+        int offset = 31 - Nlz(x);
+        int n = (int)(((offset >= 0) ? (x >> offset) : (x << -offset)) >> 2);
+        assert(n >= ONE);
+        long y = (long)Util.LogPoly5(n - ONE) << 2;
 
         // Combine integer and fractional parts (into s32.32).
-        return (FP_LONG)offset * RCP_LOG2_E + y;
+        return (long)offset * RCP_LOG2_E + y;
     }
 
-    static FP_LONG Log2(FP_LONG x)
+    public static long Log2(long x)
     {
         // Normalize value to range [1.0, 2.0( as s2.30 and extract exponent.
-        FP_ASSERT(x > 0);
-        FP_INT offset = 31 - Nlz((FP_ULONG)x);
-        FP_INT n = (FP_INT)(((offset >= 0) ? (x >> offset) : (x << -offset)) >> 2);
+        assert(x > 0);
+        int offset = 31 - Nlz(x);
+        int n = (int)(((offset >= 0) ? (x >> offset) : (x << -offset)) >> 2);
 
         // Polynomial approximation of mantissa.
-        static const FP_INT ONE = (1 << 30);
-        FP_ASSERT(n >= ONE);
-        FP_LONG y = (FP_LONG)Log2Poly4Lut16(n - ONE) << 2;
+        final int ONE = (1 << 30);
+        assert(n >= ONE);
+        long y = (long)Util.Log2Poly4Lut16(n - ONE) << 2;
 
         // Combine integer and fractional parts (into s32.32).
-        return ((FP_LONG)offset << Shift) + y;
+        return ((long)offset << Shift) + y;
     }
 
-    static FP_LONG Log2Fast(FP_LONG x)
+    public static long Log2Fast(long x)
     {
         // Normalize value to range [1.0, 2.0( as s2.30 and extract exponent.
-        FP_ASSERT(x > 0);
-        FP_INT offset = 31 - Nlz((FP_ULONG)x);
-        FP_INT n = (FP_INT)(((offset >= 0) ? (x >> offset) : (x << -offset)) >> 2);
+        assert(x > 0);
+        int offset = 31 - Nlz(x);
+        int n = (int)(((offset >= 0) ? (x >> offset) : (x << -offset)) >> 2);
 
         // Polynomial approximation of mantissa.
-        static const FP_INT ONE = (1 << 30);
-        FP_ASSERT(n >= ONE);
-        FP_LONG y = (FP_LONG)Log2Poly3Lut16(n - ONE) << 2;
+        final int ONE = (1 << 30);
+        assert(n >= ONE);
+        long y = (long)Util.Log2Poly3Lut16(n - ONE) << 2;
 
         // Combine integer and fractional parts (into s32.32).
-        return ((FP_LONG)offset << Shift) + y;
+        return ((long)offset << Shift) + y;
     }
 
-    static FP_LONG Log2Fastest(FP_LONG x)
+    public static long Log2Fastest(long x)
     {
         // Normalize value to range [1.0, 2.0( as s2.30 and extract exponent.
-        FP_ASSERT(x > 0);
-        FP_INT offset = 31 - Nlz((FP_ULONG)x);
-        FP_INT n = (FP_INT)(((offset >= 0) ? (x >> offset) : (x << -offset)) >> 2);
+        assert(x > 0);
+        int offset = 31 - Nlz(x);
+        int n = (int)(((offset >= 0) ? (x >> offset) : (x << -offset)) >> 2);
 
         // Polynomial approximation of mantissa.
-        static const FP_INT ONE = (1 << 30);
-        FP_ASSERT(n >= ONE);
-        FP_LONG y = (FP_LONG)Log2Poly5(n - ONE) << 2;
+        final int ONE = (1 << 30);
+        assert(n >= ONE);
+        long y = (long)Util.Log2Poly5(n - ONE) << 2;
 
         // Combine integer and fractional parts (into s32.32).
-        return ((FP_LONG)offset << Shift) + y;
+        return ((long)offset << Shift) + y;
     }
 
     /// <summary>
     /// Calculates x to the power of the exponent.
     /// </summary>
-    static FP_LONG Pow(FP_LONG x, FP_LONG exponent)
+    public static long Pow(long x, long exponent)
     {
-        FP_ASSERT(x >= 0);
+        assert(x >= 0);
         if (x <= 0) return 0;
         return Exp(Mul(exponent, Log(x)));
     }
@@ -1422,9 +1407,9 @@ namespace Fixed64
     /// <summary>
     /// Calculates x to the power of the exponent.
     /// </summary>
-    static FP_LONG PowFast(FP_LONG x, FP_LONG exponent)
+    public static long PowFast(long x, long exponent)
     {
-        FP_ASSERT(x >= 0);
+        assert(x >= 0);
         if (x <= 0) return 0;
         return ExpFast(Mul(exponent, LogFast(x)));
     }
@@ -1432,14 +1417,14 @@ namespace Fixed64
     /// <summary>
     /// Calculates x to the power of the exponent.
     /// </summary>
-    static FP_LONG PowFastest(FP_LONG x, FP_LONG exponent)
+    public static long PowFastest(long x, long exponent)
     {
-        FP_ASSERT(x >= 0);
+        assert(x >= 0);
         if (x <= 0) return 0;
         return ExpFastest(Mul(exponent, LogFastest(x)));
     }
 
-    static FP_INT UnitSin(FP_INT z)
+    private static int UnitSin(int z)
     {
         // See: http://www.coranac.com/2009/07/sines/
 
@@ -1449,18 +1434,18 @@ namespace Fixed64
             z = (1 << 31) - z;
 
         // Now z is in range [-1, 1].
-        static const FP_INT ONE = (1 << 30);
-        FP_ASSERT((z >= -ONE) && (z <= ONE));
+        final int ONE = (1 << 30);
+        assert((z >= -ONE) && (z <= ONE));
 
         // Polynomial approximation.
-        FP_INT zz = Qmul30(z, z);
-        FP_INT res = Qmul30(SinPoly4(zz), z);
+        int zz = Util.Qmul30(z, z);
+        int res = Util.Qmul30(Util.SinPoly4(zz), z);
 
         // Return s2.30 value.
         return res;
     }
 
-    static FP_INT UnitSinFast(FP_INT z)
+    private static int UnitSinFast(int z)
     {
         // See: http://www.coranac.com/2009/07/sines/
 
@@ -1470,18 +1455,18 @@ namespace Fixed64
             z = (1 << 31) - z;
 
         // Now z is in range [-1, 1].
-        static const FP_INT ONE = (1 << 30);
-        FP_ASSERT((z >= -ONE) && (z <= ONE));
+        final int ONE = (1 << 30);
+        assert((z >= -ONE) && (z <= ONE));
 
         // Polynomial approximation.
-        FP_INT zz = Qmul30(z, z);
-        FP_INT res = Qmul30(SinPoly3(zz), z);
+        int zz = Util.Qmul30(z, z);
+        int res = Util.Qmul30(Util.SinPoly3(zz), z);
 
         // Return s2.30 value.
         return res;
     }
 
-    static FP_INT UnitSinFastest(FP_INT z)
+    private static int UnitSinFastest(int z)
     {
         // See: http://www.coranac.com/2009/07/sines/
 
@@ -1491,107 +1476,107 @@ namespace Fixed64
             z = (1 << 31) - z;
 
         // Now z is in range [-1, 1].
-        static const FP_INT ONE = (1 << 30);
-        FP_ASSERT((z >= -ONE) && (z <= ONE));
+        final int ONE = (1 << 30);
+        assert((z >= -ONE) && (z <= ONE));
 
         // Polynomial approximation.
-        FP_INT zz = Qmul30(z, z);
-        FP_INT res = Qmul30(SinPoly2(zz), z);
+        int zz = Util.Qmul30(z, z);
+        int res = Util.Qmul30(Util.SinPoly2(zz), z);
 
         // Return s2.30 value.
         return res;
     }
 
-    static FP_LONG Sin(FP_LONG x)
+    public static long Sin(long x)
     {
         // Map [0, 2pi] to [0, 4] (as s2.30).
         // This also wraps the values into one period.
-        FP_INT z = MulIntLongLow(RCP_HALF_PI, x);
+        int z = MulIntLongLow(RCP_HALF_PI, x);
 
         // Compute sine and convert to s32.32.
-        return (FP_LONG)UnitSin(z) << 2;
+        return (long)UnitSin(z) << 2;
     }
 
-    static FP_LONG SinFast(FP_LONG x)
+    public static long SinFast(long x)
     {
         // Map [0, 2pi] to [0, 4] (as s2.30).
         // This also wraps the values into one period.
-        FP_INT z = MulIntLongLow(RCP_HALF_PI, x);
+        int z = MulIntLongLow(RCP_HALF_PI, x);
 
         // Compute sine and convert to s32.32.
-        return (FP_LONG)UnitSinFast(z) << 2;
+        return (long)UnitSinFast(z) << 2;
     }
 
-    static FP_LONG SinFastest(FP_LONG x)
+    public static long SinFastest(long x)
     {
         // Map [0, 2pi] to [0, 4] (as s2.30).
         // This also wraps the values into one period.
-        FP_INT z = MulIntLongLow(RCP_HALF_PI, x);
+        int z = MulIntLongLow(RCP_HALF_PI, x);
 
         // Compute sine and convert to s32.32.
-        return (FP_LONG)UnitSinFastest(z) << 2;
+        return (long)UnitSinFastest(z) << 2;
     }
 
-    static FP_LONG Cos(FP_LONG x)
+    public static long Cos(long x)
     {
         return Sin(x + PiHalf);
     }
 
-    static FP_LONG CosFast(FP_LONG x)
+    public static long CosFast(long x)
     {
         return SinFast(x + PiHalf);
     }
 
-    static FP_LONG CosFastest(FP_LONG x)
+    public static long CosFastest(long x)
     {
         return SinFastest(x + PiHalf);
     }
 
-    static FP_LONG Tan(FP_LONG x)
+    public static long Tan(long x)
     {
-        FP_INT z = MulIntLongLow(RCP_HALF_PI, x);
-        FP_LONG sinX = (FP_LONG)UnitSin(z) << 32;
-        FP_LONG cosX = (FP_LONG)UnitSin(z + (1 << 30)) << 32;
+        int z = MulIntLongLow(RCP_HALF_PI, x);
+        long sinX = (long)UnitSin(z) << 32;
+        long cosX = (long)UnitSin(z + (1 << 30)) << 32;
         return Div(sinX, cosX);
     }
 
-    static FP_LONG TanFast(FP_LONG x)
+    public static long TanFast(long x)
     {
-        FP_INT z = MulIntLongLow(RCP_HALF_PI, x);
-        FP_LONG sinX = (FP_LONG)UnitSinFast(z) << 32;
-        FP_LONG cosX = (FP_LONG)UnitSinFast(z + (1 << 30)) << 32;
+        int z = MulIntLongLow(RCP_HALF_PI, x);
+        long sinX = (long)UnitSinFast(z) << 32;
+        long cosX = (long)UnitSinFast(z + (1 << 30)) << 32;
         return DivFast(sinX, cosX);
     }
 
-    static FP_LONG TanFastest(FP_LONG x)
+    public static long TanFastest(long x)
     {
-        FP_INT z = MulIntLongLow(RCP_HALF_PI, x);
-        FP_LONG sinX = (FP_LONG)UnitSinFastest(z) << 32;
-        FP_LONG cosX = (FP_LONG)UnitSinFastest(z + (1 << 30)) << 32;
+        int z = MulIntLongLow(RCP_HALF_PI, x);
+        long sinX = (long)UnitSinFastest(z) << 32;
+        long cosX = (long)UnitSinFastest(z + (1 << 30)) << 32;
         return DivFastest(sinX, cosX);
     }
 
-    static FP_INT Atan2Div(FP_LONG y, FP_LONG x)
+    private static int Atan2Div(long y, long x)
     {
-        FP_ASSERT(y >= 0 && x > 0 && x >= y);
+        assert(y >= 0 && x > 0 && x >= y);
 
         // Normalize input into [1.0, 2.0( range (convert to s2.30).
-        static const FP_INT ONE = (1 << 30);
-        static const FP_INT HALF = (1 << 29);
-        FP_INT offset = 31 - Nlz((FP_ULONG)x);
-        FP_INT n = (FP_INT)(((offset >= 0) ? (x >> offset) : (x << -offset)) >> 2);
-        FP_INT k = n - ONE;
+        final int ONE = (1 << 30);
+        final int HALF = (1 << 29);
+        int offset = 31 - Nlz(x);
+        int n = (int)(((offset >= 0) ? (x >> offset) : (x << -offset)) >> 2);
+        int k = n - ONE;
 
         // Polynomial approximation of reciprocal.
-        FP_INT oox = RcpPoly4Lut8(k);
-        FP_ASSERT(oox >= HALF && oox <= ONE);
+        int oox = Util.RcpPoly4Lut8(k);
+        assert(oox >= HALF && oox <= ONE);
 
         // Apply exponent and multiply.
-        FP_LONG yr = (offset >= 0) ? (y >> offset) : (y << -offset);
-        return Qmul30((FP_INT)(yr >> 2), oox);
+        long yr = (offset >= 0) ? (y >> offset) : (y << -offset);
+        return Util.Qmul30((int)(yr >> 2), oox);
     }
 
-    static FP_LONG Atan2(FP_LONG y, FP_LONG x)
+    public static long Atan2(long y, long x)
     {
         // See: https://www.dsprelated.com/showarticle/1052.php
 
@@ -1603,49 +1588,49 @@ namespace Fixed64
         }
 
         // \note these round negative numbers slightly
-        FP_LONG nx = x ^ (x >> 63);
-        FP_LONG ny = y ^ (y >> 63);
-        FP_LONG negMask = ((x ^ y) >> 63);
+        long nx = x ^ (x >> 63);
+        long ny = y ^ (y >> 63);
+        long negMask = ((x ^ y) >> 63);
 
         if (nx >= ny)
         {
-            FP_INT k = Atan2Div(ny, nx);
-            FP_INT z = AtanPoly5Lut8(k);
-            FP_LONG angle = negMask ^ ((FP_LONG)z << 2);
+            int k = Atan2Div(ny, nx);
+            int z = Util.AtanPoly5Lut8(k);
+            long angle = negMask ^ ((long)z << 2);
             if (x > 0) return angle;
             if (y >= 0) return angle + Pi;
             return angle - Pi;
         }
         else
         {
-            FP_INT k = Atan2Div(nx, ny);
-            FP_INT z = AtanPoly5Lut8(k);
-            FP_LONG angle = negMask ^ ((FP_LONG)z << 2);
+            int k = Atan2Div(nx, ny);
+            int z = Util.AtanPoly5Lut8(k);
+            long angle = negMask ^ ((long)z << 2);
             return ((y > 0) ? PiHalf : -PiHalf) - angle;
         }
     }
 
-    static FP_INT Atan2DivFast(FP_LONG y, FP_LONG x)
+    private static int Atan2DivFast(long y, long x)
     {
-        FP_ASSERT(y >= 0 && x > 0 && x >= y);
+        assert(y >= 0 && x > 0 && x >= y);
 
         // Normalize input into [1.0, 2.0( range (convert to s2.30).
-        static const FP_INT ONE = (1 << 30);
-        static const FP_INT HALF = (1 << 29);
-        FP_INT offset = 31 - Nlz((FP_ULONG)x);
-        FP_INT n = (FP_INT)(((offset >= 0) ? (x >> offset) : (x << -offset)) >> 2);
-        FP_INT k = n - ONE;
+        final int ONE = (1 << 30);
+        final int HALF = (1 << 29);
+        int offset = 31 - Nlz(x);
+        int n = (int)(((offset >= 0) ? (x >> offset) : (x << -offset)) >> 2);
+        int k = n - ONE;
 
         // Polynomial approximation.
-        FP_INT oox = RcpPoly6(k);
-        FP_ASSERT(oox >= HALF && oox <= ONE);
+        int oox = Util.RcpPoly6(k);
+        assert(oox >= HALF && oox <= ONE);
 
         // Apply exponent and multiply.
-        FP_LONG yr = (offset >= 0) ? (y >> offset) : (y << -offset);
-        return Qmul30((FP_INT)(yr >> 2), oox);
+        long yr = (offset >= 0) ? (y >> offset) : (y << -offset);
+        return Util.Qmul30((int)(yr >> 2), oox);
     }
 
-    static FP_LONG Atan2Fast(FP_LONG y, FP_LONG x)
+    public static long Atan2Fast(long y, long x)
     {
         // See: https://www.dsprelated.com/showarticle/1052.php
 
@@ -1657,49 +1642,49 @@ namespace Fixed64
         }
 
         // \note these round negative numbers slightly
-        FP_LONG nx = x ^ (x >> 63);
-        FP_LONG ny = y ^ (y >> 63);
-        FP_LONG negMask = ((x ^ y) >> 63);
+        long nx = x ^ (x >> 63);
+        long ny = y ^ (y >> 63);
+        long negMask = ((x ^ y) >> 63);
 
         if (nx >= ny)
         {
-            FP_INT k = Atan2DivFast(ny, nx);
-            FP_INT z = AtanPoly3Lut8(k);
-            FP_LONG angle = negMask ^ ((FP_LONG)z << 2);
+            int k = Atan2DivFast(ny, nx);
+            int z = Util.AtanPoly3Lut8(k);
+            long angle = negMask ^ ((long)z << 2);
             if (x > 0) return angle;
             if (y >= 0) return angle + Pi;
             return angle - Pi;
         }
         else
         {
-            FP_INT k = Atan2DivFast(nx, ny);
-            FP_INT z = AtanPoly3Lut8(k);
-            FP_LONG angle = negMask ^ ((FP_LONG)z << 2);
+            int k = Atan2DivFast(nx, ny);
+            int z = Util.AtanPoly3Lut8(k);
+            long angle = negMask ^ ((long)z << 2);
             return ((y > 0) ? PiHalf : -PiHalf) - angle;
         }
     }
 
-    static FP_INT Atan2DivFastest(FP_LONG y, FP_LONG x)
+    private static int Atan2DivFastest(long y, long x)
     {
-        FP_ASSERT(y >= 0 && x > 0 && x >= y);
+        assert(y >= 0 && x > 0 && x >= y);
 
         // Normalize input into [1.0, 2.0( range (convert to s2.30).
-        static const FP_INT ONE = (1 << 30);
-        static const FP_INT HALF = (1 << 29);
-        FP_INT offset = 31 - Nlz((FP_ULONG)x);
-        FP_INT n = (FP_INT)(((offset >= 0) ? (x >> offset) : (x << -offset)) >> 2);
-        FP_INT k = n - ONE;
+        final int ONE = (1 << 30);
+        final int HALF = (1 << 29);
+        int offset = 31 - Nlz(x);
+        int n = (int)(((offset >= 0) ? (x >> offset) : (x << -offset)) >> 2);
+        int k = n - ONE;
 
         // Polynomial approximation.
-        FP_INT oox = RcpPoly4(k);
-        FP_ASSERT(oox >= HALF && oox <= ONE);
+        int oox = Util.RcpPoly4(k);
+        assert(oox >= HALF && oox <= ONE);
 
         // Apply exponent and multiply.
-        FP_LONG yr = (offset >= 0) ? (y >> offset) : (y << -offset);
-        return Qmul30((FP_INT)(yr >> 2), oox);
+        long yr = (offset >= 0) ? (y >> offset) : (y << -offset);
+        return Util.Qmul30((int)(yr >> 2), oox);
     }
 
-    static FP_LONG Atan2Fastest(FP_LONG y, FP_LONG x)
+    public static long Atan2Fastest(long y, long x)
     {
         // See: https://www.dsprelated.com/showarticle/1052.php
 
@@ -1711,83 +1696,79 @@ namespace Fixed64
         }
 
         // \note these round negative numbers slightly
-        FP_LONG nx = x ^ (x >> 63);
-        FP_LONG ny = y ^ (y >> 63);
-        FP_LONG negMask = ((x ^ y) >> 63);
+        long nx = x ^ (x >> 63);
+        long ny = y ^ (y >> 63);
+        long negMask = ((x ^ y) >> 63);
 
         if (nx >= ny)
         {
-            FP_INT z = Atan2DivFastest(ny, nx);
-            FP_INT res = AtanPoly4(z);
-            FP_LONG angle = negMask ^ ((FP_LONG)res << 2);
+            int z = Atan2DivFastest(ny, nx);
+            int res = Util.AtanPoly4(z);
+            long angle = negMask ^ ((long)res << 2);
             if (x > 0) return angle;
             if (y >= 0) return angle + Pi;
             return angle - Pi;
         }
         else
         {
-            FP_INT z = Atan2DivFastest(nx, ny);
-            FP_INT res = AtanPoly4(z);
-            FP_LONG angle = negMask ^ ((FP_LONG)res << 2);
+            int z = Atan2DivFastest(nx, ny);
+            int res = Util.AtanPoly4(z);
+            long angle = negMask ^ ((long)res << 2);
             return ((y > 0) ? PiHalf : -PiHalf) - angle;
         }
     }
 
-    static FP_LONG Asin(FP_LONG x)
+    public static long Asin(long x)
     {
-        FP_ASSERT(x >= -One && x <= One);
+        assert(x >= -One && x <= One);
         return Atan2(x, Sqrt(Mul(One + x, One - x)));
     }
 
-    static FP_LONG AsinFast(FP_LONG x)
+    public static long AsinFast(long x)
     {
-        FP_ASSERT(x >= -One && x <= One);
+        assert(x >= -One && x <= One);
         return Atan2Fast(x, SqrtFast(Mul(One + x, One - x)));
     }
 
-    static FP_LONG AsinFastest(FP_LONG x)
+    public static long AsinFastest(long x)
     {
-        FP_ASSERT(x >= -One && x <= One);
+        assert(x >= -One && x <= One);
         return Atan2Fastest(x, SqrtFastest(Mul(One + x, One - x)));
     }
 
-    static FP_LONG Acos(FP_LONG x)
+    public static long Acos(long x)
     {
-        FP_ASSERT(x >= -One && x <= One);
+        assert(x >= -One && x <= One);
         return Atan2(Sqrt(Mul(One + x, One - x)), x);
     }
 
-    static FP_LONG AcosFast(FP_LONG x)
+    public static long AcosFast(long x)
     {
-        FP_ASSERT(x >= -One && x <= One);
+        assert(x >= -One && x <= One);
         return Atan2Fast(SqrtFast(Mul(One + x, One - x)), x);
     }
 
-    static FP_LONG AcosFastest(FP_LONG x)
+    public static long AcosFastest(long x)
     {
-        FP_ASSERT(x >= -One && x <= One);
+        assert(x >= -One && x <= One);
         return Atan2Fastest(SqrtFastest(Mul(One + x, One - x)), x);
     }
 
-    static FP_LONG Atan(FP_LONG x)
+    public static long Atan(long x)
     {
         return Atan2(x, One);
     }
 
-    static FP_LONG AtanFast(FP_LONG x)
+    public static long AtanFast(long x)
     {
         return Atan2Fast(x, One);
     }
 
-    static FP_LONG AtanFastest(FP_LONG x)
+    public static long AtanFastest(long x)
     {
         return Atan2Fastest(x, One);
     }
+} // Fixed64
 
 
-
-
-    #undef FP_ASSERT
-};
-#endif // __FIXED64_H
-
+// END GENERATED FILE

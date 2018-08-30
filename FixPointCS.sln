@@ -7,7 +7,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FixPointCS", "FixPointCS\Fi
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FixPointCSTest", "FixPointCSTest\FixPointCSTest.csproj", "{9BDCDAF4-3D43-46C2-8085-E59749AB0592}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GenerateCpp", "GenerateCpp\GenerateCpp.csproj", "{FAA807BE-4DA8-4A03-9C65-22AC74A83C92}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Transpiler", "Transpiler\Transpiler.csproj", "{FAA807BE-4DA8-4A03-9C65-22AC74A83C92}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
