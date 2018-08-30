@@ -112,9 +112,9 @@ The performance was measured with C# (Release build) on Windows 10 using a Core 
 |             Cos(x) |     125.74 |     26.64
 |         CosFast(x) |     171.58 |     19.57
 |      CosFastest(x) |     198.76 |     12.57
-|             Tan(x) |      33.42 |     23.78
-|         TanFast(x) |      38.67 |     16.24
-|      TanFastest(x) |      48.48 |     11.22
+|             Tan(x) |      39.23 |     23.74
+|         TanFast(x) |      47.59 |     16.24
+|      TanFastest(x) |      59.42 |     11.22
 |            Asin(x) |      23.62 |     23.46
 |        AsinFast(x) |      27.23 |     16.60
 |     AsinFastest(x) |      35.56 |     11.44
