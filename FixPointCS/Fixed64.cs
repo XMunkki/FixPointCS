@@ -920,11 +920,14 @@ namespace FixPointCS
         }
 #endif
 
-#if JAVA
-        // \todo [petri] implement Java version!
-#else
-        private static long DivRem(long arg_a, long arg_b, out long rem)
+        /// <summary>
+        /// Divides two FP values.
+        /// </summary>
+        public static long DivPrecise(long arg_a, long arg_b)
         {
+#if JAVA
+            return arg_a;
+#else
             // From http://www.hackersdelight.org/hdcodetxt/divlu.c.txt
 
             long sign_dif = arg_a ^ arg_b;
@@ -938,7 +941,7 @@ namespace FixPointCS
             // Overflow?
             if (u1 >= v)
             {
-                rem = 0;
+                //rem = 0;
                 return 0x7fffffffffffffffL;
             }
 
@@ -963,7 +966,8 @@ namespace FixPointCS
                 {
                     q1 = q1 - 1;
                     rhat = rhat + vn1;
-                } else break;
+                }
+                else break;
             } while (rhat < b);
 
             ulong un21 = un32 * b + un1 - q1 * v; // Multiply and subtract
@@ -977,26 +981,18 @@ namespace FixPointCS
                 {
                     q0 = q0 - 1;
                     rhat = rhat + vn1;
-                } else break;
+                }
+                else break;
             } while (rhat < b);
 
             // Calculate the remainder
-            ulong r = (un21 * b + un0 - q0 * v) >> s;
-            rem = (long)r;
+            // ulong r = (un21 * b + un0 - q0 * v) >> s;
+            // rem = (long)r;
 
             ulong ret = q1 * b + q0;
             return (sign_dif < 0) ? -(long)ret : (long)ret;
-        }
-
-        /// <summary>
-        /// Divides two FP values.
-        /// </summary>
-        public static long DivPrecise(long arg_a, long arg_b)
-        {
-            long rem;
-            return DivRem(arg_a, arg_b, out rem);
-        }
 #endif
+        }
 
         /// <summary>
         /// Calculates division approximation.
@@ -1089,15 +1085,16 @@ namespace FixPointCS
         /// <summary>
         /// Calculates the square root of the given number.
         /// </summary>
-#if JAVA
-        // \todo [petri] implement Java version!
-#else
         public static long SqrtPrecise(long a)
         {
             // Adapted from https://github.com/chmike/fpsqrt
             if (a < 0)
                 return -1;
 
+#if JAVA
+            // \todo [petri] implement Java version!
+            return 0;
+#else
             ulong r = (ulong)a;
             ulong b = 0x4000000000000000L;
             ulong q = 0L;
@@ -1114,8 +1111,8 @@ namespace FixPointCS
             }
             q >>= 16;
             return (long)q;
-        }
 #endif
+        }
 
         public static long Sqrt(long x)
         {

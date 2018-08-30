@@ -627,6 +627,7 @@ namespace Fixed64
     // Private constants
     static const FP_LONG RCP_LN2      = INT64_C(0x171547652); // 1.0 / log(2.0) ~= 1.4426950408889634
     static const FP_LONG RCP_LOG2_E   = INT64_C(2977044471);  // 1.0 / log2(e) ~= 0.6931471805599453
+    static const FP_INT  RCP_HALF_PI  = 683565276; // 1.0 / (4.0 * 0.5 * Math.PI);  // the 4.0 factor converts directly to s2.30
 
     /// <summary>
     /// Converts an integer to a fixed-point value.
@@ -828,7 +829,10 @@ namespace Fixed64
         return n;
     }
 
-    static FP_LONG DivRem(FP_LONG arg_a, FP_LONG arg_b, FP_LONG& rem)
+    /// <summary>
+    /// Divides two FP values.
+    /// </summary>
+    static FP_LONG DivPrecise(FP_LONG arg_a, FP_LONG arg_b)
     {
         // From http://www.hackersdelight.org/hdcodetxt/divlu.c.txt
 
@@ -843,7 +847,7 @@ namespace Fixed64
         // Overflow?
         if (u1 >= v)
         {
-            rem = 0;
+            //rem = 0;
             return INT64_C(0x7fffffffffffffff);
         }
 
@@ -868,7 +872,8 @@ namespace Fixed64
             {
                 q1 = q1 - 1;
                 rhat = rhat + vn1;
-            } else break;
+            }
+            else break;
         } while (rhat < b);
 
         FP_ULONG un21 = un32 * b + un1 - q1 * v; // Multiply and subtract
@@ -882,24 +887,16 @@ namespace Fixed64
             {
                 q0 = q0 - 1;
                 rhat = rhat + vn1;
-            } else break;
+            }
+            else break;
         } while (rhat < b);
 
         // Calculate the remainder
-        FP_ULONG r = (un21 * b + un0 - q0 * v) >> s;
-        rem = (FP_LONG)r;
+        // FP_ULONG r = (un21 * b + un0 - q0 * v) >> s;
+        // rem = (FP_LONG)r;
 
         FP_ULONG ret = q1 * b + q0;
         return (sign_dif < 0) ? -(FP_LONG)ret : (FP_LONG)ret;
-    }
-
-    /// <summary>
-    /// Divides two FP values.
-    /// </summary>
-    static FP_LONG DivPrecise(FP_LONG arg_a, FP_LONG arg_b)
-    {
-        FP_LONG rem;
-        return DivRem(arg_a, arg_b, rem);
     }
 
     /// <summary>
@@ -1442,14 +1439,9 @@ namespace Fixed64
         return ExpFastest(Mul(exponent, LogFastest(x)));
     }
 
-    static FP_LONG Sin(FP_LONG x)
+    static FP_INT UnitSin(FP_INT z)
     {
         // See: http://www.coranac.com/2009/07/sines/
-
-        // Map [0, 2pi] to [0, 4] (as s2.30).
-        // This also wraps the values into one period.
-        static const FP_INT RCP_HALF_PI = 683565276; // 1.0 / (4.0 * 0.5 * Math.PI);  // the 4.0 factor converts directly to s2.30
-        FP_INT z = MulIntLongLow(RCP_HALF_PI, x);
 
         // Handle quadrants 1 and 2 by mirroring the [1, 3] range to [-1, 1] (by calculating 2 - z).
         // The if condition uses the fact that for the quadrants of interest are 0b01 and 0b10 (top two bits are different).
@@ -1464,18 +1456,13 @@ namespace Fixed64
         FP_INT zz = Qmul30(z, z);
         FP_INT res = Qmul30(SinPoly4(zz), z);
 
-        // Convert back to s32.32.
-        return (FP_LONG)res << 2;
+        // Return s2.30 value.
+        return res;
     }
 
-    static FP_LONG SinFast(FP_LONG x)
+    static FP_INT UnitSinFast(FP_INT z)
     {
         // See: http://www.coranac.com/2009/07/sines/
-
-        // Map [0, 2pi] to [0, 4] (as s2.30).
-        // This also wraps the values into one period.
-        static const FP_INT RCP_HALF_PI = 683565276; // 1.0 / (4.0 * 0.5 * Math.PI);  // the 4.0 factor converts directly to s2.30
-        FP_INT z = MulIntLongLow(RCP_HALF_PI, x);
 
         // Handle quadrants 1 and 2 by mirroring the [1, 3] range to [-1, 1] (by calculating 2 - z).
         // The if condition uses the fact that for the quadrants of interest are 0b01 and 0b10 (top two bits are different).
@@ -1490,18 +1477,13 @@ namespace Fixed64
         FP_INT zz = Qmul30(z, z);
         FP_INT res = Qmul30(SinPoly3(zz), z);
 
-        // Convert back to s32.32.
-        return (FP_LONG)res << 2;
+        // Return s2.30 value.
+        return res;
     }
 
-    static FP_LONG SinFastest(FP_LONG x)
+    static FP_INT UnitSinFastest(FP_INT z)
     {
         // See: http://www.coranac.com/2009/07/sines/
-
-        // Map [0, 2pi] to [0, 4] (as s2.30).
-        // This also wraps the values into one period.
-        static const FP_INT RCP_HALF_PI = 683565276; // 1.0 / (4.0 * 0.5 * Math.PI);  // the 4.0 factor converts directly to s2.30
-        FP_INT z = MulIntLongLow(RCP_HALF_PI, x);
 
         // Handle quadrants 1 and 2 by mirroring the [1, 3] range to [-1, 1] (by calculating 2 - z).
         // The if condition uses the fact that for the quadrants of interest are 0b01 and 0b10 (top two bits are different).
@@ -1516,8 +1498,38 @@ namespace Fixed64
         FP_INT zz = Qmul30(z, z);
         FP_INT res = Qmul30(SinPoly2(zz), z);
 
-        // Convert back to s32.32.
-        return (FP_LONG)res << 2;
+        // Return s2.30 value.
+        return res;
+    }
+
+    static FP_LONG Sin(FP_LONG x)
+    {
+        // Map [0, 2pi] to [0, 4] (as s2.30).
+        // This also wraps the values into one period.
+        FP_INT z = MulIntLongLow(RCP_HALF_PI, x);
+
+        // Compute sine and convert to s32.32.
+        return (FP_LONG)UnitSin(z) << 2;
+    }
+
+    static FP_LONG SinFast(FP_LONG x)
+    {
+        // Map [0, 2pi] to [0, 4] (as s2.30).
+        // This also wraps the values into one period.
+        FP_INT z = MulIntLongLow(RCP_HALF_PI, x);
+
+        // Compute sine and convert to s32.32.
+        return (FP_LONG)UnitSinFast(z) << 2;
+    }
+
+    static FP_LONG SinFastest(FP_LONG x)
+    {
+        // Map [0, 2pi] to [0, 4] (as s2.30).
+        // This also wraps the values into one period.
+        FP_INT z = MulIntLongLow(RCP_HALF_PI, x);
+
+        // Compute sine and convert to s32.32.
+        return (FP_LONG)UnitSinFastest(z) << 2;
     }
 
     static FP_LONG Cos(FP_LONG x)
@@ -1537,17 +1549,26 @@ namespace Fixed64
 
     static FP_LONG Tan(FP_LONG x)
     {
-        return Mul(Sin(x), Rcp(Cos(x)));
+        FP_INT z = MulIntLongLow(RCP_HALF_PI, x);
+        FP_LONG sinX = (FP_LONG)UnitSin(z) << 32;
+        FP_LONG cosX = (FP_LONG)UnitSin(z + (1 << 30)) << 32;
+        return Div(sinX, cosX);
     }
 
     static FP_LONG TanFast(FP_LONG x)
     {
-        return Mul(SinFast(x), RcpFast(CosFast(x)));
+        FP_INT z = MulIntLongLow(RCP_HALF_PI, x);
+        FP_LONG sinX = (FP_LONG)UnitSinFast(z) << 32;
+        FP_LONG cosX = (FP_LONG)UnitSinFast(z + (1 << 30)) << 32;
+        return DivFast(sinX, cosX);
     }
 
     static FP_LONG TanFastest(FP_LONG x)
     {
-        return Mul(SinFastest(x), RcpFastest(CosFastest(x)));
+        FP_INT z = MulIntLongLow(RCP_HALF_PI, x);
+        FP_LONG sinX = (FP_LONG)UnitSinFastest(z) << 32;
+        FP_LONG cosX = (FP_LONG)UnitSinFastest(z + (1 << 30)) << 32;
+        return DivFastest(sinX, cosX);
     }
 
     static FP_INT Atan2Div(FP_LONG y, FP_LONG x)
