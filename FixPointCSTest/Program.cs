@@ -1549,7 +1549,7 @@ namespace FixPointCSTest
             //TestOperations(testFilter);
 
             // Determinism testing
-            TestDeterminism(testFilter);
+            TestDeterminism("Div");
 
             /*Console.WriteLine("-ENTER-");
             Console.ReadLine();*/

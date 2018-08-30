@@ -404,8 +404,22 @@ namespace FixPointCS
                 return -1;
 
 #if JAVA
-            // \todo [petri] implement Java version!
-            return 0;
+            int r = a;
+            int b = 0x40000000;
+            int q = 0;
+            while (b > 0x40)
+            {
+                int t = q + b;
+                if (Integer.compareUnsigned(r, t) >= 0)
+                {
+                    r -= t;
+                    q = t + b;
+                }
+                r <<= 1;
+                b >>= 1;
+            }
+            q >>>= 8;
+            return q;
 #else
             uint r = (uint)a;
             uint b = 0x40000000;

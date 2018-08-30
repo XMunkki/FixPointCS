@@ -839,9 +839,9 @@ namespace Fixed64
         FP_LONG sign_dif = arg_a ^ arg_b;
 
         static const FP_ULONG b = INT64_C(0x100000000); // Number base (32 bits)
-        FP_ULONG unsigned_arg_a = (FP_ULONG)((arg_a < 0) ? -arg_a : arg_a);
-        FP_ULONG u1 = unsigned_arg_a >> 32;
-        FP_ULONG u0 = unsigned_arg_a << 32;
+        FP_ULONG abs_arg_a = (FP_ULONG)((arg_a < 0) ? -arg_a : arg_a);
+        FP_ULONG u1 = abs_arg_a >> 32;
+        FP_ULONG u0 = abs_arg_a << 32;
         FP_ULONG v = (FP_ULONG)((arg_b < 0) ? -arg_b : arg_b);
 
         // Overflow?
@@ -862,6 +862,8 @@ namespace Fixed64
 
         FP_ULONG un1 = un10 >> 32; // Break the right half of dividend into two digits
         FP_ULONG un0 = un10 & INT64_C(0xffffffff);
+
+        return (FP_LONG)un0;
 
         // Compute the first quotient digit, q1
         FP_ULONG q1 = un32 / vn1;

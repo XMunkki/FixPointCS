@@ -14,7 +14,7 @@ class Util
 	public static void Check(String opName, long output, long expected, long input0, long input1)
 	{
 		if (output != expected)
-			System.out.printf("MISMATCH in %s: got %d, expected %d, inputs %d\n", opName, output, expected, input0, input1);
+			System.out.printf("MISMATCH in %s: got %d, expected %d, inputs %d %d\n", opName, output, expected, input0, input1);
 	}
 
 	public static void Check(String opName, int output, int expected, int input0)

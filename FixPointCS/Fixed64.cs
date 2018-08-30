@@ -925,17 +925,79 @@ namespace FixPointCS
         /// </summary>
         public static long DivPrecise(long arg_a, long arg_b)
         {
-#if JAVA
-            return arg_a;
-#else
             // From http://www.hackersdelight.org/hdcodetxt/divlu.c.txt
 
+#if JAVA
+            long sign_dif = arg_a ^ arg_b;
+
+            const long b = 0x100000000L; // Number base (32 bits)
+            long abs_arg_a = (arg_a < 0) ? -arg_a : arg_a;
+            long u1 = abs_arg_a >>> 32;
+            long u0 = abs_arg_a << 32;
+            long v = (arg_b < 0) ? -arg_b : arg_b;
+
+            // Overflow?
+            if (Long.compareUnsigned(u1, v) >= 0) // u1 >= v
+            {
+                //rem = 0;
+                return 0x7fffffffffffffffL;
+            }
+
+            // Shift amount for norm
+            int s = Nlz(v); // 0 <= s <= 63
+            v = v << s; // Normalize the divisor
+            long vn1 = v >>> 32; // Break the divisor into two 32-bit digits
+            long vn0 = v & 0xffffffffL;
+
+            long un32 = (u1 << s) | (u0 >>> (64 - s)) & (-s >>> 63);
+            long un10 = u0 << s; // Shift dividend left
+
+            long un1 = un10 >>> 32; // Break the right half of dividend into two digits
+            long un0 = un10 & 0xffffffffL;
+
+            return un0;
+
+            // Compute the first quotient digit, q1
+            long q1 = Long.divideUnsigned(un32, vn1);
+            long rhat = un32 - q1 * vn1;
+            do
+            {
+                if ((Long.compareUnsigned(q1, b) >= 0) || (Long.compareUnsigned(q1 * vn0, b * rhat + un1) > 0))
+                {
+                    q1 = q1 - 1;
+                    rhat = rhat + vn1;
+                }
+                else break;
+            } while (Long.compareUnsigned(rhat, b) < 0);
+
+            long un21 = un32 * b + un1 - q1 * v; // Multiply and subtract
+
+            // Compute the second quotient digit, q0
+            long q0 = Long.divideUnsigned(un21, vn1);
+            rhat = un21 - q0 * vn1;
+            do
+            {
+                if ((Long.compareUnsigned(q0, b) >= 0) || (Long.compareUnsigned(q0 * vn0, b * rhat + un0) > 0))
+                {
+                    q0 = q0 - 1;
+                    rhat = rhat + vn1;
+                }
+                else break;
+            } while (Long.compareUnsigned(rhat, b) < 0);
+
+            // Calculate the remainder
+            // ulong r = (un21 * b + un0 - q0 * v) >>> s;
+            // rem = (long)r;
+
+            long ret = q1 * b + q0;
+            return (sign_dif < 0) ? -ret : ret;
+#else
             long sign_dif = arg_a ^ arg_b;
 
             const ulong b = 0x100000000L; // Number base (32 bits)
-            ulong unsigned_arg_a = (ulong)((arg_a < 0) ? -arg_a : arg_a);
-            ulong u1 = unsigned_arg_a >> 32;
-            ulong u0 = unsigned_arg_a << 32;
+            ulong abs_arg_a = (ulong)((arg_a < 0) ? -arg_a : arg_a);
+            ulong u1 = abs_arg_a >> 32;
+            ulong u0 = abs_arg_a << 32;
             ulong v = (ulong)((arg_b < 0) ? -arg_b : arg_b);
 
             // Overflow?
@@ -1092,8 +1154,22 @@ namespace FixPointCS
                 return -1;
 
 #if JAVA
-            // \todo [petri] implement Java version!
-            return 0;
+            long r = a;
+            long b = 0x4000000000000000L;
+            long q = 0;
+            while (b > 0x40)
+            {
+                long t = q + b;
+                if (Long.compareUnsigned(r, t) >= 0)
+                {
+                    r -= t;
+                    q = t + b;
+                }
+                r <<= 1;
+                b >>= 1;
+            }
+            q >>>= 16;
+            return q;
 #else
             ulong r = (ulong)a;
             ulong b = 0x4000000000000000L;
