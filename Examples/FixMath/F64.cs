@@ -62,6 +62,7 @@ namespace FixMath
         public static int RoundToInt(F64 a) { return Fixed64.RoundToInt(a.raw); }
         public float Float { get { return Fixed64.ToFloat(raw); } }
         public double Double { get { return Fixed64.ToDouble(raw); } }
+        public F32 F32 { get { return F32.FromRaw((int)(raw >> 16)); } }
 
         // Operators
         public static F64 operator -(F64 v1) { return FromRaw(-v1.raw); }

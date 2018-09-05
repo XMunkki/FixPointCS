@@ -80,12 +80,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DoubleTracer.cs" />
-    <Compile Include="F32Tracer.cs" />
     <Compile Include="Program.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="F64Tracer.cs" />
+    <Compile Include="FixedTracer.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
