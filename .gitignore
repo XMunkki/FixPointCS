@@ -2,9 +2,5 @@
 *.user
 *.class
 Cpp/x64
-FixPointCS/obj
-FixPointCS/bin
-FixPointCSTest/obj
-FixPointCSTest/bin
-Transpiler/obj
-Transpiler/bin
+obj
+bin

@@ -26,8 +26,10 @@ using System.IO;
 using System.Threading;
 using System.Linq;
 using System.Diagnostics;
-using FixPointCS;
 using System.Collections.Generic;
+
+using FixPointCS;
+using FixMath;
 
 namespace FixPointCSTest
 {

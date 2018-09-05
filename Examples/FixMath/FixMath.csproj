@@ -1,14 +1,14 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{9BDCDAF4-3D43-46C2-8085-E59749AB0592}</ProjectGuid>
-    <OutputType>Exe</OutputType>
+    <ProjectGuid>{37DF7BEA-1665-482E-9BD5-63D09FF426B2}</ProjectGuid>
+    <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>FixPointCSTest</RootNamespace>
-    <AssemblyName>FixPointCSTest</AssemblyName>
+    <RootNamespace>FixMath</RootNamespace>
+    <AssemblyName>FixMath</AssemblyName>
     <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
@@ -70,25 +70,29 @@
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Numerics" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Program.cs" />
+    <Compile Include="F32.cs" />
+    <Compile Include="F32Vec2.cs" />
+    <Compile Include="F64.cs" />
+    <Compile Include="F64Vec2.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Examples\FixMath\FixMath.csproj">
-      <Project>{37df7bea-1665-482e-9bd5-63d09ff426b2}</Project>
-      <Name>FixMath</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\FixPointCS\FixPointCS.csproj">
+    <ProjectReference Include="..\..\FixPointCS\FixPointCS.csproj">
       <Project>{53d6f31f-ae20-4c5c-9674-0ca79e4c36c1}</Project>
       <Name>FixPointCS</Name>
     </ProjectReference>

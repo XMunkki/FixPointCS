@@ -23,7 +23,9 @@
 //
 using System;
 
-namespace FixPointCS
+using FixPointCS;
+
+namespace FixMath
 {
     /// <summary>
     /// Vector2 struct with signed 32.32 fixed point components.

@@ -23,7 +23,9 @@
 //
 using System;
 
-namespace FixPointCS
+using FixPointCS;
+
+namespace FixMath
 {
     /// <summary>
     /// Signed 16.16 fixed point value struct.
