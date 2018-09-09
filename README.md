@@ -1,134 +1,86 @@
-# FixPointCS 
+# FixPointCS
 
-A signed 32.32 fixed point numerics library for 64bit CPU architectures
+#### A fast, multi-language, multi-precision fixed-point library!
 
+---
 
-## Description
+## Key Features
 
-The FixPointCS is numerics library that implements efficient signed 32.32bit fixed point numbers.
-The library assumes that the target CPU architecture has native 64bit support, and all of
-the operations are built on that assumption.
-Intended use cases include deterministic game system simulations (for example in Unity games).
-The library is easily portable across compilers and platforms.
-The results of a certain sequence of numeric operations are the same on any platform, and any compiler optimizations.
+- **Deterministic**: Operations produce bit-identical results across languages and compilers
+- **Fast**: All operations use efficient algorithms and are highly optimized
+- **Multi-Language**: Supports C#, Java, and C++
+- **Multiple Types**: Supports signed 32.32 and 16.16 fixed-point numbers
+- **Multiple Precisions**: Operations provide variants with 24, 16, and 10 bits of precision
+- **Extensive**: All standard math functions supported, except hyperbolic trigonometry
+- **Well Tested**: The library comes with a comprehensive performance and precision testing suite
 
-Target languages: C#, C++ (generated)
+## Overview
 
-Supported operations:
- - Conversions: from int/double, to double, to string
- - Basic: +, -, *, /, Mod (remainder)
- - Convenience: Abs, Min, Max, Sign
- - Sqrt, RSqrt (1/sqrt(x)), Rcp (1/x), Exp2, Exp, Log, Log2, Pow, Sin, Cos, Tan, Asin, Acos, Atan, Atan2
+FixPointCS aims to provide as robust and efficient core math operations as possible, while keeping
+the API simple to stay compatible with multiple languages. It is intended to be a building block
+for higher-level math libraries, not to be used directly from application code.
 
-## Library design philosophy
+For convenience, FixPointCS does include a higher-level math library as well (only for C#). It is
+provided as an example on how to utilize the core primitives. It also be used as-is, or customized
+to a project's needs. The convenience library is located in *Examples/FixMath*.
 
-The design of the operations can rely on the assumption that the target platform has efficient support for 64bit operations.
-The raw library comes with multiple implementations of various operations.
-These operations have different performance vs precision trade-offs.
-Being a fixed point library, the library leans towards efficiency over full correctness.
-There are no denors, infs or NaNs that are often supported by floating point numbers.
-The core library is implemented as a single file (Fixed64.cs).
+## Getting Started
 
-There are extra convenience wrapper classes for easier usage:
+### Core Math Library (all languages)
 
- - F64.cs: Struct wrapper for a single value with operator overloads.
- - F64Vec2.cs: 2D fixed point vector.
+The simplest and recommended way to use FixPointCS is to copy the relevant source files directly into
+your project. The core math operations reside in the following files:
+- For **C#**: FixPointCS/Fixed32.cs and FixPointCS/Fixed64.cs
+- For **Java**: Java/Fixed32.cs and Java/Fixed64.cs
+- For **C++**: Cpp/Fixed64.h (Fixed32 is not yet supported)
 
-You're free to use the included convenience wrappers or build your own.
+### FixMath Convenience Library (C# only)
 
-## Usage instructions
+For C#, you can also use the provided higher-level math library, located under *Examples/FixMath*. In
+order to get started writing applications as easily as possible, using the example library is recommended.
 
-### (C#) Use as a library
+The FixMath library provides basic scalar types (*F32* and *F64*, signed 16.16 and 32.32 fixed-point
+values, respectively), as well as vector types (*F32VecN* and *F64VecN*).
 
-When you compile FixPointCS, a .NET DLL is produced.
-Reference that in your project and use the functionality directly.
-It's advisable to compile the release version (debug version has assertions that slow the library down).
+For examples on how to use the FixMath library, see *Examples/FixedTracer/FixedTracer.cs*, which
+implements a simple fixed-point raytracer.
 
-### (C#) Include source files
+## Supported Functions
 
-You can just copy the required files (Fixed64.cs at the minimum) into your own project and compile & use the functionality directly.
+Supported operations include:
+- Arithmetic: Add(), Sub(), Mul(), Div(), Rcp() (reciprocal), Mod() (modulo)
+- Trigonometry: Sin(), Cos(), Tan(), Asin(), Acos(), Atan(), Atan2()
+- Exponential: Exp(), Exp2(), Log(), Log2(), Pow()
+- Square root: Sqrt(), RSqrt() (reciprocal square root)
+- Utility: Abs(), Nabs(), Sign(), Ceil(), Floor(), Round(), Fract(), Min(), Max()
+- Conversions: CeilToInt(), FloorToInt(), RoundToInt(), FromDouble(), FromFloat(), ToDouble(), ToFloat()
 
-### (C++) Include source files
+Note that the conversions to/from floating point values are not guaranteed to be deterministic.
 
-Copy the Fixed64.h file from the Cpp-folder into your project.
-All the code is self contained within.
+For full list of supported operations, see functions.md.
 
-It is automatically generated from the Fixed64.cs file by the GenerateCpp -tool.
+## Precision Guide
 
-## Contributing
+The library supports both signed 32.32 fixed-point type (Fixed64), and signed 16.16 fixed-point (Fixed32).
+For each operation, for both types, each approximate function comes with three precision variants with
+different speed/precision trade off. For example, *Sin()* has 24 bits of precision, *SinFast()* has 16
+bits of precision and *SinFastest()* has 10 bits of precision.
 
-New contributions are welcome! Especially new operations, faster versions of existing ones or testing/verification code.
+The precision is relative to the output value, so for example 10 bits of precision means that the answer
+is accurate to about 1 part in 1000 (or has error margin of 0.1%). The Fast variant is typically about
+10-15% faster than the highest precision, and the Fastest variant about 20-30% faster. See functions.md
+for details.
 
-## Operations
+Div and Sqrt also come with a Precise variant (*DivPrecise()*, *SqrtPrecise()*), which produce a result
+that is exactly correct within representable fixed-point numbers.
 
-Below is a table describing the supported operations, their relative performance and precision (as number of accurate bits).
-The performance was measured with C# (Release build) on Windows 10 using a Core i7-4700MQ @ 2.40GHz using a single thread.
+## Known Limitations
 
-|          Operation |     Mops/s | Precision
-|--------------------|-----------:|----------:
-|           Identity |    1502.35 |     exact
-|                a+b |    1066.67 |     exact
-|                a-b |    1057.85 |     exact
-|                a*b |     288.29 |     exact
-|                a/b |      32.08 |     exact
-|                a%b |      96.24 |     exact
-|           Min(a,b) |     477.61 |     exact
-|           Max(a,b) |     505.93 |     exact
-|             Ceil() |     920.86 |     exact
-|            Floor() |     977.10 |     exact
-|            Round() |     507.94 |     exact
-|            Fract() |    1163.64 |     exact
-|              Abs() |     914.29 |     exact
-|             Nabs() |     673.68 |     exact
-|                1/x |      32.16 |     52.01
-|             Rcp(x) |      79.50 |     23.71
-|         RcpFast(x) |     101.59 |     16.13
-|      RcpFastest(x) |     108.47 |     10.95
-|     SqrtPrecise(x) |       6.92 |     exact
-|            Sqrt(x) |      91.43 |     23.22
-|        SqrtFast(x) |     104.07 |     16.23
-|     SqrtFastest(x) |     104.07 |     13.32
-|           RSqrt(x) |      89.51 |     24.25
-|       RSqrtFast(x) |     101.59 |     15.71
-|    RSqrtFastest(x) |     108.47 |     10.54
-|             Exp(x) |     127.24 |     23.01
-|         ExpFast(x) |     137.63 |     17.85
-|      ExpFastest(x) |     150.94 |     12.97
-|            Exp2(x) |     170.21 |     23.01
-|        Exp2Fast(x) |     199.38 |     17.85
-|     Exp2Fastest(x) |     238.81 |     12.97
-|             Log(x) |      84.21 |     30.05
-|         LogFast(x) |      96.24 |     15.10
-|      LogFastest(x) |     120.75 |      9.27
-|            Log2(x) |      89.51 |     exact
-|        Log2Fast(x) |     104.92 |     17.98
-|     Log2Fastest(x) |     121.90 |     10.69
-|          Pow(a, b) |      41.29 |     22.89
-|      PowFast(a, b) |      52.67 |     14.87
-|   PowFastest(a, b) |      53.78 |     10.31
-|             Sin(x) |     153.11 |     26.63
-|         SinFast(x) |     177.29 |     19.57
-|      SinFastest(x) |     212.62 |     12.57
-|             Cos(x) |     125.74 |     26.64
-|         CosFast(x) |     171.58 |     19.57
-|      CosFastest(x) |     198.76 |     12.57
-|             Tan(x) |      39.23 |     23.74
-|         TanFast(x) |      47.59 |     16.24
-|      TanFastest(x) |      59.42 |     11.22
-|            Asin(x) |      23.62 |     23.46
-|        AsinFast(x) |      27.23 |     16.60
-|     AsinFastest(x) |      35.56 |     11.44
-|            Acos(x) |      23.10 |     22.67
-|        AcosFast(x) |      26.23 |     16.60
-|     AcosFastest(x) |      34.78 |     11.44
-|            Atan(x) |      39.02 |     24.90
-|        AtanFast(x) |      47.58 |     17.53
-|     AtanFastest(x) |      71.91 |     11.45
-|        Atan2(a, b) |      39.02 |     22.03
-|    Atan2Fast(a, b) |      47.94 |     17.52
-| Atan2Fastest(a, b) |      72.73 |     11.13
+- C++ currently only supports s32.32 fixed-point (Fixed64), but not s16.16
+- The determinism tester doesn't currently cover the C++ implementation
+- Few operations are much slower without a 64-bit CPU, most notably s32.32 multiply and division
+- The library opts for performance and determinism over full correctness in edge cases like overflows
 
-## History
+## License
 
-Initial version (Jere Sanisalo, Petri Kero)
-
+Available under MIT license, see LICENSE.txt for details.
