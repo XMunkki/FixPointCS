@@ -33,7 +33,14 @@ namespace Transpiler
 {
     public static class GenerateCpp
     {
-        public static void ConvertFile(string inPath, string outPath)
+        public enum Mode
+        {
+            Fp32,
+            Fp64,
+            Util,
+        }
+
+        public static void ConvertFile(string inPath, string outPath, Mode mode)
         {
             Console.WriteLine("Generating {0}..", outPath);
 
@@ -42,6 +49,10 @@ namespace Transpiler
 
             // Prepare output
             StringBuilder sb = new StringBuilder();
+
+            // Create the prefix and suffix
+            string prefix = MakePrefix(mode);
+            string suffix = MakeSuffix(mode);
 
             // Run hacky preprocessor
             lines = Util.Preprocess(lines, "CPP");
@@ -61,18 +72,23 @@ namespace Transpiler
                 line = Util.ReplaceWholeWord(line, "private", "");
                 line = Util.ReplaceWholeWord(line, "const", "static const");
                 line = Util.ReplaceWholeWord(line, "out int", "int&");
+                line = Util.ReplaceWholeWord(line, "out uint", "uint&");
                 line = Util.ReplaceWholeWord(line, "out long", "long&");
                 line = Util.ReplaceWholeWord(line, "out ulong", "ulong&");
                 line = Util.ReplaceWholeWord(line, "out", "");
                 line = Util.ReplaceWholeWord(line, "int", "FP_INT");
+                line = Util.ReplaceWholeWord(line, "uint", "FP_UINT");
                 line = Util.ReplaceWholeWord(line, "long", "FP_LONG");
                 line = Util.ReplaceWholeWord(line, "ulong", "FP_ULONG");
                 line = Util.ReplaceWholeWord(line, "Debug.Assert", "FP_ASSERT");
-                line = line.Replace("Util.", "");
+                line = line.Replace("FixedUtil.", "FixedUtil::");
+                line = line.Replace("Fixed64.", "Fixed64::");
                 line = ConvertArrays(line);
                 line = Convert64bitConstants(line);
-                line = Util.ReplaceWholeWord(line, "// PREFIX", g_prefix);
-                line = Util.ReplaceWholeWord(line, "// SUFFIX", g_suffix);
+                line = Util.ReplaceWholeWord(line, "-2147483648", "INT32_MIN");
+                line = Util.ReplaceWholeWord(line, "2147483647", "INT32_MAX");
+                line = Util.ReplaceWholeWord(line, "// PREFIX", prefix);
+                line = Util.ReplaceWholeWord(line, "// SUFFIX", suffix);
 
                 // Add the line
                 sb.AppendLine(line);
@@ -97,18 +113,40 @@ namespace Transpiler
             return Regex.Replace(str, " (-?0?x?[0-9a-fA-F]+)L", " INT64_C($1)", RegexOptions.Singleline);
         }
 
+        private static string GetModeShortDesc(Mode mode)
+        {
+            switch (mode)
+            {
+                case Mode.Fp32: return "32";
+                case Mode.Fp64: return "64";
+                case Mode.Util: return "Util";
+                default: throw new Exception();
+            }
+        }
+
         // Prefix for the generated file
-        private static string g_prefix = @"//
+        private static string MakePrefix(Mode mode)
+        {
+            string desc = GetModeShortDesc(mode);
+
+            string includes = "";
+            if (mode != Mode.Util)
+                includes += "#include \"FixedUtil.h\"\n";
+            if (mode == Mode.Fp32)
+                includes += "#include \"Fixed64.h\"\n";
+
+            return $@"//
 // GENERATED FILE!!!
 //
-// Generated from Fixed64.cs, part of the FixPointCS project (MIT license).
+// Generated from Fixed{desc}.cs, part of the FixPointCS project (MIT license).
 //
 #pragma once
-#ifndef __FIXED64_H
-#define __FIXED64_H
+#ifndef __FIXED{desc.ToUpperInvariant()}_H
+#define __FIXED{desc.ToUpperInvariant()}_H
 
 // Include numeric types
 #include <stdint.h>
+{includes}
 
 // If FP_ASSERT is not custom-defined, then use the standard one
 #ifndef FP_ASSERT
@@ -116,10 +154,10 @@ namespace Transpiler
 #   define FP_ASSERT(x) assert(x)
 #endif
 
-namespace Fixed64
-{
-    typedef int FP_INT;
-    typedef unsigned int FP_UINT;
+namespace Fixed{desc}
+{{
+    typedef int32_t FP_INT;
+    typedef uint32_t FP_UINT;
     typedef int64_t FP_LONG;
     typedef uint64_t FP_ULONG;
 
@@ -128,12 +166,17 @@ namespace Fixed64
     static_assert(sizeof(FP_LONG) == 8, ""Wrong bytesize for FP_LONG"");
     static_assert(sizeof(FP_ULONG) == 8, ""Wrong bytesize for FP_ULONG"");
 ";
+        }
 
-        private static string g_suffix = @"
+        private static string MakeSuffix(Mode mode)
+        {
+            string desc = GetModeShortDesc(mode);
+            return $@"
 
     #undef FP_ASSERT
-};
-#endif // __FIXED64_H
+}};
+#endif // __FIXED{desc.ToUpperInvariant()}_H
 ";
+        }
     }
 }

@@ -25,15 +25,16 @@
 //
 // GENERATED FILE!!!
 //
-// Generated from Fixed64.cs, part of the FixPointCS project (MIT license).
+// Generated from Fixed32.cs, part of the FixPointCS project (MIT license).
 //
 #pragma once
-#ifndef __FIXED64_H
-#define __FIXED64_H
+#ifndef __FIXED32_H
+#define __FIXED32_H
 
 // Include numeric types
 #include <stdint.h>
 #include "FixedUtil.h"
+#include "Fixed64.h"
 
 
 // If FP_ASSERT is not custom-defined, then use the standard one
@@ -42,7 +43,7 @@
 #   define FP_ASSERT(x) assert(x)
 #endif
 
-namespace Fixed64
+namespace Fixed32
 {
     typedef int32_t FP_INT;
     typedef uint32_t FP_UINT;
@@ -56,59 +57,59 @@ namespace Fixed64
 
 
 
-    static const FP_INT Shift = 32;
-    static const FP_LONG FractionMask = ( INT64_C(1) << Shift ) - 1; // Space before INT64_C(1) needed because of hacky C++ code generator
-    static const FP_LONG IntegerMask = ~FractionMask;
+    static const FP_INT Shift = 16;
+    static const FP_INT FractionMask = (1 << Shift) - 1;
+    static const FP_INT IntegerMask = ~FractionMask;
 
     // Constants
-    static const FP_LONG Zero = INT64_C(0);
-    static const FP_LONG Neg1 = INT64_C(-1) << Shift;
-    static const FP_LONG One = INT64_C(1) << Shift;
-    static const FP_LONG Two = INT64_C(2) << Shift;
-    static const FP_LONG Three = INT64_C(3) << Shift;
-    static const FP_LONG Four = INT64_C(4) << Shift;
-    static const FP_LONG Half = One >> 1;
-    static const FP_LONG Pi = INT64_C(13493037705); //(FP_LONG)(Math.PI * 65536.0) << 16;
-    static const FP_LONG Pi2 = INT64_C(26986075409);
-    static const FP_LONG PiHalf = INT64_C(6746518852);
-    static const FP_LONG E = INT64_C(11674931555);
+    static const FP_INT Zero = 0;
+    static const FP_INT Neg1 = -1 << Shift;
+    static const FP_INT One = 1 << Shift;
+    static const FP_INT Two = 2 << Shift;
+    static const FP_INT Three = 3 << Shift;
+    static const FP_INT Four = 4 << Shift;
+    static const FP_INT Half = One >> 1;
+    static const FP_INT Pi = (FP_INT)(13493037705L >> 16); //(FP_INT)(Math.PI * 65536.0) << 16;
+    static const FP_INT Pi2 = (FP_INT)(26986075409L >> 16);
+    static const FP_INT PiHalf = (FP_INT)(6746518852L >> 16);
+    static const FP_INT E = (FP_INT)(11674931555L >> 16);
 
-    static const FP_LONG MinValue = INT64_C(-9223372036854775808);
-    static const FP_LONG MaxValue = INT64_C(9223372036854775807);
+    static const FP_INT MinValue = INT32_MIN;
+    static const FP_INT MaxValue = INT32_MAX;
 
     // Private constants
-    static const FP_LONG RCP_LN2      = INT64_C(0x171547652); // 1.0 / log(2.0) ~= 1.4426950408889634
-    static const FP_LONG RCP_LOG2_E   = INT64_C(2977044471);  // 1.0 / log2(e) ~= 0.6931471805599453
-    static const FP_INT  RCP_HALF_PI  = 683565276; // 1.0 / (4.0 * 0.5 * Math.PI);  // the 4.0 factor converts directly to s2.30
+    static const FP_INT RCP_LN2       = (FP_INT)(0x171547652L >> 16);    // 1.0 / log(2.0) ~= 1.4426950408889634
+    static const FP_INT RCP_LOG2_E    = (FP_INT)(2977044471L >> 16);     // 1.0 / log2(e) ~= 0.6931471805599453
+    static const FP_INT RCP_TWO_PI    = 683565276;                    // 1.0 / (4.0 * 0.5 * pi);  -- the 4.0 factor converts directly to s2.30
 
     /// <summary>
     /// Converts an integer to a fixed-point value.
     /// </summary>
-    static FP_LONG FromInt(FP_INT v)
+    static FP_INT FromInt(FP_INT v)
     {
-        return (FP_LONG)v << Shift;
+        return (FP_INT)v << Shift;
     }
 
     /// <summary>
     /// Converts a double to a fixed-point value.
     /// </summary>
-    static FP_LONG FromDouble(double v)
+    static FP_INT FromDouble(double v)
     {
-        return (FP_LONG)(v * 4294967296.0);
+        return (FP_INT)(v * 65536.0);
     }
 
     /// <summary>
     /// Converts a float to a fixed-point value.
     /// </summary>
-    static FP_LONG FromFloat(float v)
+    static FP_INT FromFloat(float v)
     {
-        return (FP_LONG)(v * 4294967296.0f);
+        return (FP_INT)(v * 65536.0f);
     }
 
     /// <summary>
     /// Converts a fixed-point value into an integer by rounding it up to nearest integer.
     /// </summary>
-    static FP_INT CeilToInt(FP_LONG v)
+    static FP_INT CeilToInt(FP_INT v)
     {
         return (FP_INT)((v + (One - 1)) >> Shift);
     }
@@ -116,7 +117,7 @@ namespace Fixed64
     /// <summary>
     /// Converts a fixed-point value into an integer by rounding it down to nearest integer.
     /// </summary>
-    static FP_INT FloorToInt(FP_LONG v)
+    static FP_INT FloorToInt(FP_INT v)
     {
         return (FP_INT)(v >> Shift);
     }
@@ -124,7 +125,7 @@ namespace Fixed64
     /// <summary>
     /// Converts a fixed-point value into an integer by rounding it to nearest integer.
     /// </summary>
-    static FP_INT RoundToInt(FP_LONG v)
+    static FP_INT RoundToInt(FP_INT v)
     {
         return (FP_INT)((v + Half) >> Shift);
     }
@@ -132,17 +133,17 @@ namespace Fixed64
     /// <summary>
     /// Converts a fixed-point value into a double.
     /// </summary>
-    static double ToDouble(FP_LONG v)
+    static double ToDouble(FP_INT v)
     {
-        return (double)v * (1.0 / 4294967296.0);
+        return (double)v * (1.0 / 65536.0);
     }
 
     /// <summary>
     /// Converts a FP value into a float.
     /// </summary>
-    static float ToFloat(FP_LONG v)
+    static float ToFloat(FP_INT v)
     {
-        return (float)v * (1.0f / 4294967296.0f);
+        return (float)v * (1.0f / 65536.0f);
     }
 
     /// <summary>
@@ -152,9 +153,9 @@ namespace Fixed64
     /// <summary>
     /// Returns the absolute (positive) value of x.
     /// </summary>
-    static FP_LONG Abs(FP_LONG x)
+    static FP_INT Abs(FP_INT x)
     {
-        // \note fails with LONG_MIN
+        // \note fails with MinValue
         // \note for some reason this is twice as fast as (x > 0) ? x : -x
         return (x < 0) ? -x : x;
     }
@@ -162,7 +163,7 @@ namespace Fixed64
     /// <summary>
     /// Negative absolute value (returns -abs(x)).
     /// </summary>
-    static FP_LONG Nabs(FP_LONG x)
+    static FP_INT Nabs(FP_INT x)
     {
         return (x > 0) ? -x : x;
     }
@@ -170,7 +171,7 @@ namespace Fixed64
     /// <summary>
     /// Round up to nearest integer.
     /// </summary>
-    static FP_LONG Ceil(FP_LONG x)
+    static FP_INT Ceil(FP_INT x)
     {
         return (x + FractionMask) & IntegerMask;
     }
@@ -178,7 +179,7 @@ namespace Fixed64
     /// <summary>
     /// Round down to nearest integer.
     /// </summary>
-    static FP_LONG Floor(FP_LONG x)
+    static FP_INT Floor(FP_INT x)
     {
         return x & IntegerMask;
     }
@@ -186,7 +187,7 @@ namespace Fixed64
     /// <summary>
     /// Round to nearest integer.
     /// </summary>
-    static FP_LONG Round(FP_LONG x)
+    static FP_INT Round(FP_INT x)
     {
         return (x + Half) & IntegerMask;
     }
@@ -194,7 +195,7 @@ namespace Fixed64
     /// <summary>
     /// Returns the fractional part of x. Equal to 'x - floor(x)'.
     /// </summary>
-    static FP_LONG Fract(FP_LONG x)
+    static FP_INT Fract(FP_INT x)
     {
         return x & FractionMask;
     }
@@ -202,7 +203,7 @@ namespace Fixed64
     /// <summary>
     /// Returns the minimum of the two values.
     /// </summary>
-    static FP_LONG Min(FP_LONG a, FP_LONG b)
+    static FP_INT Min(FP_INT a, FP_INT b)
     {
         return (a < b) ? a : b;
     }
@@ -210,7 +211,7 @@ namespace Fixed64
     /// <summary>
     /// Returns the maximum of the two values.
     /// </summary>
-    static FP_LONG Max(FP_LONG a, FP_LONG b)
+    static FP_INT Max(FP_INT a, FP_INT b)
     {
         return (a > b) ? a : b;
     }
@@ -218,7 +219,7 @@ namespace Fixed64
     /// <summary>
     /// Returns the sign of the value (-1 if negative, 0 if zero, 1 if positive).
     /// </summary>
-    static FP_INT Sign(FP_LONG x)
+    static FP_INT Sign(FP_INT x)
     {
         if (x == 0) return 0;
         return (x < 0) ? -1 : 1;
@@ -227,7 +228,7 @@ namespace Fixed64
     /// <summary>
     /// Adds the two FP numbers together.
     /// </summary>
-    static FP_LONG Add(FP_LONG a, FP_LONG b)
+    static FP_INT Add(FP_INT a, FP_INT b)
     {
         return a + b;
     }
@@ -235,7 +236,7 @@ namespace Fixed64
     /// <summary>
     /// Subtracts the two FP numbers from each other.
     /// </summary>
-    static FP_LONG Sub(FP_LONG a, FP_LONG b)
+    static FP_INT Sub(FP_INT a, FP_INT b)
     {
         return a - b;
     }
@@ -243,144 +244,65 @@ namespace Fixed64
     /// <summary>
     /// Multiplies two FP values together.
     /// </summary>
-    static FP_LONG Mul(FP_LONG a, FP_LONG b)
+    static FP_INT Mul(FP_INT a, FP_INT b)
     {
-        FP_LONG ai = a >> Shift;
-        FP_LONG af = (a & FractionMask);
-        FP_LONG bi = b >> Shift;
-        FP_LONG bf = (b & FractionMask);
-        return FixedUtil::LogicalShiftRight(af * bf, Shift) + ai * b + af * bi;
+        return (FP_INT)(((FP_LONG)a * (FP_LONG)b) >> Shift);
     }
 
-    static FP_INT MulIntLongLow(FP_INT a, FP_LONG b)
-    {
-        FP_ASSERT(a >= 0);
-        FP_INT bi = (FP_INT)(b >> Shift);
-        FP_LONG bf = b & FractionMask;
-        return (FP_INT)FixedUtil::LogicalShiftRight(a * bf, Shift) + a * bi;
-    }
-
-    static FP_LONG MulIntLongLong(FP_INT a, FP_LONG b)
-    {
-        FP_ASSERT(a >= 0);
-        FP_LONG bi = b >> Shift;
-        FP_LONG bf = b & FractionMask;
-        return FixedUtil::LogicalShiftRight(a * bf, Shift) + a * bi;
-    }
-
-    static FP_INT Nlz(FP_ULONG x)
+    static FP_INT Nlz(FP_UINT x)
     {
         FP_INT n = 0;
-        if (x <= INT64_C(0x00000000FFFFFFFF)) { n = n + 32; x = x << 32; }
-        if (x <= INT64_C(0x0000FFFFFFFFFFFF)) { n = n + 16; x = x << 16; }
-        if (x <= INT64_C(0x00FFFFFFFFFFFFFF)) { n = n + 8; x = x << 8; }
-        if (x <= INT64_C(0x0FFFFFFFFFFFFFFF)) { n = n + 4; x = x << 4; }
-        if (x <= INT64_C(0x3FFFFFFFFFFFFFFF)) { n = n + 2; x = x << 2; }
-        if (x <= INT64_C(0x7FFFFFFFFFFFFFFF)) { n = n + 1; }
-        if (x == 0) return 64;
+        if (x <= 0x0000FFFF) { n = n + 16; x = x << 16; }
+        if (x <= 0x00FFFFFF) { n = n + 8; x = x << 8; }
+        if (x <= 0x0FFFFFFF) { n = n + 4; x = x << 4; }
+        if (x <= 0x3FFFFFFF) { n = n + 2; x = x << 2; }
+        if (x <= 0x7FFFFFFF) { n = n + 1; }
+        if (x == 0) return 32;
         return n;
     }
 
     /// <summary>
     /// Divides two FP values.
     /// </summary>
-    static FP_LONG DivPrecise(FP_LONG arg_a, FP_LONG arg_b)
+    static FP_INT DivPrecise(FP_INT arg_a, FP_INT arg_b)
     {
-        // From http://www.hackersdelight.org/hdcodetxt/divlu.c.txt
-
-        FP_LONG sign_dif = arg_a ^ arg_b;
-
-        static const FP_ULONG b = INT64_C(0x100000000); // Number base (32 bits)
-        FP_ULONG abs_arg_a = (FP_ULONG)((arg_a < 0) ? -arg_a : arg_a);
-        FP_ULONG u1 = abs_arg_a >> 32;
-        FP_ULONG u0 = abs_arg_a << 32;
-        FP_ULONG v = (FP_ULONG)((arg_b < 0) ? -arg_b : arg_b);
-
-        // Overflow?
-        if (u1 >= v)
-        {
-            //rem = 0;
-            return INT64_C(0x7fffffffffffffff);
-        }
-
-        // Shift amount for norm
-        FP_INT s = Nlz(v); // 0 <= s <= 63
-        v = v << s; // Normalize the divisor
-        FP_ULONG vn1 = v >> 32; // Break the divisor into two 32-bit digits
-        FP_ULONG vn0 = v & INT64_C(0xffffffff);
-
-        FP_ULONG un32 = (u1 << s) | (u0 >> (64 - s)) & (FP_ULONG)((FP_LONG)-s >> 63);
-        FP_ULONG un10 = u0 << s; // Shift dividend left
-
-        FP_ULONG un1 = un10 >> 32; // Break the right half of dividend into two digits
-        FP_ULONG un0 = un10 & INT64_C(0xffffffff);
-
-        // Compute the first quotient digit, q1
-        FP_ULONG q1 = un32 / vn1;
-        FP_ULONG rhat = un32 - q1 * vn1;
-        do
-        {
-            if ((q1 >= b) || ((q1 * vn0) > (b * rhat + un1)))
-            {
-                q1 = q1 - 1;
-                rhat = rhat + vn1;
-            }
-            else break;
-        } while (rhat < b);
-
-        FP_ULONG un21 = un32 * b + un1 - q1 * v; // Multiply and subtract
-
-        // Compute the second quotient digit, q0
-        FP_ULONG q0 = un21 / vn1;
-        rhat = un21 - q0 * vn1;
-        do
-        {
-            if ((q0 >= b) || ((q0 * vn0) > (b * rhat + un0)))
-            {
-                q0 = q0 - 1;
-                rhat = rhat + vn1;
-            }
-            else break;
-        } while (rhat < b);
-
-        // Calculate the remainder
-        // FP_ULONG r = (un21 * b + un0 - q0 * v) >> s;
-        // rem = (FP_LONG)r;
-
-        FP_ULONG ret = q1 * b + q0;
-        return (sign_dif < 0) ? -(FP_LONG)ret : (FP_LONG)ret;
+        FP_INT res = (FP_INT)(((FP_LONG)arg_a << Shift) / (FP_LONG)arg_b);
+        return res;
     }
 
     /// <summary>
     /// Calculates division approximation.
     /// </summary>
-    static FP_LONG Div(FP_LONG a, FP_LONG b)
+    static FP_INT Div(FP_INT a, FP_INT b)
     {
         if (b == MinValue)
             return 0;
 
+        return (FP_INT)(((FP_LONG)a << 16) / b);
+/*
         // Handle negative values.
         FP_INT sign = (b < 0) ? -1 : 1;
         b *= sign;
 
         // Normalize input into [1.0, 2.0( range (convert to s2.30).
-        FP_INT offset = 31 - Nlz((FP_ULONG)b);
-        FP_INT n = (FP_INT)FixedUtil::ShiftRight(b, offset + 2);
+        FP_INT offset = 29 - Nlz((FP_UINT)b);
+        FP_INT n = Util.ShiftRight(b, offset - 28);
         static const FP_INT ONE = (1 << 30);
         FP_ASSERT(n >= ONE);
 
         // Polynomial approximation.
-        FP_INT res = FixedUtil::RcpPoly4Lut8(n - ONE);
+        FP_INT res = Util.RcpPoly4Lut8(n - ONE);
 
-        // Apply exponent, convert back to s32.32.
-        FP_LONG y = MulIntLongLong(res, a) << 2;
-        return FixedUtil::ShiftRight(sign * y, offset);
+        // Multiply by reciprocal, apply exponent, convert back to s16.16.
+        FP_INT y = Util.Qmul30(res, a);
+        return Util.ShiftRight(sign * y, offset - 14);
+*/
     }
 
     /// <summary>
     /// Calculates division approximation.
     /// </summary>
-    static FP_LONG DivFast(FP_LONG a, FP_LONG b)
+    static FP_INT DivFast(FP_INT a, FP_INT b)
     {
         if (b == MinValue)
             return 0;
@@ -390,23 +312,23 @@ namespace Fixed64
         b *= sign;
 
         // Normalize input into [1.0, 2.0( range (convert to s2.30).
-        FP_INT offset = 31 - Nlz((FP_ULONG)b);
-        FP_INT n = (FP_INT)FixedUtil::ShiftRight(b, offset + 2);
+        FP_INT offset = 29 - Nlz((FP_UINT)b);
+        FP_INT n = FixedUtil::ShiftRight(b, offset - 28);
         static const FP_INT ONE = (1 << 30);
         FP_ASSERT(n >= ONE);
 
         // Polynomial approximation.
         FP_INT res = FixedUtil::RcpPoly6(n - ONE);
 
-        // Apply exponent, convert back to s32.32.
-        FP_LONG y = MulIntLongLong(res, a) << 2;
-        return FixedUtil::ShiftRight(sign * y, offset);
+        // Multiply by reciprocal, apply exponent, convert back to s16.16.
+        FP_INT y = FixedUtil::Qmul30(res, a);
+        return FixedUtil::ShiftRight(sign * y, offset - 14);
     }
 
     /// <summary>
     /// Calculates division approximation.
     /// </summary>
-    static FP_LONG DivFastest(FP_LONG a, FP_LONG b)
+    static FP_INT DivFastest(FP_INT a, FP_INT b)
     {
         if (b == MinValue)
             return 0;
@@ -416,44 +338,44 @@ namespace Fixed64
         b *= sign;
 
         // Normalize input into [1.0, 2.0( range (convert to s2.30).
-        FP_INT offset = 31 - Nlz((FP_ULONG)b);
-        FP_INT n = (FP_INT)FixedUtil::ShiftRight(b, offset + 2);
+        FP_INT offset = 29 - Nlz((FP_UINT)b);
+        FP_INT n = FixedUtil::ShiftRight(b, offset - 28);
         static const FP_INT ONE = (1 << 30);
         FP_ASSERT(n >= ONE);
 
         // Polynomial approximation.
         FP_INT res = FixedUtil::RcpPoly4(n - ONE);
 
-        // Apply exponent, convert back to s32.32.
-        FP_LONG y = MulIntLongLong(res, a) << 2;
-        return FixedUtil::ShiftRight(sign * y, offset);
+        // Multiply by reciprocal, apply exponent, convert back to s16.16.
+        FP_INT y = FixedUtil::Qmul30(res, a);
+        return FixedUtil::ShiftRight(sign * y, offset - 14);
     }
 
     /// <summary>
     /// Divides two FP values and returns the modulus.
     /// </summary>
-    static FP_LONG Mod(FP_LONG a, FP_LONG b)
+    static FP_INT Mod(FP_INT a, FP_INT b)
     {
-        FP_LONG di = a / b;
-        FP_LONG ret = a - (di * b);
+        FP_INT di = a / b;
+        FP_INT ret = a - (di * b);
         return ret;
     }
 
     /// <summary>
     /// Calculates the square root of the given number.
     /// </summary>
-    static FP_LONG SqrtPrecise(FP_LONG a)
+    static FP_INT SqrtPrecise(FP_INT a)
     {
         // Adapted from https://github.com/chmike/fpsqrt
         if (a < 0)
             return -1;
 
-        FP_ULONG r = (FP_ULONG)a;
-        FP_ULONG b = INT64_C(0x4000000000000000);
-        FP_ULONG q = INT64_C(0);
-        while (b > INT64_C(0x40))
+        FP_UINT r = (FP_UINT)a;
+        FP_UINT b = 0x40000000;
+        FP_UINT q = 0;
+        while (b > 0x40)
         {
-            FP_ULONG t = q + b;
+            FP_UINT t = q + b;
             if (r >= t)
             {
                 r -= t;
@@ -462,11 +384,11 @@ namespace Fixed64
             r <<= 1;
             b >>= 1;
         }
-        q >>= 16;
-        return (FP_LONG)q;
+        q >>= 8;
+        return (FP_INT)q;
     }
 
-    static FP_LONG Sqrt(FP_LONG x)
+    static FP_INT Sqrt(FP_INT x)
     {
         // Return 0 for all non-positive values.
         if (x <= 0)
@@ -477,8 +399,8 @@ namespace Fixed64
         static const FP_INT SQRT2 = 1518500249; // sqrt(2.0)
 
         // Normalize input into [1.0, 2.0( range (as s2.30).
-        FP_INT offset = 31 - Nlz((FP_ULONG)x);
-        FP_INT n = (FP_INT)(((offset >= 0) ? (x >> offset) : (x << -offset)) >> 2);
+        FP_INT offset = 15 - Nlz((FP_UINT)x);
+        FP_INT n = FixedUtil::ShiftRight(x, offset - 14);
         FP_ASSERT(n >= ONE);
         FP_INT y = FixedUtil::SqrtPoly3Lut8(n - ONE);
 
@@ -486,12 +408,12 @@ namespace Fixed64
         FP_INT adjust = ((offset & 1) != 0) ? SQRT2 : ONE;
         offset = offset >> 1;
 
-        // Apply exponent, convert back to s32.32.
-        FP_LONG yr = (FP_LONG)FixedUtil::Qmul30(adjust, y) << 2;
-        return (offset >= 0) ? (yr << offset) : (yr >> -offset);
+        // Apply exponent, convert back to s16.16.
+        FP_INT yr = FixedUtil::Qmul30(adjust, y);
+        return FixedUtil::ShiftRight(yr, 14 - offset);
     }
 
-    static FP_LONG SqrtFast(FP_LONG x)
+    static FP_INT SqrtFast(FP_INT x)
     {
         // Return 0 for all non-positive values.
         if (x <= 0)
@@ -502,8 +424,8 @@ namespace Fixed64
         static const FP_INT SQRT2 = 1518500249; // sqrt(2.0)
 
         // Normalize input into [1.0, 2.0( range (as s2.30).
-        FP_INT offset = 31 - Nlz((FP_ULONG)x);
-        FP_INT n = (FP_INT)(((offset >= 0) ? (x >> offset) : (x << -offset)) >> 2);
+        FP_INT offset = 15 - Nlz((FP_UINT)x);
+        FP_INT n = FixedUtil::ShiftRight(x, offset - 14);
         FP_ASSERT(n >= ONE);
         FP_INT y = FixedUtil::SqrtPoly4(n - ONE);
 
@@ -511,12 +433,12 @@ namespace Fixed64
         FP_INT adjust = ((offset & 1) != 0) ? SQRT2 : ONE;
         offset = offset >> 1;
 
-        // Apply exponent, convert back to s32.32.
-        FP_LONG yr = (FP_LONG)FixedUtil::Qmul30(adjust, y) << 2;
-        return (offset >= 0) ? (yr << offset) : (yr >> -offset);
+        // Apply exponent, convert back to s16.16.
+        FP_INT yr = FixedUtil::Qmul30(adjust, y);
+        return FixedUtil::ShiftRight(yr, 14 - offset);
     }
 
-    static FP_LONG SqrtFastest(FP_LONG x)
+    static FP_INT SqrtFastest(FP_INT x)
     {
         // Return 0 for all non-positive values.
         if (x <= 0)
@@ -527,8 +449,8 @@ namespace Fixed64
         static const FP_INT SQRT2 = 1518500249; // sqrt(2.0)
 
         // Normalize input into [1.0, 2.0( range (as s2.30).
-        FP_INT offset = 31 - Nlz((FP_ULONG)x);
-        FP_INT n = (FP_INT)(((offset >= 0) ? (x >> offset) : (x << -offset)) >> 2);
+        FP_INT offset = 15 - Nlz((FP_UINT)x);
+        FP_INT n = FixedUtil::ShiftRight(x, offset - 14);
         FP_ASSERT(n >= ONE);
         FP_INT y = FixedUtil::SqrtPoly3(n - ONE);
 
@@ -536,15 +458,15 @@ namespace Fixed64
         FP_INT adjust = ((offset & 1) != 0) ? SQRT2 : ONE;
         offset = offset >> 1;
 
-        // Apply exponent, convert back to s32.32.
-        FP_LONG yr = (FP_LONG)FixedUtil::Qmul30(adjust, y) << 2;
-        return (offset >= 0) ? (yr << offset) : (yr >> -offset);
+        // Apply exponent, convert back to s16.16.
+        FP_INT yr = FixedUtil::Qmul30(adjust, y);
+        return FixedUtil::ShiftRight(yr, 14 - offset);
     }
 
     /// <summary>
     /// Calculates the reciprocal square root.
     /// </summary>
-    static FP_LONG RSqrt(FP_LONG x)
+    static FP_INT RSqrt(FP_INT x)
     {
         FP_ASSERT(x > 0);
 
@@ -553,8 +475,8 @@ namespace Fixed64
         static const FP_INT HALF_SQRT2 = 759250125; // 0.5 * sqrt(2.0)
 
         // Normalize input into [1.0, 2.0( range (as s2.30).
-        FP_INT offset = 31 - Nlz((FP_ULONG)x);
-        FP_INT n = (FP_INT)(((offset >= 0) ? (x >> offset) : (x << -offset)) >> 2);
+        FP_INT offset = 1 - Nlz((FP_UINT)x);
+        FP_INT n = FixedUtil::ShiftRight(x, offset);
         FP_ASSERT(n >= ONE);
         FP_INT y = FixedUtil::RSqrtPoly3Lut16(n - ONE);
 
@@ -562,15 +484,15 @@ namespace Fixed64
         FP_INT adjust = ((offset & 1) != 0) ? HALF_SQRT2 : ONE;
         offset = offset >> 1;
 
-        // Apply exponent, convert back to s32.32.
-        FP_LONG yr = (FP_LONG)FixedUtil::Qmul30(adjust, y) << 2;
-        return (offset >= 0) ? (yr >> offset) : (yr << -offset);
+        // Apply exponent, convert back to s16.16.
+        FP_INT yr = FixedUtil::Qmul30(adjust, y);
+        return FixedUtil::ShiftRight(yr, offset + 21);
     }
 
     /// <summary>
     /// Calculates the reciprocal square root.
     /// </summary>
-    static FP_LONG RSqrtFast(FP_LONG x)
+    static FP_INT RSqrtFast(FP_INT x)
     {
         FP_ASSERT(x > 0);
 
@@ -579,8 +501,8 @@ namespace Fixed64
         static const FP_INT HALF_SQRT2 = 759250125; // 0.5 * sqrt(2.0)
 
         // Normalize input into [1.0, 2.0( range (as s2.30).
-        FP_INT offset = 31 - Nlz((FP_ULONG)x);
-        FP_INT n = (FP_INT)(((offset >= 0) ? (x >> offset) : (x << -offset)) >> 2);
+        FP_INT offset = 1 - Nlz((FP_UINT)x);
+        FP_INT n = FixedUtil::ShiftRight(x, offset);
         FP_ASSERT(n >= ONE);
         FP_INT y = FixedUtil::RSqrtPoly5(n - ONE);
 
@@ -588,15 +510,15 @@ namespace Fixed64
         FP_INT adjust = ((offset & 1) != 0) ? HALF_SQRT2 : ONE;
         offset = offset >> 1;
 
-        // Apply exponent, convert back to s32.32.
-        FP_LONG yr = (FP_LONG)FixedUtil::Qmul30(adjust, y) << 2;
-        return (offset >= 0) ? (yr >> offset) : (yr << -offset);
+        // Apply exponent, convert back to s16.16.
+        FP_INT yr = FixedUtil::Qmul30(adjust, y);
+        return FixedUtil::ShiftRight(yr, offset + 21);
     }
 
     /// <summary>
     /// Calculates the reciprocal square root.
     /// </summary>
-    static FP_LONG RSqrtFastest(FP_LONG x)
+    static FP_INT RSqrtFastest(FP_INT x)
     {
         FP_ASSERT(x > 0);
 
@@ -605,8 +527,8 @@ namespace Fixed64
         static const FP_INT HALF_SQRT2 = 759250125; // 0.5 * sqrt(2.0)
 
         // Normalize input into [1.0, 2.0( range (as s2.30).
-        FP_INT offset = 31 - Nlz((FP_ULONG)x);
-        FP_INT n = (FP_INT)(((offset >= 0) ? (x >> offset) : (x << -offset)) >> 2);
+        FP_INT offset = 1 - Nlz((FP_UINT)x);
+        FP_INT n = FixedUtil::ShiftRight(x, offset);
         FP_ASSERT(n >= ONE);
         FP_INT y = FixedUtil::RSqrtPoly3(n - ONE);
 
@@ -614,15 +536,15 @@ namespace Fixed64
         FP_INT adjust = ((offset & 1) != 0) ? HALF_SQRT2 : ONE;
         offset = offset >> 1;
 
-        // Apply exponent, convert back to s32.32.
-        FP_LONG yr = (FP_LONG)FixedUtil::Qmul30(adjust, y) << 2;
-        return (offset >= 0) ? (yr >> offset) : (yr << -offset);
+        // Apply exponent, convert back to s16.16.
+        FP_INT yr = FixedUtil::Qmul30(adjust, y);
+        return FixedUtil::ShiftRight(yr, offset + 21);
     }
 
     /// <summary>
     /// Calculates reciprocal approximation.
     /// </summary>
-    static FP_LONG Rcp(FP_LONG x)
+    static FP_INT Rcp(FP_INT x)
     {
         if (x == MinValue)
             return 0;
@@ -632,23 +554,22 @@ namespace Fixed64
         x *= sign;
 
         // Normalize input into [1.0, 2.0( range (convert to s2.30).
-        FP_INT offset = 31 - Nlz((FP_ULONG)x);
-        FP_INT n = (FP_INT)FixedUtil::ShiftRight(x, offset + 2);
+        FP_INT offset = 29 - Nlz((FP_UINT)x);
+        FP_INT n = FixedUtil::ShiftRight(x, offset - 28);
         static const FP_INT ONE = (1 << 30);
         FP_ASSERT(n >= ONE);
 
         // Polynomial approximation.
         FP_INT res = FixedUtil::RcpPoly4Lut8(n - ONE);
-        FP_LONG y = (FP_LONG)(sign * res) << 2;
 
-        // Apply exponent, convert back to s32.32.
-        return FixedUtil::ShiftRight(y, offset);
+        // Apply exponent, convert back to s16.16.
+        return FixedUtil::ShiftRight(sign * res, offset);
     }
 
     /// <summary>
     /// Calculates reciprocal approximation.
     /// </summary>
-    static FP_LONG RcpFast(FP_LONG x)
+    static FP_INT RcpFast(FP_INT x)
     {
         if (x == MinValue)
             return 0;
@@ -658,23 +579,23 @@ namespace Fixed64
         x *= sign;
 
         // Normalize input into [1.0, 2.0( range (convert to s2.30).
-        FP_INT offset = 31 - Nlz((FP_ULONG)x);
-        FP_INT n = (FP_INT)FixedUtil::ShiftRight(x, offset + 2);
+        FP_INT offset = 29 - Nlz((FP_UINT)x);
+        FP_INT n = FixedUtil::ShiftRight(x, offset - 28);
         static const FP_INT ONE = (1 << 30);
         FP_ASSERT(n >= ONE);
 
         // Polynomial approximation.
         FP_INT res = FixedUtil::RcpPoly6(n - ONE);
-        FP_LONG y = (FP_LONG)(sign * res) << 2;
+        //FP_INT res = Util.RcpPoly3Lut8(n - ONE);
 
-        // Apply exponent, convert back to s32.32.
-        return FixedUtil::ShiftRight(y, offset);
+        // Apply exponent, convert back to s16.16.
+        return FixedUtil::ShiftRight(sign * res, offset);
     }
 
     /// <summary>
     /// Calculates reciprocal approximation.
     /// </summary>
-    static FP_LONG RcpFastest(FP_LONG x)
+    static FP_INT RcpFastest(FP_INT x)
     {
         if (x == MinValue)
             return 0;
@@ -684,187 +605,191 @@ namespace Fixed64
         x *= sign;
 
         // Normalize input into [1.0, 2.0( range (convert to s2.30).
+        FP_INT offset = 29 - Nlz((FP_UINT)x);
+        FP_INT n = FixedUtil::ShiftRight(x, offset - 28);
         static const FP_INT ONE = (1 << 30);
-        FP_INT offset = 31 - Nlz((FP_ULONG)x);
-        FP_INT n = (FP_INT)FixedUtil::ShiftRight(x, offset + 2);
-        //FP_INT n = (FP_INT)(((offset >= 0) ? (x >> offset) : (x << -offset)) >> 2);
+        FP_ASSERT(n >= ONE);
 
         // Polynomial approximation.
         FP_INT res = FixedUtil::RcpPoly4(n - ONE);
-        FP_LONG y = (FP_LONG)(sign * res) << 2;
+        //FP_INT res = Util.RcpPoly3Lut4(n - ONE);
 
-        // Apply exponent, convert back to s32.32.
-        return FixedUtil::ShiftRight(y, offset);
+        // Apply exponent, convert back to s16.16.
+        return FixedUtil::ShiftRight(sign * res, offset);
     }
 
     /// <summary>
     /// Calculates the base 2 exponent.
     /// </summary>
-    static FP_LONG Exp2(FP_LONG x)
+    static FP_INT Exp2(FP_INT x)
     {
         // Handle values that would under or overflow.
-        if (x >= 32 * One) return MaxValue;
-        if (x <= -32 * One) return 0;
+        if (x >= 15 * One) return MaxValue;
+        if (x <= -16 * One) return 0;
 
         // Compute exp2 for fractional part.
-        FP_INT k = (FP_INT)((x & FractionMask) >> 2);
-        FP_LONG y = (FP_LONG)FixedUtil::Exp2Poly5(k) << 2;
+        FP_INT k = (x & FractionMask) << 14;
+        FP_INT y = FixedUtil::Exp2Poly5(k);
 
-        // Combine integer and fractional result, and convert back to s32.32.
-        FP_INT intPart = (FP_INT)(x >> Shift);
-        return (intPart >= 0) ? (y << intPart) : (y >> -intPart);
+        // Combine integer and fractional result, and convert back to s16.16.
+        FP_INT intPart = x >> Shift;
+        return FixedUtil::ShiftRight(y, 14 - intPart);
     }
 
     /// <summary>
     /// Calculates the base 2 exponent.
     /// </summary>
-    static FP_LONG Exp2Fast(FP_LONG x)
+    static FP_INT Exp2Fast(FP_INT x)
     {
         // Handle values that would under or overflow.
-        if (x >= 32 * One) return MaxValue;
-        if (x <= -32 * One) return 0;
+        if (x >= 15 * One) return MaxValue;
+        if (x <= -16 * One) return 0;
 
         // Compute exp2 for fractional part.
-        FP_INT k = (FP_INT)((x & FractionMask) >> 2);
-        FP_LONG y = (FP_LONG)FixedUtil::Exp2Poly4(k) << 2;
+        FP_INT k = (x & FractionMask) << 14;
+        FP_INT y = FixedUtil::Exp2Poly4(k);
 
-        // Combine integer and fractional result, and convert back to s32.32.
-        FP_INT intPart = (FP_INT)(x >> Shift);
-        return (intPart >= 0) ? (y << intPart) : (y >> -intPart);
+        // Combine integer and fractional result, and convert back to s16.16.
+        FP_INT intPart = x >> Shift;
+        return FixedUtil::ShiftRight(y, 14 - intPart);
     }
 
     /// <summary>
     /// Calculates the base 2 exponent.
     /// </summary>
-    static FP_LONG Exp2Fastest(FP_LONG x)
+    static FP_INT Exp2Fastest(FP_INT x)
     {
         // Handle values that would under or overflow.
-        if (x >= 32 * One) return MaxValue;
-        if (x <= -32 * One) return 0;
+        if (x >= 15 * One) return MaxValue;
+        if (x <= -16 * One) return 0;
 
         // Compute exp2 for fractional part.
-        FP_INT k = (FP_INT)((x & FractionMask) >> 2);
-        FP_LONG y = (FP_LONG)FixedUtil::Exp2Poly3(k) << 2;
+        FP_INT k = (x & FractionMask) << 14;
+        FP_INT y = FixedUtil::Exp2Poly3(k);
 
-        // Combine integer and fractional result, and convert back to s32.32.
-        FP_INT intPart = (FP_INT)(x >> Shift);
-        return (intPart >= 0) ? (y << intPart) : (y >> -intPart);
+        // Combine integer and fractional result, and convert back to s16.16.
+        FP_INT intPart = x >> Shift;
+        return FixedUtil::ShiftRight(y, 14 - intPart);
     }
 
-    static FP_LONG Exp(FP_LONG x)
+    static FP_INT Exp(FP_INT x)
     {
         // e^x == 2^(x / ln(2))
         return Exp2(Mul(x, RCP_LN2));
     }
 
-    static FP_LONG ExpFast(FP_LONG x)
+    static FP_INT ExpFast(FP_INT x)
     {
         // e^x == 2^(x / ln(2))
         return Exp2Fast(Mul(x, RCP_LN2));
     }
 
-    static FP_LONG ExpFastest(FP_LONG x)
+    static FP_INT ExpFastest(FP_INT x)
     {
         // e^x == 2^(x / ln(2))
         return Exp2Fastest(Mul(x, RCP_LN2));
     }
 
-    static FP_LONG Log(FP_LONG x)
+    static FP_INT Log(FP_INT x)
     {
-        // Natural logarithm (base e).
-        FP_ASSERT(x > 0);
-
         // Normalize value to range [1.0, 2.0( as s2.30 and extract exponent.
-        static const FP_INT ONE = (1 << 30);
-        FP_INT offset = 31 - Nlz((FP_ULONG)x);
-        FP_INT n = (FP_INT)(((offset >= 0) ? (x >> offset) : (x << -offset)) >> 2);
-        FP_ASSERT(n >= ONE);
-        FP_LONG y = (FP_LONG)FixedUtil::LogPoly5Lut8(n - ONE) << 2;
+        FP_ASSERT(x > 0);
+        FP_INT offset = 15 - Nlz((FP_UINT)x);
+        FP_INT n = FixedUtil::ShiftRight(x, offset - 14);
 
-        // Combine integer and fractional parts (into s32.32).
-        return (FP_LONG)offset * RCP_LOG2_E + y;
+        // Polynomial approximation.
+        static const FP_INT ONE = (1 << 30);
+        FP_ASSERT(n >= ONE);
+        FP_INT y = FixedUtil::LogPoly5Lut8(n - ONE);
+
+        // Combine integer and fractional parts (into s16.16).
+        return offset * RCP_LOG2_E + (y >> 14);
     }
 
-    static FP_LONG LogFast(FP_LONG x)
+    static FP_INT LogFast(FP_INT x)
     {
         // Normalize value to range [1.0, 2.0( as s2.30 and extract exponent.
         FP_ASSERT(x > 0);
-        static const FP_INT ONE = (1 << 30);
-        FP_INT offset = 31 - Nlz((FP_ULONG)x);
-        FP_INT n = (FP_INT)(((offset >= 0) ? (x >> offset) : (x << -offset)) >> 2);
-        FP_ASSERT(n >= ONE);
-        FP_LONG y = (FP_LONG)FixedUtil::LogPoly3Lut8(n - ONE) << 2;
+        FP_INT offset = 15 - Nlz((FP_UINT)x);
+        FP_INT n = FixedUtil::ShiftRight(x, offset - 14);
 
-        // Combine integer and fractional parts (into s32.32).
-        return (FP_LONG)offset * RCP_LOG2_E + y;
+        // Polynomial approximation.
+        static const FP_INT ONE = (1 << 30);
+        FP_ASSERT(n >= ONE);
+        FP_INT y = FixedUtil::LogPoly3Lut8(n - ONE);
+
+        // Combine integer and fractional parts (into s16.16).
+        return offset * RCP_LOG2_E + (y >> 14);
     }
 
-    static FP_LONG LogFastest(FP_LONG x)
+    static FP_INT LogFastest(FP_INT x)
     {
         // Normalize value to range [1.0, 2.0( as s2.30 and extract exponent.
         FP_ASSERT(x > 0);
-        static const FP_INT ONE = (1 << 30);
-        FP_INT offset = 31 - Nlz((FP_ULONG)x);
-        FP_INT n = (FP_INT)(((offset >= 0) ? (x >> offset) : (x << -offset)) >> 2);
-        FP_ASSERT(n >= ONE);
-        FP_LONG y = (FP_LONG)FixedUtil::LogPoly5(n - ONE) << 2;
+        FP_INT offset = 15 - Nlz((FP_UINT)x);
+        FP_INT n = FixedUtil::ShiftRight(x, offset - 14);
 
-        // Combine integer and fractional parts (into s32.32).
-        return (FP_LONG)offset * RCP_LOG2_E + y;
+        // Polynomial approximation.
+        static const FP_INT ONE = (1 << 30);
+        FP_ASSERT(n >= ONE);
+        FP_INT y = FixedUtil::LogPoly5(n - ONE);
+
+        // Combine integer and fractional parts (into s16.16).
+        return offset * RCP_LOG2_E + (y >> 14);
     }
 
-    static FP_LONG Log2(FP_LONG x)
+    static FP_INT Log2(FP_INT x)
     {
         // Normalize value to range [1.0, 2.0( as s2.30 and extract exponent.
         FP_ASSERT(x > 0);
-        FP_INT offset = 31 - Nlz((FP_ULONG)x);
-        FP_INT n = (FP_INT)(((offset >= 0) ? (x >> offset) : (x << -offset)) >> 2);
+        FP_INT offset = 15 - Nlz((FP_UINT)x);
+        FP_INT n = FixedUtil::ShiftRight(x, offset - 14);
 
         // Polynomial approximation of mantissa.
         static const FP_INT ONE = (1 << 30);
         FP_ASSERT(n >= ONE);
-        FP_LONG y = (FP_LONG)FixedUtil::Log2Poly4Lut16(n - ONE) << 2;
+        FP_INT y = FixedUtil::Log2Poly4Lut16(n - ONE);
 
-        // Combine integer and fractional parts (into s32.32).
-        return ((FP_LONG)offset << Shift) + y;
+        // Combine integer and fractional parts (into s16.16).
+        return (offset << Shift) + (y >> 14);
     }
 
-    static FP_LONG Log2Fast(FP_LONG x)
+    static FP_INT Log2Fast(FP_INT x)
     {
         // Normalize value to range [1.0, 2.0( as s2.30 and extract exponent.
         FP_ASSERT(x > 0);
-        FP_INT offset = 31 - Nlz((FP_ULONG)x);
-        FP_INT n = (FP_INT)(((offset >= 0) ? (x >> offset) : (x << -offset)) >> 2);
+        FP_INT offset = 15 - Nlz((FP_UINT)x);
+        FP_INT n = FixedUtil::ShiftRight(x, offset - 14);
 
         // Polynomial approximation of mantissa.
         static const FP_INT ONE = (1 << 30);
         FP_ASSERT(n >= ONE);
-        FP_LONG y = (FP_LONG)FixedUtil::Log2Poly3Lut16(n - ONE) << 2;
+        FP_INT y = FixedUtil::Log2Poly3Lut16(n - ONE);
 
-        // Combine integer and fractional parts (into s32.32).
-        return ((FP_LONG)offset << Shift) + y;
+        // Combine integer and fractional parts (into s16.16).
+        return (offset << Shift) + (y >> 14);
     }
 
-    static FP_LONG Log2Fastest(FP_LONG x)
+    static FP_INT Log2Fastest(FP_INT x)
     {
         // Normalize value to range [1.0, 2.0( as s2.30 and extract exponent.
         FP_ASSERT(x > 0);
-        FP_INT offset = 31 - Nlz((FP_ULONG)x);
-        FP_INT n = (FP_INT)(((offset >= 0) ? (x >> offset) : (x << -offset)) >> 2);
+        FP_INT offset = 15 - Nlz((FP_UINT)x);
+        FP_INT n = FixedUtil::ShiftRight(x, offset - 14);
 
         // Polynomial approximation of mantissa.
         static const FP_INT ONE = (1 << 30);
         FP_ASSERT(n >= ONE);
-        FP_LONG y = (FP_LONG)FixedUtil::Log2Poly5(n - ONE) << 2;
+        FP_INT y = FixedUtil::Log2Poly5(n - ONE);
 
-        // Combine integer and fractional parts (into s32.32).
-        return ((FP_LONG)offset << Shift) + y;
+        // Combine integer and fractional parts (into s16.16).
+        return (offset << Shift) + (y >> 14);
     }
 
     /// <summary>
     /// Calculates x to the power of the exponent.
     /// </summary>
-    static FP_LONG Pow(FP_LONG x, FP_LONG exponent)
+    static FP_INT Pow(FP_INT x, FP_INT exponent)
     {
         FP_ASSERT(x >= 0);
         if (x <= 0) return 0;
@@ -874,7 +799,7 @@ namespace Fixed64
     /// <summary>
     /// Calculates x to the power of the exponent.
     /// </summary>
-    static FP_LONG PowFast(FP_LONG x, FP_LONG exponent)
+    static FP_INT PowFast(FP_INT x, FP_INT exponent)
     {
         FP_ASSERT(x >= 0);
         if (x <= 0) return 0;
@@ -884,7 +809,7 @@ namespace Fixed64
     /// <summary>
     /// Calculates x to the power of the exponent.
     /// </summary>
-    static FP_LONG PowFastest(FP_LONG x, FP_LONG exponent)
+    static FP_INT PowFastest(FP_INT x, FP_INT exponent)
     {
         FP_ASSERT(x >= 0);
         if (x <= 0) return 0;
@@ -908,7 +833,7 @@ namespace Fixed64
         FP_INT zz = FixedUtil::Qmul30(z, z);
         FP_INT res = FixedUtil::Qmul30(FixedUtil::SinPoly4(zz), z);
 
-        // Return s2.30 value.
+        // Return as s2.30.
         return res;
     }
 
@@ -929,7 +854,7 @@ namespace Fixed64
         FP_INT zz = FixedUtil::Qmul30(z, z);
         FP_INT res = FixedUtil::Qmul30(FixedUtil::SinPoly3(zz), z);
 
-        // Return s2.30 value.
+        // Return as s2.30.
         return res;
     }
 
@@ -950,100 +875,100 @@ namespace Fixed64
         FP_INT zz = FixedUtil::Qmul30(z, z);
         FP_INT res = FixedUtil::Qmul30(FixedUtil::SinPoly2(zz), z);
 
-        // Return s2.30 value.
+        // Return as s2.30.
         return res;
     }
 
-    static FP_LONG Sin(FP_LONG x)
+    static FP_INT Sin(FP_INT x)
     {
         // Map [0, 2pi] to [0, 4] (as s2.30).
         // This also wraps the values into one period.
-        FP_INT z = MulIntLongLow(RCP_HALF_PI, x);
+        FP_INT z = Mul(RCP_TWO_PI, x);
 
-        // Compute sine and convert to s32.32.
-        return (FP_LONG)UnitSin(z) << 2;
+        // Compute sin from s2.30 and convert back to s16.16.
+        return UnitSin(z) >> 14;
     }
 
-    static FP_LONG SinFast(FP_LONG x)
+    static FP_INT SinFast(FP_INT x)
     {
         // Map [0, 2pi] to [0, 4] (as s2.30).
         // This also wraps the values into one period.
-        FP_INT z = MulIntLongLow(RCP_HALF_PI, x);
+        FP_INT z = Mul(RCP_TWO_PI, x);
 
-        // Compute sine and convert to s32.32.
-        return (FP_LONG)UnitSinFast(z) << 2;
+        // Compute sin from s2.30 and convert back to s16.16.
+        return UnitSinFast(z) >> 14;
     }
 
-    static FP_LONG SinFastest(FP_LONG x)
+    static FP_INT SinFastest(FP_INT x)
     {
         // Map [0, 2pi] to [0, 4] (as s2.30).
         // This also wraps the values into one period.
-        FP_INT z = MulIntLongLow(RCP_HALF_PI, x);
+        FP_INT z = Mul(RCP_TWO_PI, x);
 
-        // Compute sine and convert to s32.32.
-        return (FP_LONG)UnitSinFastest(z) << 2;
+        // Compute sin from s2.30 and convert back to s16.16.
+        return UnitSinFastest(z) >> 14;
     }
 
-    static FP_LONG Cos(FP_LONG x)
+    static FP_INT Cos(FP_INT x)
     {
         return Sin(x + PiHalf);
     }
 
-    static FP_LONG CosFast(FP_LONG x)
+    static FP_INT CosFast(FP_INT x)
     {
         return SinFast(x + PiHalf);
     }
 
-    static FP_LONG CosFastest(FP_LONG x)
+    static FP_INT CosFastest(FP_INT x)
     {
         return SinFastest(x + PiHalf);
     }
 
-    static FP_LONG Tan(FP_LONG x)
+    static FP_INT Tan(FP_INT x)
     {
-        FP_INT z = MulIntLongLow(RCP_HALF_PI, x);
-        FP_LONG sinX = (FP_LONG)UnitSin(z) << 32;
-        FP_LONG cosX = (FP_LONG)UnitSin(z + (1 << 30)) << 32;
+        FP_INT z = Mul(RCP_TWO_PI, x);
+        FP_INT sinX = UnitSin(z);
+        FP_INT cosX = UnitSin(z + (1 << 30));
         return Div(sinX, cosX);
     }
 
-    static FP_LONG TanFast(FP_LONG x)
+    static FP_INT TanFast(FP_INT x)
     {
-        FP_INT z = MulIntLongLow(RCP_HALF_PI, x);
-        FP_LONG sinX = (FP_LONG)UnitSinFast(z) << 32;
-        FP_LONG cosX = (FP_LONG)UnitSinFast(z + (1 << 30)) << 32;
+        FP_INT z = Mul(RCP_TWO_PI, x);
+        FP_INT sinX = UnitSinFast(z);
+        FP_INT cosX = UnitSinFast(z + (1 << 30));
         return DivFast(sinX, cosX);
     }
 
-    static FP_LONG TanFastest(FP_LONG x)
+    static FP_INT TanFastest(FP_INT x)
     {
-        FP_INT z = MulIntLongLow(RCP_HALF_PI, x);
-        FP_LONG sinX = (FP_LONG)UnitSinFastest(z) << 32;
-        FP_LONG cosX = (FP_LONG)UnitSinFastest(z + (1 << 30)) << 32;
+        FP_INT z = Mul(RCP_TWO_PI, x);
+        FP_INT sinX = UnitSinFastest(z);
+        FP_INT cosX = UnitSinFastest(z + (1 << 30));
         return DivFastest(sinX, cosX);
     }
 
-    static FP_INT Atan2Div(FP_LONG y, FP_LONG x)
+    static FP_INT Atan2Div(FP_INT y, FP_INT x)
     {
         FP_ASSERT(y >= 0 && x > 0 && x >= y);
 
         // Normalize input into [1.0, 2.0( range (convert to s2.30).
         static const FP_INT ONE = (1 << 30);
         static const FP_INT HALF = (1 << 29);
-        FP_INT offset = 31 - Nlz((FP_ULONG)x);
-        FP_INT n = (FP_INT)(((offset >= 0) ? (x >> offset) : (x << -offset)) >> 2);
-        FP_INT k = n - ONE;
+        FP_INT offset = 1 - Nlz((FP_UINT)x);
+        FP_INT n = FixedUtil::ShiftRight(x, offset);
+        FP_ASSERT(n >= ONE);
 
         // Polynomial approximation of reciprocal.
-        FP_INT oox = FixedUtil::RcpPoly4Lut8(k);
+        FP_INT oox = FixedUtil::RcpPoly4Lut8(n - ONE);
         FP_ASSERT(oox >= HALF && oox <= ONE);
 
         // Apply exponent and multiply.
-        FP_LONG yr = (offset >= 0) ? (y >> offset) : (y << -offset);
-        return FixedUtil::Qmul30((FP_INT)(yr >> 2), oox);
+        FP_INT yr = FixedUtil::ShiftRight(y, offset);
+        return FixedUtil::Qmul30(yr, oox);
     }
 
-    static FP_LONG Atan2(FP_LONG y, FP_LONG x)
+    static FP_INT Atan2(FP_INT y, FP_INT x)
     {
         // See: https://www.dsprelated.com/showarticle/1052.php
 
@@ -1054,16 +979,15 @@ namespace Fixed64
             return 0;
         }
 
-        // \note these round negative numbers slightly
-        FP_LONG nx = x ^ (x >> 63);
-        FP_LONG ny = y ^ (y >> 63);
-        FP_LONG negMask = ((x ^ y) >> 63);
+        FP_INT nx = Abs(x);
+        FP_INT ny = Abs(y);
+        FP_INT negMask = ((x ^ y) >> 31);
 
         if (nx >= ny)
         {
             FP_INT k = Atan2Div(ny, nx);
             FP_INT z = FixedUtil::AtanPoly5Lut8(k);
-            FP_LONG angle = negMask ^ ((FP_LONG)z << 2);
+            FP_INT angle = (negMask ^ (z >> 14)) - negMask;
             if (x > 0) return angle;
             if (y >= 0) return angle + Pi;
             return angle - Pi;
@@ -1072,32 +996,31 @@ namespace Fixed64
         {
             FP_INT k = Atan2Div(nx, ny);
             FP_INT z = FixedUtil::AtanPoly5Lut8(k);
-            FP_LONG angle = negMask ^ ((FP_LONG)z << 2);
+            FP_INT angle = negMask ^  (z >> 14);
             return ((y > 0) ? PiHalf : -PiHalf) - angle;
         }
     }
 
-    static FP_INT Atan2DivFast(FP_LONG y, FP_LONG x)
+    static FP_INT Atan2DivFast(FP_INT y, FP_INT x)
     {
         FP_ASSERT(y >= 0 && x > 0 && x >= y);
 
         // Normalize input into [1.0, 2.0( range (convert to s2.30).
         static const FP_INT ONE = (1 << 30);
         static const FP_INT HALF = (1 << 29);
-        FP_INT offset = 31 - Nlz((FP_ULONG)x);
-        FP_INT n = (FP_INT)(((offset >= 0) ? (x >> offset) : (x << -offset)) >> 2);
-        FP_INT k = n - ONE;
+        FP_INT offset = 1 - Nlz((FP_UINT)x);
+        FP_INT n = FixedUtil::ShiftRight(x, offset);
 
         // Polynomial approximation.
-        FP_INT oox = FixedUtil::RcpPoly6(k);
+        FP_INT oox = FixedUtil::RcpPoly6(n - ONE);
         FP_ASSERT(oox >= HALF && oox <= ONE);
 
         // Apply exponent and multiply.
-        FP_LONG yr = (offset >= 0) ? (y >> offset) : (y << -offset);
-        return FixedUtil::Qmul30((FP_INT)(yr >> 2), oox);
+        FP_INT yr = FixedUtil::ShiftRight(y, offset);
+        return FixedUtil::Qmul30(yr, oox);
     }
 
-    static FP_LONG Atan2Fast(FP_LONG y, FP_LONG x)
+    static FP_INT Atan2Fast(FP_INT y, FP_INT x)
     {
         // See: https://www.dsprelated.com/showarticle/1052.php
 
@@ -1108,16 +1031,15 @@ namespace Fixed64
             return 0;
         }
 
-        // \note these round negative numbers slightly
-        FP_LONG nx = x ^ (x >> 63);
-        FP_LONG ny = y ^ (y >> 63);
-        FP_LONG negMask = ((x ^ y) >> 63);
+        FP_INT nx = Abs(x);
+        FP_INT ny = Abs(y);
+        FP_INT negMask = ((x ^ y) >> 31);
 
         if (nx >= ny)
         {
             FP_INT k = Atan2DivFast(ny, nx);
             FP_INT z = FixedUtil::AtanPoly3Lut8(k);
-            FP_LONG angle = negMask ^ ((FP_LONG)z << 2);
+            FP_INT angle = negMask ^ (z >> 14);
             if (x > 0) return angle;
             if (y >= 0) return angle + Pi;
             return angle - Pi;
@@ -1126,32 +1048,31 @@ namespace Fixed64
         {
             FP_INT k = Atan2DivFast(nx, ny);
             FP_INT z = FixedUtil::AtanPoly3Lut8(k);
-            FP_LONG angle = negMask ^ ((FP_LONG)z << 2);
+            FP_INT angle = negMask ^ (z >> 14);
             return ((y > 0) ? PiHalf : -PiHalf) - angle;
         }
     }
 
-    static FP_INT Atan2DivFastest(FP_LONG y, FP_LONG x)
+    static FP_INT Atan2DivFastest(FP_INT y, FP_INT x)
     {
         FP_ASSERT(y >= 0 && x > 0 && x >= y);
 
         // Normalize input into [1.0, 2.0( range (convert to s2.30).
         static const FP_INT ONE = (1 << 30);
         static const FP_INT HALF = (1 << 29);
-        FP_INT offset = 31 - Nlz((FP_ULONG)x);
-        FP_INT n = (FP_INT)(((offset >= 0) ? (x >> offset) : (x << -offset)) >> 2);
-        FP_INT k = n - ONE;
+        FP_INT offset = 1 - Nlz((FP_UINT)x);
+        FP_INT n = FixedUtil::ShiftRight(x, offset);
 
         // Polynomial approximation.
-        FP_INT oox = FixedUtil::RcpPoly4(k);
+        FP_INT oox = FixedUtil::RcpPoly4(n - ONE);
         FP_ASSERT(oox >= HALF && oox <= ONE);
 
         // Apply exponent and multiply.
-        FP_LONG yr = (offset >= 0) ? (y >> offset) : (y << -offset);
-        return FixedUtil::Qmul30((FP_INT)(yr >> 2), oox);
+        FP_INT yr = FixedUtil::ShiftRight(y, offset);
+        return FixedUtil::Qmul30(yr, oox);
     }
 
-    static FP_LONG Atan2Fastest(FP_LONG y, FP_LONG x)
+    static FP_INT Atan2Fastest(FP_INT y, FP_INT x)
     {
         // See: https://www.dsprelated.com/showarticle/1052.php
 
@@ -1162,76 +1083,93 @@ namespace Fixed64
             return 0;
         }
 
-        // \note these round negative numbers slightly
-        FP_LONG nx = x ^ (x >> 63);
-        FP_LONG ny = y ^ (y >> 63);
-        FP_LONG negMask = ((x ^ y) >> 63);
+        FP_INT nx = Abs(x);
+        FP_INT ny = Abs(y);
+        FP_INT negMask = ((x ^ y) >> 31);
 
         if (nx >= ny)
         {
-            FP_INT z = Atan2DivFastest(ny, nx);
-            FP_INT res = FixedUtil::AtanPoly4(z);
-            FP_LONG angle = negMask ^ ((FP_LONG)res << 2);
+            FP_INT k = Atan2DivFastest(ny, nx);
+            FP_INT z = FixedUtil::AtanPoly4(k);
+            FP_INT angle = negMask ^ (z >> 14);
             if (x > 0) return angle;
             if (y >= 0) return angle + Pi;
             return angle - Pi;
         }
         else
         {
-            FP_INT z = Atan2DivFastest(nx, ny);
-            FP_INT res = FixedUtil::AtanPoly4(z);
-            FP_LONG angle = negMask ^ ((FP_LONG)res << 2);
+            FP_INT k = Atan2DivFastest(nx, ny);
+            FP_INT z = FixedUtil::AtanPoly4(k);
+            FP_INT angle = negMask ^ (z >> 14);
             return ((y > 0) ? PiHalf : -PiHalf) - angle;
         }
     }
 
-    static FP_LONG Asin(FP_LONG x)
+    static FP_INT Asin(FP_INT x)
     {
+        // Compute Atan2(x, Sqrt((1+x) * (1-x))), using s32.32.
         FP_ASSERT(x >= -One && x <= One);
-        return Atan2(x, Sqrt(Mul(One + x, One - x)));
+        FP_LONG xx = (FP_LONG)(One + x) * (FP_LONG)(One - x);
+        FP_LONG y = Fixed64::Sqrt(xx);
+        return (FP_INT)(Fixed64::Atan2((FP_LONG)x << 16, y) >> 16);
     }
 
-    static FP_LONG AsinFast(FP_LONG x)
+    static FP_INT AsinFast(FP_INT x)
     {
+        // Compute Atan2(x, Sqrt((1+x) * (1-x))), using s32.32.
         FP_ASSERT(x >= -One && x <= One);
-        return Atan2Fast(x, SqrtFast(Mul(One + x, One - x)));
+        FP_LONG xx = (FP_LONG)(One + x) * (FP_LONG)(One - x);
+        FP_LONG y = Fixed64::SqrtFast(xx);
+        return (FP_INT)(Fixed64::Atan2Fast((FP_LONG)x << 16, y) >> 16);
     }
 
-    static FP_LONG AsinFastest(FP_LONG x)
+    static FP_INT AsinFastest(FP_INT x)
     {
+        // Compute Atan2(x, Sqrt((1+x) * (1-x))), using s32.32.
         FP_ASSERT(x >= -One && x <= One);
-        return Atan2Fastest(x, SqrtFastest(Mul(One + x, One - x)));
+        FP_LONG xx = (FP_LONG)(One + x) * (FP_LONG)(One - x);
+        FP_LONG y = Fixed64::SqrtFastest(xx);
+        return (FP_INT)(Fixed64::Atan2Fastest((FP_LONG)x << 16, y) >> 16);
     }
 
-    static FP_LONG Acos(FP_LONG x)
+    static FP_INT Acos(FP_INT x)
     {
+        // Compute Atan2(Sqrt((1+x) * (1-x)), x), using s32.32.
         FP_ASSERT(x >= -One && x <= One);
-        return Atan2(Sqrt(Mul(One + x, One - x)), x);
+        FP_LONG xx = (FP_LONG)(One + x) * (FP_LONG)(One - x);
+        FP_LONG y = Fixed64::Sqrt(xx);
+        return (FP_INT)(Fixed64::Atan2(y, (FP_LONG)x << 16) >> 16);
     }
 
-    static FP_LONG AcosFast(FP_LONG x)
+    static FP_INT AcosFast(FP_INT x)
     {
+        // Compute Atan2(Sqrt((1+x) * (1-x)), x), using s32.32.
         FP_ASSERT(x >= -One && x <= One);
-        return Atan2Fast(SqrtFast(Mul(One + x, One - x)), x);
+        FP_LONG xx = (FP_LONG)(One + x) * (FP_LONG)(One - x);
+        FP_LONG y = Fixed64::SqrtFast(xx);
+        return (FP_INT)(Fixed64::Atan2Fast(y, (FP_LONG)x << 16) >> 16);
     }
 
-    static FP_LONG AcosFastest(FP_LONG x)
+    static FP_INT AcosFastest(FP_INT x)
     {
+        // Compute Atan2(Sqrt((1+x) * (1-x)), x), using s32.32.
         FP_ASSERT(x >= -One && x <= One);
-        return Atan2Fastest(SqrtFastest(Mul(One + x, One - x)), x);
+        FP_LONG xx = (FP_LONG)(One + x) * (FP_LONG)(One - x);
+        FP_LONG y = Fixed64::SqrtFastest(xx);
+        return (FP_INT)(Fixed64::Atan2Fastest(y, (FP_LONG)x << 16) >> 16);
     }
 
-    static FP_LONG Atan(FP_LONG x)
+    static FP_INT Atan(FP_INT x)
     {
         return Atan2(x, One);
     }
 
-    static FP_LONG AtanFast(FP_LONG x)
+    static FP_INT AtanFast(FP_INT x)
     {
         return Atan2Fast(x, One);
     }
 
-    static FP_LONG AtanFastest(FP_LONG x)
+    static FP_INT AtanFastest(FP_INT x)
     {
         return Atan2Fastest(x, One);
     }
@@ -1241,5 +1179,5 @@ namespace Fixed64
 
     #undef FP_ASSERT
 };
-#endif // __FIXED64_H
+#endif // __FIXED32_H
 

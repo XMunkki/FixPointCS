@@ -19,5 +19,11 @@
     <ClInclude Include="Fixed64.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="Fixed32.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="FixedUtil.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

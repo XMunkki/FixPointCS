@@ -292,16 +292,16 @@ public class Fixed32
 
         // Normalize input into [1.0, 2.0( range (convert to s2.30).
         int offset = 29 - Nlz(b);
-        int n = Util.ShiftRight(b, offset - 28);
+        int n = FixedUtil.ShiftRight(b, offset - 28);
         final int ONE = (1 << 30);
         assert(n >= ONE);
 
         // Polynomial approximation.
-        int res = Util.RcpPoly6(n - ONE);
+        int res = FixedUtil.RcpPoly6(n - ONE);
 
         // Multiply by reciprocal, apply exponent, convert back to s16.16.
-        int y = Util.Qmul30(res, a);
-        return Util.ShiftRight(sign * y, offset - 14);
+        int y = FixedUtil.Qmul30(res, a);
+        return FixedUtil.ShiftRight(sign * y, offset - 14);
     }
 
     /// <summary>
@@ -318,16 +318,16 @@ public class Fixed32
 
         // Normalize input into [1.0, 2.0( range (convert to s2.30).
         int offset = 29 - Nlz(b);
-        int n = Util.ShiftRight(b, offset - 28);
+        int n = FixedUtil.ShiftRight(b, offset - 28);
         final int ONE = (1 << 30);
         assert(n >= ONE);
 
         // Polynomial approximation.
-        int res = Util.RcpPoly4(n - ONE);
+        int res = FixedUtil.RcpPoly4(n - ONE);
 
         // Multiply by reciprocal, apply exponent, convert back to s16.16.
-        int y = Util.Qmul30(res, a);
-        return Util.ShiftRight(sign * y, offset - 14);
+        int y = FixedUtil.Qmul30(res, a);
+        return FixedUtil.ShiftRight(sign * y, offset - 14);
     }
 
     /// <summary>
@@ -379,17 +379,17 @@ public class Fixed32
 
         // Normalize input into [1.0, 2.0( range (as s2.30).
         int offset = 15 - Nlz(x);
-        int n = Util.ShiftRight(x, offset - 14);
+        int n = FixedUtil.ShiftRight(x, offset - 14);
         assert(n >= ONE);
-        int y = Util.SqrtPoly3Lut8(n - ONE);
+        int y = FixedUtil.SqrtPoly3Lut8(n - ONE);
 
         // Divide offset by 2 (to get sqrt), compute adjust value for odd exponents.
         int adjust = ((offset & 1) != 0) ? SQRT2 : ONE;
         offset = offset >> 1;
 
         // Apply exponent, convert back to s16.16.
-        int yr = Util.Qmul30(adjust, y);
-        return Util.ShiftRight(yr, 14 - offset);
+        int yr = FixedUtil.Qmul30(adjust, y);
+        return FixedUtil.ShiftRight(yr, 14 - offset);
     }
 
     public static int SqrtFast(int x)
@@ -404,17 +404,17 @@ public class Fixed32
 
         // Normalize input into [1.0, 2.0( range (as s2.30).
         int offset = 15 - Nlz(x);
-        int n = Util.ShiftRight(x, offset - 14);
+        int n = FixedUtil.ShiftRight(x, offset - 14);
         assert(n >= ONE);
-        int y = Util.SqrtPoly4(n - ONE);
+        int y = FixedUtil.SqrtPoly4(n - ONE);
 
         // Divide offset by 2 (to get sqrt), compute adjust value for odd exponents.
         int adjust = ((offset & 1) != 0) ? SQRT2 : ONE;
         offset = offset >> 1;
 
         // Apply exponent, convert back to s16.16.
-        int yr = Util.Qmul30(adjust, y);
-        return Util.ShiftRight(yr, 14 - offset);
+        int yr = FixedUtil.Qmul30(adjust, y);
+        return FixedUtil.ShiftRight(yr, 14 - offset);
     }
 
     public static int SqrtFastest(int x)
@@ -429,17 +429,17 @@ public class Fixed32
 
         // Normalize input into [1.0, 2.0( range (as s2.30).
         int offset = 15 - Nlz(x);
-        int n = Util.ShiftRight(x, offset - 14);
+        int n = FixedUtil.ShiftRight(x, offset - 14);
         assert(n >= ONE);
-        int y = Util.SqrtPoly3(n - ONE);
+        int y = FixedUtil.SqrtPoly3(n - ONE);
 
         // Divide offset by 2 (to get sqrt), compute adjust value for odd exponents.
         int adjust = ((offset & 1) != 0) ? SQRT2 : ONE;
         offset = offset >> 1;
 
         // Apply exponent, convert back to s16.16.
-        int yr = Util.Qmul30(adjust, y);
-        return Util.ShiftRight(yr, 14 - offset);
+        int yr = FixedUtil.Qmul30(adjust, y);
+        return FixedUtil.ShiftRight(yr, 14 - offset);
     }
 
     /// <summary>
@@ -455,17 +455,17 @@ public class Fixed32
 
         // Normalize input into [1.0, 2.0( range (as s2.30).
         int offset = 1 - Nlz(x);
-        int n = Util.ShiftRight(x, offset);
+        int n = FixedUtil.ShiftRight(x, offset);
         assert(n >= ONE);
-        int y = Util.RSqrtPoly3Lut16(n - ONE);
+        int y = FixedUtil.RSqrtPoly3Lut16(n - ONE);
 
         // Divide offset by 2 (to get sqrt), compute adjust value for odd exponents.
         int adjust = ((offset & 1) != 0) ? HALF_SQRT2 : ONE;
         offset = offset >> 1;
 
         // Apply exponent, convert back to s16.16.
-        int yr = Util.Qmul30(adjust, y);
-        return Util.ShiftRight(yr, offset + 21);
+        int yr = FixedUtil.Qmul30(adjust, y);
+        return FixedUtil.ShiftRight(yr, offset + 21);
     }
 
     /// <summary>
@@ -481,17 +481,17 @@ public class Fixed32
 
         // Normalize input into [1.0, 2.0( range (as s2.30).
         int offset = 1 - Nlz(x);
-        int n = Util.ShiftRight(x, offset);
+        int n = FixedUtil.ShiftRight(x, offset);
         assert(n >= ONE);
-        int y = Util.RSqrtPoly5(n - ONE);
+        int y = FixedUtil.RSqrtPoly5(n - ONE);
 
         // Divide offset by 2 (to get sqrt), compute adjust value for odd exponents.
         int adjust = ((offset & 1) != 0) ? HALF_SQRT2 : ONE;
         offset = offset >> 1;
 
         // Apply exponent, convert back to s16.16.
-        int yr = Util.Qmul30(adjust, y);
-        return Util.ShiftRight(yr, offset + 21);
+        int yr = FixedUtil.Qmul30(adjust, y);
+        return FixedUtil.ShiftRight(yr, offset + 21);
     }
 
     /// <summary>
@@ -507,17 +507,17 @@ public class Fixed32
 
         // Normalize input into [1.0, 2.0( range (as s2.30).
         int offset = 1 - Nlz(x);
-        int n = Util.ShiftRight(x, offset);
+        int n = FixedUtil.ShiftRight(x, offset);
         assert(n >= ONE);
-        int y = Util.RSqrtPoly3(n - ONE);
+        int y = FixedUtil.RSqrtPoly3(n - ONE);
 
         // Divide offset by 2 (to get sqrt), compute adjust value for odd exponents.
         int adjust = ((offset & 1) != 0) ? HALF_SQRT2 : ONE;
         offset = offset >> 1;
 
         // Apply exponent, convert back to s16.16.
-        int yr = Util.Qmul30(adjust, y);
-        return Util.ShiftRight(yr, offset + 21);
+        int yr = FixedUtil.Qmul30(adjust, y);
+        return FixedUtil.ShiftRight(yr, offset + 21);
     }
 
     /// <summary>
@@ -534,15 +534,15 @@ public class Fixed32
 
         // Normalize input into [1.0, 2.0( range (convert to s2.30).
         int offset = 29 - Nlz(x);
-        int n = Util.ShiftRight(x, offset - 28);
+        int n = FixedUtil.ShiftRight(x, offset - 28);
         final int ONE = (1 << 30);
         assert(n >= ONE);
 
         // Polynomial approximation.
-        int res = Util.RcpPoly4Lut8(n - ONE);
+        int res = FixedUtil.RcpPoly4Lut8(n - ONE);
 
         // Apply exponent, convert back to s16.16.
-        return Util.ShiftRight(sign * res, offset);
+        return FixedUtil.ShiftRight(sign * res, offset);
     }
 
     /// <summary>
@@ -559,16 +559,16 @@ public class Fixed32
 
         // Normalize input into [1.0, 2.0( range (convert to s2.30).
         int offset = 29 - Nlz(x);
-        int n = Util.ShiftRight(x, offset - 28);
+        int n = FixedUtil.ShiftRight(x, offset - 28);
         final int ONE = (1 << 30);
         assert(n >= ONE);
 
         // Polynomial approximation.
-        int res = Util.RcpPoly6(n - ONE);
+        int res = FixedUtil.RcpPoly6(n - ONE);
         //int res = Util.RcpPoly3Lut8(n - ONE);
 
         // Apply exponent, convert back to s16.16.
-        return Util.ShiftRight(sign * res, offset);
+        return FixedUtil.ShiftRight(sign * res, offset);
     }
 
     /// <summary>
@@ -585,16 +585,16 @@ public class Fixed32
 
         // Normalize input into [1.0, 2.0( range (convert to s2.30).
         int offset = 29 - Nlz(x);
-        int n = Util.ShiftRight(x, offset - 28);
+        int n = FixedUtil.ShiftRight(x, offset - 28);
         final int ONE = (1 << 30);
         assert(n >= ONE);
 
         // Polynomial approximation.
-        int res = Util.RcpPoly4(n - ONE);
+        int res = FixedUtil.RcpPoly4(n - ONE);
         //int res = Util.RcpPoly3Lut4(n - ONE);
 
         // Apply exponent, convert back to s16.16.
-        return Util.ShiftRight(sign * res, offset);
+        return FixedUtil.ShiftRight(sign * res, offset);
     }
 
     /// <summary>
@@ -608,11 +608,11 @@ public class Fixed32
 
         // Compute exp2 for fractional part.
         int k = (x & FractionMask) << 14;
-        int y = Util.Exp2Poly5(k);
+        int y = FixedUtil.Exp2Poly5(k);
 
         // Combine integer and fractional result, and convert back to s16.16.
         int intPart = x >> Shift;
-        return Util.ShiftRight(y, 14 - intPart);
+        return FixedUtil.ShiftRight(y, 14 - intPart);
     }
 
     /// <summary>
@@ -626,11 +626,11 @@ public class Fixed32
 
         // Compute exp2 for fractional part.
         int k = (x & FractionMask) << 14;
-        int y = Util.Exp2Poly4(k);
+        int y = FixedUtil.Exp2Poly4(k);
 
         // Combine integer and fractional result, and convert back to s16.16.
         int intPart = x >> Shift;
-        return Util.ShiftRight(y, 14 - intPart);
+        return FixedUtil.ShiftRight(y, 14 - intPart);
     }
 
     /// <summary>
@@ -644,11 +644,11 @@ public class Fixed32
 
         // Compute exp2 for fractional part.
         int k = (x & FractionMask) << 14;
-        int y = Util.Exp2Poly3(k);
+        int y = FixedUtil.Exp2Poly3(k);
 
         // Combine integer and fractional result, and convert back to s16.16.
         int intPart = x >> Shift;
-        return Util.ShiftRight(y, 14 - intPart);
+        return FixedUtil.ShiftRight(y, 14 - intPart);
     }
 
     public static int Exp(int x)
@@ -674,12 +674,12 @@ public class Fixed32
         // Normalize value to range [1.0, 2.0( as s2.30 and extract exponent.
         assert(x > 0);
         int offset = 15 - Nlz(x);
-        int n = Util.ShiftRight(x, offset - 14);
+        int n = FixedUtil.ShiftRight(x, offset - 14);
 
         // Polynomial approximation.
         final int ONE = (1 << 30);
         assert(n >= ONE);
-        int y = Util.LogPoly5Lut8(n - ONE);
+        int y = FixedUtil.LogPoly5Lut8(n - ONE);
 
         // Combine integer and fractional parts (into s16.16).
         return offset * RCP_LOG2_E + (y >> 14);
@@ -690,12 +690,12 @@ public class Fixed32
         // Normalize value to range [1.0, 2.0( as s2.30 and extract exponent.
         assert(x > 0);
         int offset = 15 - Nlz(x);
-        int n = Util.ShiftRight(x, offset - 14);
+        int n = FixedUtil.ShiftRight(x, offset - 14);
 
         // Polynomial approximation.
         final int ONE = (1 << 30);
         assert(n >= ONE);
-        int y = Util.LogPoly3Lut8(n - ONE);
+        int y = FixedUtil.LogPoly3Lut8(n - ONE);
 
         // Combine integer and fractional parts (into s16.16).
         return offset * RCP_LOG2_E + (y >> 14);
@@ -706,12 +706,12 @@ public class Fixed32
         // Normalize value to range [1.0, 2.0( as s2.30 and extract exponent.
         assert(x > 0);
         int offset = 15 - Nlz(x);
-        int n = Util.ShiftRight(x, offset - 14);
+        int n = FixedUtil.ShiftRight(x, offset - 14);
 
         // Polynomial approximation.
         final int ONE = (1 << 30);
         assert(n >= ONE);
-        int y = Util.LogPoly5(n - ONE);
+        int y = FixedUtil.LogPoly5(n - ONE);
 
         // Combine integer and fractional parts (into s16.16).
         return offset * RCP_LOG2_E + (y >> 14);
@@ -722,12 +722,12 @@ public class Fixed32
         // Normalize value to range [1.0, 2.0( as s2.30 and extract exponent.
         assert(x > 0);
         int offset = 15 - Nlz(x);
-        int n = Util.ShiftRight(x, offset - 14);
+        int n = FixedUtil.ShiftRight(x, offset - 14);
 
         // Polynomial approximation of mantissa.
         final int ONE = (1 << 30);
         assert(n >= ONE);
-        int y = Util.Log2Poly4Lut16(n - ONE);
+        int y = FixedUtil.Log2Poly4Lut16(n - ONE);
 
         // Combine integer and fractional parts (into s16.16).
         return (offset << Shift) + (y >> 14);
@@ -738,12 +738,12 @@ public class Fixed32
         // Normalize value to range [1.0, 2.0( as s2.30 and extract exponent.
         assert(x > 0);
         int offset = 15 - Nlz(x);
-        int n = Util.ShiftRight(x, offset - 14);
+        int n = FixedUtil.ShiftRight(x, offset - 14);
 
         // Polynomial approximation of mantissa.
         final int ONE = (1 << 30);
         assert(n >= ONE);
-        int y = Util.Log2Poly3Lut16(n - ONE);
+        int y = FixedUtil.Log2Poly3Lut16(n - ONE);
 
         // Combine integer and fractional parts (into s16.16).
         return (offset << Shift) + (y >> 14);
@@ -754,12 +754,12 @@ public class Fixed32
         // Normalize value to range [1.0, 2.0( as s2.30 and extract exponent.
         assert(x > 0);
         int offset = 15 - Nlz(x);
-        int n = Util.ShiftRight(x, offset - 14);
+        int n = FixedUtil.ShiftRight(x, offset - 14);
 
         // Polynomial approximation of mantissa.
         final int ONE = (1 << 30);
         assert(n >= ONE);
-        int y = Util.Log2Poly5(n - ONE);
+        int y = FixedUtil.Log2Poly5(n - ONE);
 
         // Combine integer and fractional parts (into s16.16).
         return (offset << Shift) + (y >> 14);
@@ -809,8 +809,8 @@ public class Fixed32
         assert((z >= -ONE) && (z <= ONE));
 
         // Polynomial approximation.
-        int zz = Util.Qmul30(z, z);
-        int res = Util.Qmul30(Util.SinPoly4(zz), z);
+        int zz = FixedUtil.Qmul30(z, z);
+        int res = FixedUtil.Qmul30(FixedUtil.SinPoly4(zz), z);
 
         // Return as s2.30.
         return res;
@@ -830,8 +830,8 @@ public class Fixed32
         assert((z >= -ONE) && (z <= ONE));
 
         // Polynomial approximation.
-        int zz = Util.Qmul30(z, z);
-        int res = Util.Qmul30(Util.SinPoly3(zz), z);
+        int zz = FixedUtil.Qmul30(z, z);
+        int res = FixedUtil.Qmul30(FixedUtil.SinPoly3(zz), z);
 
         // Return as s2.30.
         return res;
@@ -851,8 +851,8 @@ public class Fixed32
         assert((z >= -ONE) && (z <= ONE));
 
         // Polynomial approximation.
-        int zz = Util.Qmul30(z, z);
-        int res = Util.Qmul30(Util.SinPoly2(zz), z);
+        int zz = FixedUtil.Qmul30(z, z);
+        int res = FixedUtil.Qmul30(FixedUtil.SinPoly2(zz), z);
 
         // Return as s2.30.
         return res;
@@ -935,16 +935,16 @@ public class Fixed32
         final int ONE = (1 << 30);
         final int HALF = (1 << 29);
         int offset = 1 - Nlz(x);
-        int n = Util.ShiftRight(x, offset);
+        int n = FixedUtil.ShiftRight(x, offset);
         assert(n >= ONE);
 
         // Polynomial approximation of reciprocal.
-        int oox = Util.RcpPoly4Lut8(n - ONE);
+        int oox = FixedUtil.RcpPoly4Lut8(n - ONE);
         assert(oox >= HALF && oox <= ONE);
 
         // Apply exponent and multiply.
-        int yr = Util.ShiftRight(y, offset);
-        return Util.Qmul30(yr, oox);
+        int yr = FixedUtil.ShiftRight(y, offset);
+        return FixedUtil.Qmul30(yr, oox);
     }
 
     public static int Atan2(int y, int x)
@@ -965,7 +965,7 @@ public class Fixed32
         if (nx >= ny)
         {
             int k = Atan2Div(ny, nx);
-            int z = Util.AtanPoly5Lut8(k);
+            int z = FixedUtil.AtanPoly5Lut8(k);
             int angle = (negMask ^ (z >> 14)) - negMask;
             if (x > 0) return angle;
             if (y >= 0) return angle + Pi;
@@ -974,7 +974,7 @@ public class Fixed32
         else
         {
             int k = Atan2Div(nx, ny);
-            int z = Util.AtanPoly5Lut8(k);
+            int z = FixedUtil.AtanPoly5Lut8(k);
             int angle = negMask ^  (z >> 14);
             return ((y > 0) ? PiHalf : -PiHalf) - angle;
         }
@@ -988,15 +988,15 @@ public class Fixed32
         final int ONE = (1 << 30);
         final int HALF = (1 << 29);
         int offset = 1 - Nlz(x);
-        int n = Util.ShiftRight(x, offset);
+        int n = FixedUtil.ShiftRight(x, offset);
 
         // Polynomial approximation.
-        int oox = Util.RcpPoly6(n - ONE);
+        int oox = FixedUtil.RcpPoly6(n - ONE);
         assert(oox >= HALF && oox <= ONE);
 
         // Apply exponent and multiply.
-        int yr = Util.ShiftRight(y, offset);
-        return Util.Qmul30(yr, oox);
+        int yr = FixedUtil.ShiftRight(y, offset);
+        return FixedUtil.Qmul30(yr, oox);
     }
 
     public static int Atan2Fast(int y, int x)
@@ -1017,7 +1017,7 @@ public class Fixed32
         if (nx >= ny)
         {
             int k = Atan2DivFast(ny, nx);
-            int z = Util.AtanPoly3Lut8(k);
+            int z = FixedUtil.AtanPoly3Lut8(k);
             int angle = negMask ^ (z >> 14);
             if (x > 0) return angle;
             if (y >= 0) return angle + Pi;
@@ -1026,7 +1026,7 @@ public class Fixed32
         else
         {
             int k = Atan2DivFast(nx, ny);
-            int z = Util.AtanPoly3Lut8(k);
+            int z = FixedUtil.AtanPoly3Lut8(k);
             int angle = negMask ^ (z >> 14);
             return ((y > 0) ? PiHalf : -PiHalf) - angle;
         }
@@ -1040,15 +1040,15 @@ public class Fixed32
         final int ONE = (1 << 30);
         final int HALF = (1 << 29);
         int offset = 1 - Nlz(x);
-        int n = Util.ShiftRight(x, offset);
+        int n = FixedUtil.ShiftRight(x, offset);
 
         // Polynomial approximation.
-        int oox = Util.RcpPoly4(n - ONE);
+        int oox = FixedUtil.RcpPoly4(n - ONE);
         assert(oox >= HALF && oox <= ONE);
 
         // Apply exponent and multiply.
-        int yr = Util.ShiftRight(y, offset);
-        return Util.Qmul30(yr, oox);
+        int yr = FixedUtil.ShiftRight(y, offset);
+        return FixedUtil.Qmul30(yr, oox);
     }
 
     public static int Atan2Fastest(int y, int x)
@@ -1069,7 +1069,7 @@ public class Fixed32
         if (nx >= ny)
         {
             int k = Atan2DivFastest(ny, nx);
-            int z = Util.AtanPoly4(k);
+            int z = FixedUtil.AtanPoly4(k);
             int angle = negMask ^ (z >> 14);
             if (x > 0) return angle;
             if (y >= 0) return angle + Pi;
@@ -1078,7 +1078,7 @@ public class Fixed32
         else
         {
             int k = Atan2DivFastest(nx, ny);
-            int z = Util.AtanPoly4(k);
+            int z = FixedUtil.AtanPoly4(k);
             int angle = negMask ^ (z >> 14);
             return ((y > 0) ? PiHalf : -PiHalf) - angle;
         }

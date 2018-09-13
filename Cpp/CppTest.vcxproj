@@ -154,7 +154,9 @@
     <ClCompile Include="CppTest.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Fixed32.h" />
     <ClInclude Include="Fixed64.h" />
+    <ClInclude Include="FixedUtil.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

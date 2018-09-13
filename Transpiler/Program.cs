@@ -36,12 +36,14 @@ namespace Transpiler
         static void Main(string[] args)
         {
             // Generate C++ files
-            GenerateCpp.ConvertFile("../../../FixPointCS/Fixed64.cs", "../../../Cpp/Fixed64.h");
-            //GenerateCpp.ConvertFile("../../../FixPointCS/Fixed32.cs", "../../../Cpp/Fixed32.h");
+            GenerateCpp.ConvertFile("../../../FixPointCS/FixedUtil.cs", "../../../Cpp/FixedUtil.h", GenerateCpp.Mode.Util);
+            GenerateCpp.ConvertFile("../../../FixPointCS/Fixed32.cs", "../../../Cpp/Fixed32.h", GenerateCpp.Mode.Fp32);
+            GenerateCpp.ConvertFile("../../../FixPointCS/Fixed64.cs", "../../../Cpp/Fixed64.h", GenerateCpp.Mode.Fp64);
 
             // Generate Java files
-            GenerateJava.ConvertFile("../../../FixPointCS/Fixed64.cs", "../../../Java/Fixed64.java");
+            GenerateJava.ConvertFile("../../../FixPointCS/FixedUtil.cs", "../../../Java/FixedUtil.java");
             GenerateJava.ConvertFile("../../../FixPointCS/Fixed32.cs", "../../../Java/Fixed32.java");
+            GenerateJava.ConvertFile("../../../FixPointCS/Fixed64.cs", "../../../Java/Fixed64.java");
         }
     }
 }

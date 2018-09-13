@@ -30,9 +30,9 @@ to a project's needs. The convenience library is located in *Examples/FixMath*.
 
 The simplest and recommended way to use FixPointCS is to copy the relevant source files directly into
 your project. The core math operations reside in the following files:
-- For **C#**: FixPointCS/Fixed32.cs and FixPointCS/Fixed64.cs
-- For **Java**: Java/Fixed32.cs and Java/Fixed64.cs
-- For **C++**: Cpp/Fixed64.h (Fixed32 is not yet supported)
+- For **C#**: FixPointCS/Fixed32.cs, FixPointCS/Fixed64.cs and FixPointCS/FixedUtil.cs
+- For **Java**: Java/Fixed32.cs, Java/Fixed64.cs and Java/FixedUtil.cs
+- For **C++**: Cpp/Fixed64.h, Cpp/Fixed32.h and Cpp/FixedUtil.h
 
 ### FixMath Convenience Library (C# only)
 
@@ -76,7 +76,6 @@ that is exactly correct within representable fixed-point numbers.
 
 ## Known Limitations
 
-- C++ currently only supports s32.32 fixed-point (Fixed64), but not s16.16
 - The determinism tester doesn't currently cover the C++ implementation
 - Few operations are much slower without a 64-bit CPU, most notably s32.32 multiply and division
 - The library opts for performance and determinism over full correctness in edge cases like overflows

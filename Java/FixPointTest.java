@@ -35,5 +35,6 @@ public class FixPointTest
 	public static void main(String[] args)
 	{
 		DeterminismTester.TestAll();
+		System.out.println("Tests done!");
 	}
 }

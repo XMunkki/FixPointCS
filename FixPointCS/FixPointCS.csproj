@@ -76,6 +76,7 @@
   <ItemGroup>
     <Compile Include="Fixed32.cs" />
     <Compile Include="Fixed64.cs" />
+    <Compile Include="FixedUtil.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
