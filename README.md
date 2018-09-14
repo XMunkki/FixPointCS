@@ -31,7 +31,7 @@ to a project's needs. The convenience library is located in *Examples/FixMath*.
 The simplest and recommended way to use FixPointCS is to copy the relevant source files directly into
 your project. The core math operations reside in the following files:
 - For **C#**: FixPointCS/Fixed32.cs, FixPointCS/Fixed64.cs and FixPointCS/FixedUtil.cs
-- For **Java**: Java/Fixed32.cs, Java/Fixed64.cs and Java/FixedUtil.cs
+- For **Java**: Java/Fixed32.java, Java/Fixed64.java and Java/FixedUtil.java
 - For **C++**: Cpp/Fixed64.h, Cpp/Fixed32.h and Cpp/FixedUtil.h
 
 ### FixMath Convenience Library (C# only)
