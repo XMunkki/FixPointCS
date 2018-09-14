@@ -57,7 +57,7 @@ Supported operations include:
 
 Note that the conversions to/from floating point values are not guaranteed to be deterministic.
 
-For full list of supported operations, see functions.md.
+For full list of supported operations, see [functions.md](functions.md).
 
 ## Precision Guide
 
@@ -68,8 +68,8 @@ bits of precision and *SinFastest()* has 10 bits of precision.
 
 The precision is relative to the output value, so for example 10 bits of precision means that the answer
 is accurate to about 1 part in 1000 (or has error margin of 0.1%). The Fast variant is typically about
-10-15% faster than the highest precision, and the Fastest variant about 20-30% faster. See functions.md
-for details.
+10-15% faster than the highest precision, and the Fastest variant about 20-30% faster. See
+[functions.md](functions.md) for details.
 
 Div and Sqrt also come with a Precise variant (*DivPrecise()*, *SqrtPrecise()*), which produce a result
 that is exactly correct within representable fixed-point numbers.
