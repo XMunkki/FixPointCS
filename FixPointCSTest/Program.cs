@@ -1514,10 +1514,10 @@ namespace FixPointCSTest
             // - "ToInt" runs all the XxxToInt family
             // - "Fixed32.Rcp"
             // - "Fixed32" executes all the whole s16.16 ops
-            //string testFilter = "";
+            string testFilter = "";
 
             // Run precision and performance tests.
-            //TestOperations(testFilter);
+            TestOperations(testFilter);
 
             /*Console.WriteLine("-ENTER-");
             Console.ReadLine();*/

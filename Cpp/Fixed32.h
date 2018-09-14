@@ -264,9 +264,12 @@ namespace Fixed32
     /// <summary>
     /// Divides two FP values.
     /// </summary>
-    static FP_INT DivPrecise(FP_INT arg_a, FP_INT arg_b)
+    static FP_INT DivPrecise(FP_INT a, FP_INT b)
     {
-        FP_INT res = (FP_INT)(((FP_LONG)arg_a << Shift) / (FP_LONG)arg_b);
+        if (b == MinValue || b == 0)
+            return 0;
+
+        FP_INT res = (FP_INT)(((FP_LONG)a << Shift) / (FP_LONG)b);
         return res;
     }
 
@@ -275,28 +278,10 @@ namespace Fixed32
     /// </summary>
     static FP_INT Div(FP_INT a, FP_INT b)
     {
-        if (b == MinValue)
+        if (b == MinValue || b == 0)
             return 0;
 
         return (FP_INT)(((FP_LONG)a << 16) / b);
-/*
-        // Handle negative values.
-        FP_INT sign = (b < 0) ? -1 : 1;
-        b *= sign;
-
-        // Normalize input into [1.0, 2.0( range (convert to s2.30).
-        FP_INT offset = 29 - Nlz((FP_UINT)b);
-        FP_INT n = Util.ShiftRight(b, offset - 28);
-        static const FP_INT ONE = (1 << 30);
-        FP_ASSERT(n >= ONE);
-
-        // Polynomial approximation.
-        FP_INT res = Util.RcpPoly4Lut8(n - ONE);
-
-        // Multiply by reciprocal, apply exponent, convert back to s16.16.
-        FP_INT y = Util.Qmul30(res, a);
-        return Util.ShiftRight(sign * y, offset - 14);
-*/
     }
 
     /// <summary>
@@ -304,7 +289,7 @@ namespace Fixed32
     /// </summary>
     static FP_INT DivFast(FP_INT a, FP_INT b)
     {
-        if (b == MinValue)
+        if (b == MinValue || b == 0)
             return 0;
 
         // Handle negative values.
@@ -330,7 +315,7 @@ namespace Fixed32
     /// </summary>
     static FP_INT DivFastest(FP_INT a, FP_INT b)
     {
-        if (b == MinValue)
+        if (b == MinValue || b == 0)
             return 0;
 
         // Handle negative values.
@@ -468,7 +453,9 @@ namespace Fixed32
     /// </summary>
     static FP_INT RSqrt(FP_INT x)
     {
-        FP_ASSERT(x > 0);
+        // Return 0 for invalid values
+        if (x <= 0)
+            return 0;
 
         // Constants (s2.30).
         static const FP_INT ONE = (1 << 30);
@@ -494,7 +481,9 @@ namespace Fixed32
     /// </summary>
     static FP_INT RSqrtFast(FP_INT x)
     {
-        FP_ASSERT(x > 0);
+        // Return 0 for invalid values
+        if (x <= 0)
+            return 0;
 
         // Constants (s2.30).
         static const FP_INT ONE = (1 << 30);
@@ -520,7 +509,9 @@ namespace Fixed32
     /// </summary>
     static FP_INT RSqrtFastest(FP_INT x)
     {
-        FP_ASSERT(x > 0);
+        // Return 0 for invalid values
+        if (x <= 0)
+            return 0;
 
         // Constants (s2.30).
         static const FP_INT ONE = (1 << 30);
@@ -546,7 +537,7 @@ namespace Fixed32
     /// </summary>
     static FP_INT Rcp(FP_INT x)
     {
-        if (x == MinValue)
+        if (x == MinValue || x == 0)
             return 0;
 
         // Handle negative values.
@@ -571,7 +562,7 @@ namespace Fixed32
     /// </summary>
     static FP_INT RcpFast(FP_INT x)
     {
-        if (x == MinValue)
+        if (x == MinValue || x == 0)
             return 0;
 
         // Handle negative values.
@@ -597,7 +588,7 @@ namespace Fixed32
     /// </summary>
     static FP_INT RcpFastest(FP_INT x)
     {
-        if (x == MinValue)
+        if (x == MinValue || x == 0)
             return 0;
 
         // Handle negative values.
@@ -692,8 +683,11 @@ namespace Fixed32
 
     static FP_INT Log(FP_INT x)
     {
+        // Return 0 for invalid values
+        if (x <= 0)
+            return 0;
+
         // Normalize value to range [1.0, 2.0( as s2.30 and extract exponent.
-        FP_ASSERT(x > 0);
         FP_INT offset = 15 - Nlz((FP_UINT)x);
         FP_INT n = FixedUtil::ShiftRight(x, offset - 14);
 
@@ -708,8 +702,11 @@ namespace Fixed32
 
     static FP_INT LogFast(FP_INT x)
     {
+        // Return 0 for invalid values
+        if (x <= 0)
+            return 0;
+
         // Normalize value to range [1.0, 2.0( as s2.30 and extract exponent.
-        FP_ASSERT(x > 0);
         FP_INT offset = 15 - Nlz((FP_UINT)x);
         FP_INT n = FixedUtil::ShiftRight(x, offset - 14);
 
@@ -724,8 +721,11 @@ namespace Fixed32
 
     static FP_INT LogFastest(FP_INT x)
     {
+        // Return 0 for invalid values
+        if (x <= 0)
+            return 0;
+
         // Normalize value to range [1.0, 2.0( as s2.30 and extract exponent.
-        FP_ASSERT(x > 0);
         FP_INT offset = 15 - Nlz((FP_UINT)x);
         FP_INT n = FixedUtil::ShiftRight(x, offset - 14);
 
@@ -740,8 +740,11 @@ namespace Fixed32
 
     static FP_INT Log2(FP_INT x)
     {
+        // Return 0 for invalid values
+        if (x <= 0)
+            return 0;
+
         // Normalize value to range [1.0, 2.0( as s2.30 and extract exponent.
-        FP_ASSERT(x > 0);
         FP_INT offset = 15 - Nlz((FP_UINT)x);
         FP_INT n = FixedUtil::ShiftRight(x, offset - 14);
 
@@ -756,8 +759,11 @@ namespace Fixed32
 
     static FP_INT Log2Fast(FP_INT x)
     {
+        // Return 0 for invalid values
+        if (x <= 0)
+            return 0;
+
         // Normalize value to range [1.0, 2.0( as s2.30 and extract exponent.
-        FP_ASSERT(x > 0);
         FP_INT offset = 15 - Nlz((FP_UINT)x);
         FP_INT n = FixedUtil::ShiftRight(x, offset - 14);
 
@@ -772,8 +778,11 @@ namespace Fixed32
 
     static FP_INT Log2Fastest(FP_INT x)
     {
+        // Return 0 for invalid values
+        if (x <= 0)
+            return 0;
+
         // Normalize value to range [1.0, 2.0( as s2.30 and extract exponent.
-        FP_ASSERT(x > 0);
         FP_INT offset = 15 - Nlz((FP_UINT)x);
         FP_INT n = FixedUtil::ShiftRight(x, offset - 14);
 
@@ -791,8 +800,10 @@ namespace Fixed32
     /// </summary>
     static FP_INT Pow(FP_INT x, FP_INT exponent)
     {
-        FP_ASSERT(x >= 0);
-        if (x <= 0) return 0;
+        // Return 0 for invalid values
+        if (x <= 0)
+            return 0;
+
         return Exp(Mul(exponent, Log(x)));
     }
 
@@ -801,8 +812,10 @@ namespace Fixed32
     /// </summary>
     static FP_INT PowFast(FP_INT x, FP_INT exponent)
     {
-        FP_ASSERT(x >= 0);
-        if (x <= 0) return 0;
+        // Return 0 for invalid values
+        if (x <= 0)
+            return 0;
+
         return ExpFast(Mul(exponent, LogFast(x)));
     }
 
@@ -811,8 +824,10 @@ namespace Fixed32
     /// </summary>
     static FP_INT PowFastest(FP_INT x, FP_INT exponent)
     {
-        FP_ASSERT(x >= 0);
-        if (x <= 0) return 0;
+        // Return 0 for invalid values
+        if (x <= 0)
+            return 0;
+
         return ExpFastest(Mul(exponent, LogFastest(x)));
     }
 
@@ -1107,8 +1122,11 @@ namespace Fixed32
 
     static FP_INT Asin(FP_INT x)
     {
+        // Return 0 for invalid values
+        if (x < -One || x > One)
+            return 0;
+
         // Compute Atan2(x, Sqrt((1+x) * (1-x))), using s32.32.
-        FP_ASSERT(x >= -One && x <= One);
         FP_LONG xx = (FP_LONG)(One + x) * (FP_LONG)(One - x);
         FP_LONG y = Fixed64::Sqrt(xx);
         return (FP_INT)(Fixed64::Atan2((FP_LONG)x << 16, y) >> 16);
@@ -1116,8 +1134,11 @@ namespace Fixed32
 
     static FP_INT AsinFast(FP_INT x)
     {
+        // Return 0 for invalid values
+        if (x < -One || x > One)
+            return 0;
+
         // Compute Atan2(x, Sqrt((1+x) * (1-x))), using s32.32.
-        FP_ASSERT(x >= -One && x <= One);
         FP_LONG xx = (FP_LONG)(One + x) * (FP_LONG)(One - x);
         FP_LONG y = Fixed64::SqrtFast(xx);
         return (FP_INT)(Fixed64::Atan2Fast((FP_LONG)x << 16, y) >> 16);
@@ -1125,8 +1146,11 @@ namespace Fixed32
 
     static FP_INT AsinFastest(FP_INT x)
     {
+        // Return 0 for invalid values
+        if (x < -One || x > One)
+            return 0;
+
         // Compute Atan2(x, Sqrt((1+x) * (1-x))), using s32.32.
-        FP_ASSERT(x >= -One && x <= One);
         FP_LONG xx = (FP_LONG)(One + x) * (FP_LONG)(One - x);
         FP_LONG y = Fixed64::SqrtFastest(xx);
         return (FP_INT)(Fixed64::Atan2Fastest((FP_LONG)x << 16, y) >> 16);
@@ -1134,8 +1158,11 @@ namespace Fixed32
 
     static FP_INT Acos(FP_INT x)
     {
+        // Return 0 for invalid values
+        if (x < -One || x > One)
+            return 0;
+
         // Compute Atan2(Sqrt((1+x) * (1-x)), x), using s32.32.
-        FP_ASSERT(x >= -One && x <= One);
         FP_LONG xx = (FP_LONG)(One + x) * (FP_LONG)(One - x);
         FP_LONG y = Fixed64::Sqrt(xx);
         return (FP_INT)(Fixed64::Atan2(y, (FP_LONG)x << 16) >> 16);
@@ -1143,8 +1170,11 @@ namespace Fixed32
 
     static FP_INT AcosFast(FP_INT x)
     {
+        // Return 0 for invalid values
+        if (x < -One || x > One)
+            return 0;
+
         // Compute Atan2(Sqrt((1+x) * (1-x)), x), using s32.32.
-        FP_ASSERT(x >= -One && x <= One);
         FP_LONG xx = (FP_LONG)(One + x) * (FP_LONG)(One - x);
         FP_LONG y = Fixed64::SqrtFast(xx);
         return (FP_INT)(Fixed64::Atan2Fast(y, (FP_LONG)x << 16) >> 16);
@@ -1152,8 +1182,11 @@ namespace Fixed32
 
     static FP_INT AcosFastest(FP_INT x)
     {
+        // Return 0 for invalid values
+        if (x < -One || x > One)
+            return 0;
+
         // Compute Atan2(Sqrt((1+x) * (1-x)), x), using s32.32.
-        FP_ASSERT(x >= -One && x <= One);
         FP_LONG xx = (FP_LONG)(One + x) * (FP_LONG)(One - x);
         FP_LONG y = Fixed64::SqrtFastest(xx);
         return (FP_INT)(Fixed64::Atan2Fastest(y, (FP_LONG)x << 16) >> 16);

@@ -243,9 +243,12 @@ public class Fixed32
     /// <summary>
     /// Divides two FP values.
     /// </summary>
-    public static int DivPrecise(int arg_a, int arg_b)
+    public static int DivPrecise(int a, int b)
     {
-        int res = (int)(((long)arg_a << Shift) / (long)arg_b);
+        if (b == MinValue || b == 0)
+            return 0;
+
+        int res = (int)(((long)a << Shift) / (long)b);
         return res;
     }
 
@@ -254,28 +257,10 @@ public class Fixed32
     /// </summary>
     public static int Div(int a, int b)
     {
-        if (b == MinValue)
+        if (b == MinValue || b == 0)
             return 0;
 
         return (int)(((long)a << 16) / b);
-/*
-        // Handle negative values.
-        int sign = (b < 0) ? -1 : 1;
-        b *= sign;
-
-        // Normalize input into [1.0, 2.0( range (convert to s2.30).
-        int offset = 29 - Nlz(b);
-        int n = Util.ShiftRight(b, offset - 28);
-        final int ONE = (1 << 30);
-        assert(n >= ONE);
-
-        // Polynomial approximation.
-        int res = Util.RcpPoly4Lut8(n - ONE);
-
-        // Multiply by reciprocal, apply exponent, convert back to s16.16.
-        int y = Util.Qmul30(res, a);
-        return Util.ShiftRight(sign * y, offset - 14);
-*/
     }
 
     /// <summary>
@@ -283,7 +268,7 @@ public class Fixed32
     /// </summary>
     public static int DivFast(int a, int b)
     {
-        if (b == MinValue)
+        if (b == MinValue || b == 0)
             return 0;
 
         // Handle negative values.
@@ -309,7 +294,7 @@ public class Fixed32
     /// </summary>
     public static int DivFastest(int a, int b)
     {
-        if (b == MinValue)
+        if (b == MinValue || b == 0)
             return 0;
 
         // Handle negative values.
@@ -447,7 +432,9 @@ public class Fixed32
     /// </summary>
     public static int RSqrt(int x)
     {
-        assert(x > 0);
+        // Return 0 for invalid values
+        if (x <= 0)
+            return 0;
 
         // Constants (s2.30).
         final int ONE = (1 << 30);
@@ -473,7 +460,9 @@ public class Fixed32
     /// </summary>
     public static int RSqrtFast(int x)
     {
-        assert(x > 0);
+        // Return 0 for invalid values
+        if (x <= 0)
+            return 0;
 
         // Constants (s2.30).
         final int ONE = (1 << 30);
@@ -499,7 +488,9 @@ public class Fixed32
     /// </summary>
     public static int RSqrtFastest(int x)
     {
-        assert(x > 0);
+        // Return 0 for invalid values
+        if (x <= 0)
+            return 0;
 
         // Constants (s2.30).
         final int ONE = (1 << 30);
@@ -525,7 +516,7 @@ public class Fixed32
     /// </summary>
     public static int Rcp(int x)
     {
-        if (x == MinValue)
+        if (x == MinValue || x == 0)
             return 0;
 
         // Handle negative values.
@@ -550,7 +541,7 @@ public class Fixed32
     /// </summary>
     public static int RcpFast(int x)
     {
-        if (x == MinValue)
+        if (x == MinValue || x == 0)
             return 0;
 
         // Handle negative values.
@@ -576,7 +567,7 @@ public class Fixed32
     /// </summary>
     public static int RcpFastest(int x)
     {
-        if (x == MinValue)
+        if (x == MinValue || x == 0)
             return 0;
 
         // Handle negative values.
@@ -671,8 +662,11 @@ public class Fixed32
 
     public static int Log(int x)
     {
+        // Return 0 for invalid values
+        if (x <= 0)
+            return 0;
+
         // Normalize value to range [1.0, 2.0( as s2.30 and extract exponent.
-        assert(x > 0);
         int offset = 15 - Nlz(x);
         int n = FixedUtil.ShiftRight(x, offset - 14);
 
@@ -687,8 +681,11 @@ public class Fixed32
 
     public static int LogFast(int x)
     {
+        // Return 0 for invalid values
+        if (x <= 0)
+            return 0;
+
         // Normalize value to range [1.0, 2.0( as s2.30 and extract exponent.
-        assert(x > 0);
         int offset = 15 - Nlz(x);
         int n = FixedUtil.ShiftRight(x, offset - 14);
 
@@ -703,8 +700,11 @@ public class Fixed32
 
     public static int LogFastest(int x)
     {
+        // Return 0 for invalid values
+        if (x <= 0)
+            return 0;
+
         // Normalize value to range [1.0, 2.0( as s2.30 and extract exponent.
-        assert(x > 0);
         int offset = 15 - Nlz(x);
         int n = FixedUtil.ShiftRight(x, offset - 14);
 
@@ -719,8 +719,11 @@ public class Fixed32
 
     public static int Log2(int x)
     {
+        // Return 0 for invalid values
+        if (x <= 0)
+            return 0;
+
         // Normalize value to range [1.0, 2.0( as s2.30 and extract exponent.
-        assert(x > 0);
         int offset = 15 - Nlz(x);
         int n = FixedUtil.ShiftRight(x, offset - 14);
 
@@ -735,8 +738,11 @@ public class Fixed32
 
     public static int Log2Fast(int x)
     {
+        // Return 0 for invalid values
+        if (x <= 0)
+            return 0;
+
         // Normalize value to range [1.0, 2.0( as s2.30 and extract exponent.
-        assert(x > 0);
         int offset = 15 - Nlz(x);
         int n = FixedUtil.ShiftRight(x, offset - 14);
 
@@ -751,8 +757,11 @@ public class Fixed32
 
     public static int Log2Fastest(int x)
     {
+        // Return 0 for invalid values
+        if (x <= 0)
+            return 0;
+
         // Normalize value to range [1.0, 2.0( as s2.30 and extract exponent.
-        assert(x > 0);
         int offset = 15 - Nlz(x);
         int n = FixedUtil.ShiftRight(x, offset - 14);
 
@@ -770,8 +779,10 @@ public class Fixed32
     /// </summary>
     public static int Pow(int x, int exponent)
     {
-        assert(x >= 0);
-        if (x <= 0) return 0;
+        // Return 0 for invalid values
+        if (x <= 0)
+            return 0;
+
         return Exp(Mul(exponent, Log(x)));
     }
 
@@ -780,8 +791,10 @@ public class Fixed32
     /// </summary>
     public static int PowFast(int x, int exponent)
     {
-        assert(x >= 0);
-        if (x <= 0) return 0;
+        // Return 0 for invalid values
+        if (x <= 0)
+            return 0;
+
         return ExpFast(Mul(exponent, LogFast(x)));
     }
 
@@ -790,8 +803,10 @@ public class Fixed32
     /// </summary>
     public static int PowFastest(int x, int exponent)
     {
-        assert(x >= 0);
-        if (x <= 0) return 0;
+        // Return 0 for invalid values
+        if (x <= 0)
+            return 0;
+
         return ExpFastest(Mul(exponent, LogFastest(x)));
     }
 
@@ -1086,8 +1101,11 @@ public class Fixed32
 
     public static int Asin(int x)
     {
+        // Return 0 for invalid values
+        if (x < -One || x > One)
+            return 0;
+
         // Compute Atan2(x, Sqrt((1+x) * (1-x))), using s32.32.
-        assert(x >= -One && x <= One);
         long xx = (long)(One + x) * (long)(One - x);
         long y = Fixed64.Sqrt(xx);
         return (int)(Fixed64.Atan2((long)x << 16, y) >> 16);
@@ -1095,8 +1113,11 @@ public class Fixed32
 
     public static int AsinFast(int x)
     {
+        // Return 0 for invalid values
+        if (x < -One || x > One)
+            return 0;
+
         // Compute Atan2(x, Sqrt((1+x) * (1-x))), using s32.32.
-        assert(x >= -One && x <= One);
         long xx = (long)(One + x) * (long)(One - x);
         long y = Fixed64.SqrtFast(xx);
         return (int)(Fixed64.Atan2Fast((long)x << 16, y) >> 16);
@@ -1104,8 +1125,11 @@ public class Fixed32
 
     public static int AsinFastest(int x)
     {
+        // Return 0 for invalid values
+        if (x < -One || x > One)
+            return 0;
+
         // Compute Atan2(x, Sqrt((1+x) * (1-x))), using s32.32.
-        assert(x >= -One && x <= One);
         long xx = (long)(One + x) * (long)(One - x);
         long y = Fixed64.SqrtFastest(xx);
         return (int)(Fixed64.Atan2Fastest((long)x << 16, y) >> 16);
@@ -1113,8 +1137,11 @@ public class Fixed32
 
     public static int Acos(int x)
     {
+        // Return 0 for invalid values
+        if (x < -One || x > One)
+            return 0;
+
         // Compute Atan2(Sqrt((1+x) * (1-x)), x), using s32.32.
-        assert(x >= -One && x <= One);
         long xx = (long)(One + x) * (long)(One - x);
         long y = Fixed64.Sqrt(xx);
         return (int)(Fixed64.Atan2(y, (long)x << 16) >> 16);
@@ -1122,8 +1149,11 @@ public class Fixed32
 
     public static int AcosFast(int x)
     {
+        // Return 0 for invalid values
+        if (x < -One || x > One)
+            return 0;
+
         // Compute Atan2(Sqrt((1+x) * (1-x)), x), using s32.32.
-        assert(x >= -One && x <= One);
         long xx = (long)(One + x) * (long)(One - x);
         long y = Fixed64.SqrtFast(xx);
         return (int)(Fixed64.Atan2Fast(y, (long)x << 16) >> 16);
@@ -1131,8 +1161,11 @@ public class Fixed32
 
     public static int AcosFastest(int x)
     {
+        // Return 0 for invalid values
+        if (x < -One || x > One)
+            return 0;
+
         // Compute Atan2(Sqrt((1+x) * (1-x)), x), using s32.32.
-        assert(x >= -One && x <= One);
         long xx = (long)(One + x) * (long)(One - x);
         long y = Fixed64.SqrtFastest(xx);
         return (int)(Fixed64.Atan2Fastest(y, (long)x << 16) >> 16);

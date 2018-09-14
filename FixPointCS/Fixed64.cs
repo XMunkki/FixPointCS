@@ -668,7 +668,9 @@ namespace FixPointCS
         /// </summary>
         public static long RSqrt(long x)
         {
-            Debug.Assert(x > 0);
+            // Return 0 for invalid values
+            if (x <= 0)
+                return 0;
 
             // Constants (s2.30).
             const int ONE = (1 << 30);
@@ -694,7 +696,9 @@ namespace FixPointCS
         /// </summary>
         public static long RSqrtFast(long x)
         {
-            Debug.Assert(x > 0);
+            // Return 0 for invalid values
+            if (x <= 0)
+                return 0;
 
             // Constants (s2.30).
             const int ONE = (1 << 30);
@@ -720,7 +724,9 @@ namespace FixPointCS
         /// </summary>
         public static long RSqrtFastest(long x)
         {
-            Debug.Assert(x > 0);
+            // Return 0 for invalid values
+            if (x <= 0)
+                return 0;
 
             // Constants (s2.30).
             const int ONE = (1 << 30);
@@ -746,7 +752,7 @@ namespace FixPointCS
         /// </summary>
         public static long Rcp(long x)
         {
-            if (x == MinValue)
+            if (x == MinValue || x == 0)
                 return 0;
 
             // Handle negative values.
@@ -772,7 +778,7 @@ namespace FixPointCS
         /// </summary>
         public static long RcpFast(long x)
         {
-            if (x == MinValue)
+            if (x == MinValue || x == 0)
                 return 0;
 
             // Handle negative values.
@@ -798,7 +804,7 @@ namespace FixPointCS
         /// </summary>
         public static long RcpFastest(long x)
         {
-            if (x == MinValue)
+            if (x == MinValue || x == 0)
                 return 0;
 
             // Handle negative values.
@@ -891,10 +897,12 @@ namespace FixPointCS
             return Exp2Fastest(Mul(x, RCP_LN2));
         }
 
+        // Natural logarithm (base e).
         public static long Log(long x)
         {
-            // Natural logarithm (base e).
-            Debug.Assert(x > 0);
+            // Return 0 for invalid values
+            if (x <= 0)
+                return 0;
 
             // Normalize value to range [1.0, 2.0( as s2.30 and extract exponent.
             const int ONE = (1 << 30);
@@ -909,8 +917,11 @@ namespace FixPointCS
 
         public static long LogFast(long x)
         {
+            // Return 0 for invalid values
+            if (x <= 0)
+                return 0;
+
             // Normalize value to range [1.0, 2.0( as s2.30 and extract exponent.
-            Debug.Assert(x > 0);
             const int ONE = (1 << 30);
             int offset = 31 - Nlz((ulong)x);
             int n = (int)(((offset >= 0) ? (x >> offset) : (x << -offset)) >> 2);
@@ -923,8 +934,11 @@ namespace FixPointCS
 
         public static long LogFastest(long x)
         {
+            // Return 0 for invalid values
+            if (x <= 0)
+                return 0;
+
             // Normalize value to range [1.0, 2.0( as s2.30 and extract exponent.
-            Debug.Assert(x > 0);
             const int ONE = (1 << 30);
             int offset = 31 - Nlz((ulong)x);
             int n = (int)(((offset >= 0) ? (x >> offset) : (x << -offset)) >> 2);
@@ -937,8 +951,11 @@ namespace FixPointCS
 
         public static long Log2(long x)
         {
+            // Return 0 for invalid values
+            if (x <= 0)
+                return 0;
+
             // Normalize value to range [1.0, 2.0( as s2.30 and extract exponent.
-            Debug.Assert(x > 0);
             int offset = 31 - Nlz((ulong)x);
             int n = (int)(((offset >= 0) ? (x >> offset) : (x << -offset)) >> 2);
 
@@ -953,8 +970,11 @@ namespace FixPointCS
 
         public static long Log2Fast(long x)
         {
+            // Return 0 for invalid values
+            if (x <= 0)
+                return 0;
+
             // Normalize value to range [1.0, 2.0( as s2.30 and extract exponent.
-            Debug.Assert(x > 0);
             int offset = 31 - Nlz((ulong)x);
             int n = (int)(((offset >= 0) ? (x >> offset) : (x << -offset)) >> 2);
 
@@ -969,8 +989,11 @@ namespace FixPointCS
 
         public static long Log2Fastest(long x)
         {
+            // Return 0 for invalid values
+            if (x <= 0)
+                return 0;
+
             // Normalize value to range [1.0, 2.0( as s2.30 and extract exponent.
-            Debug.Assert(x > 0);
             int offset = 31 - Nlz((ulong)x);
             int n = (int)(((offset >= 0) ? (x >> offset) : (x << -offset)) >> 2);
 
@@ -988,8 +1011,10 @@ namespace FixPointCS
         /// </summary>
         public static long Pow(long x, long exponent)
         {
-            Debug.Assert(x >= 0);
-            if (x <= 0) return 0;
+            // Return 0 for invalid values
+            if (x <= 0)
+                return 0;
+
             return Exp(Mul(exponent, Log(x)));
         }
 
@@ -998,8 +1023,10 @@ namespace FixPointCS
         /// </summary>
         public static long PowFast(long x, long exponent)
         {
-            Debug.Assert(x >= 0);
-            if (x <= 0) return 0;
+            // Return 0 for invalid values
+            if (x <= 0)
+                return 0;
+
             return ExpFast(Mul(exponent, LogFast(x)));
         }
 
@@ -1008,8 +1035,10 @@ namespace FixPointCS
         /// </summary>
         public static long PowFastest(long x, long exponent)
         {
-            Debug.Assert(x >= 0);
-            if (x <= 0) return 0;
+            // Return 0 for invalid values
+            if (x <= 0)
+                return 0;
+
             return ExpFastest(Mul(exponent, LogFastest(x)));
         }
 
@@ -1312,37 +1341,55 @@ namespace FixPointCS
 
         public static long Asin(long x)
         {
-            Debug.Assert(x >= -One && x <= One);
+            // Return 0 for invalid values
+            if (x < -One || x > One)
+                return 0;
+
             return Atan2(x, Sqrt(Mul(One + x, One - x)));
         }
 
         public static long AsinFast(long x)
         {
-            Debug.Assert(x >= -One && x <= One);
+            // Return 0 for invalid values
+            if (x < -One || x > One)
+                return 0;
+
             return Atan2Fast(x, SqrtFast(Mul(One + x, One - x)));
         }
 
         public static long AsinFastest(long x)
         {
-            Debug.Assert(x >= -One && x <= One);
+            // Return 0 for invalid values
+            if (x < -One || x > One)
+                return 0;
+
             return Atan2Fastest(x, SqrtFastest(Mul(One + x, One - x)));
         }
 
         public static long Acos(long x)
         {
-            Debug.Assert(x >= -One && x <= One);
+            // Return 0 for invalid values
+            if (x < -One || x > One)
+                return 0;
+
             return Atan2(Sqrt(Mul(One + x, One - x)), x);
         }
 
         public static long AcosFast(long x)
         {
-            Debug.Assert(x >= -One && x <= One);
+            // Return 0 for invalid values
+            if (x < -One || x > One)
+                return 0;
+
             return Atan2Fast(SqrtFast(Mul(One + x, One - x)), x);
         }
 
         public static long AcosFastest(long x)
         {
-            Debug.Assert(x >= -One && x <= One);
+            // Return 0 for invalid values
+            if (x < -One || x > One)
+                return 0;
+
             return Atan2Fastest(SqrtFastest(Mul(One + x, One - x)), x);
         }
 

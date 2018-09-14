@@ -546,7 +546,9 @@ namespace Fixed64
     /// </summary>
     static FP_LONG RSqrt(FP_LONG x)
     {
-        FP_ASSERT(x > 0);
+        // Return 0 for invalid values
+        if (x <= 0)
+            return 0;
 
         // Constants (s2.30).
         static const FP_INT ONE = (1 << 30);
@@ -572,7 +574,9 @@ namespace Fixed64
     /// </summary>
     static FP_LONG RSqrtFast(FP_LONG x)
     {
-        FP_ASSERT(x > 0);
+        // Return 0 for invalid values
+        if (x <= 0)
+            return 0;
 
         // Constants (s2.30).
         static const FP_INT ONE = (1 << 30);
@@ -598,7 +602,9 @@ namespace Fixed64
     /// </summary>
     static FP_LONG RSqrtFastest(FP_LONG x)
     {
-        FP_ASSERT(x > 0);
+        // Return 0 for invalid values
+        if (x <= 0)
+            return 0;
 
         // Constants (s2.30).
         static const FP_INT ONE = (1 << 30);
@@ -624,7 +630,7 @@ namespace Fixed64
     /// </summary>
     static FP_LONG Rcp(FP_LONG x)
     {
-        if (x == MinValue)
+        if (x == MinValue || x == 0)
             return 0;
 
         // Handle negative values.
@@ -650,7 +656,7 @@ namespace Fixed64
     /// </summary>
     static FP_LONG RcpFast(FP_LONG x)
     {
-        if (x == MinValue)
+        if (x == MinValue || x == 0)
             return 0;
 
         // Handle negative values.
@@ -676,7 +682,7 @@ namespace Fixed64
     /// </summary>
     static FP_LONG RcpFastest(FP_LONG x)
     {
-        if (x == MinValue)
+        if (x == MinValue || x == 0)
             return 0;
 
         // Handle negative values.
@@ -769,10 +775,12 @@ namespace Fixed64
         return Exp2Fastest(Mul(x, RCP_LN2));
     }
 
+    // Natural logarithm (base e).
     static FP_LONG Log(FP_LONG x)
     {
-        // Natural logarithm (base e).
-        FP_ASSERT(x > 0);
+        // Return 0 for invalid values
+        if (x <= 0)
+            return 0;
 
         // Normalize value to range [1.0, 2.0( as s2.30 and extract exponent.
         static const FP_INT ONE = (1 << 30);
@@ -787,8 +795,11 @@ namespace Fixed64
 
     static FP_LONG LogFast(FP_LONG x)
     {
+        // Return 0 for invalid values
+        if (x <= 0)
+            return 0;
+
         // Normalize value to range [1.0, 2.0( as s2.30 and extract exponent.
-        FP_ASSERT(x > 0);
         static const FP_INT ONE = (1 << 30);
         FP_INT offset = 31 - Nlz((FP_ULONG)x);
         FP_INT n = (FP_INT)(((offset >= 0) ? (x >> offset) : (x << -offset)) >> 2);
@@ -801,8 +812,11 @@ namespace Fixed64
 
     static FP_LONG LogFastest(FP_LONG x)
     {
+        // Return 0 for invalid values
+        if (x <= 0)
+            return 0;
+
         // Normalize value to range [1.0, 2.0( as s2.30 and extract exponent.
-        FP_ASSERT(x > 0);
         static const FP_INT ONE = (1 << 30);
         FP_INT offset = 31 - Nlz((FP_ULONG)x);
         FP_INT n = (FP_INT)(((offset >= 0) ? (x >> offset) : (x << -offset)) >> 2);
@@ -815,8 +829,11 @@ namespace Fixed64
 
     static FP_LONG Log2(FP_LONG x)
     {
+        // Return 0 for invalid values
+        if (x <= 0)
+            return 0;
+
         // Normalize value to range [1.0, 2.0( as s2.30 and extract exponent.
-        FP_ASSERT(x > 0);
         FP_INT offset = 31 - Nlz((FP_ULONG)x);
         FP_INT n = (FP_INT)(((offset >= 0) ? (x >> offset) : (x << -offset)) >> 2);
 
@@ -831,8 +848,11 @@ namespace Fixed64
 
     static FP_LONG Log2Fast(FP_LONG x)
     {
+        // Return 0 for invalid values
+        if (x <= 0)
+            return 0;
+
         // Normalize value to range [1.0, 2.0( as s2.30 and extract exponent.
-        FP_ASSERT(x > 0);
         FP_INT offset = 31 - Nlz((FP_ULONG)x);
         FP_INT n = (FP_INT)(((offset >= 0) ? (x >> offset) : (x << -offset)) >> 2);
 
@@ -847,8 +867,11 @@ namespace Fixed64
 
     static FP_LONG Log2Fastest(FP_LONG x)
     {
+        // Return 0 for invalid values
+        if (x <= 0)
+            return 0;
+
         // Normalize value to range [1.0, 2.0( as s2.30 and extract exponent.
-        FP_ASSERT(x > 0);
         FP_INT offset = 31 - Nlz((FP_ULONG)x);
         FP_INT n = (FP_INT)(((offset >= 0) ? (x >> offset) : (x << -offset)) >> 2);
 
@@ -866,8 +889,10 @@ namespace Fixed64
     /// </summary>
     static FP_LONG Pow(FP_LONG x, FP_LONG exponent)
     {
-        FP_ASSERT(x >= 0);
-        if (x <= 0) return 0;
+        // Return 0 for invalid values
+        if (x <= 0)
+            return 0;
+
         return Exp(Mul(exponent, Log(x)));
     }
 
@@ -876,8 +901,10 @@ namespace Fixed64
     /// </summary>
     static FP_LONG PowFast(FP_LONG x, FP_LONG exponent)
     {
-        FP_ASSERT(x >= 0);
-        if (x <= 0) return 0;
+        // Return 0 for invalid values
+        if (x <= 0)
+            return 0;
+
         return ExpFast(Mul(exponent, LogFast(x)));
     }
 
@@ -886,8 +913,10 @@ namespace Fixed64
     /// </summary>
     static FP_LONG PowFastest(FP_LONG x, FP_LONG exponent)
     {
-        FP_ASSERT(x >= 0);
-        if (x <= 0) return 0;
+        // Return 0 for invalid values
+        if (x <= 0)
+            return 0;
+
         return ExpFastest(Mul(exponent, LogFastest(x)));
     }
 
@@ -1187,37 +1216,55 @@ namespace Fixed64
 
     static FP_LONG Asin(FP_LONG x)
     {
-        FP_ASSERT(x >= -One && x <= One);
+        // Return 0 for invalid values
+        if (x < -One || x > One)
+            return 0;
+
         return Atan2(x, Sqrt(Mul(One + x, One - x)));
     }
 
     static FP_LONG AsinFast(FP_LONG x)
     {
-        FP_ASSERT(x >= -One && x <= One);
+        // Return 0 for invalid values
+        if (x < -One || x > One)
+            return 0;
+
         return Atan2Fast(x, SqrtFast(Mul(One + x, One - x)));
     }
 
     static FP_LONG AsinFastest(FP_LONG x)
     {
-        FP_ASSERT(x >= -One && x <= One);
+        // Return 0 for invalid values
+        if (x < -One || x > One)
+            return 0;
+
         return Atan2Fastest(x, SqrtFastest(Mul(One + x, One - x)));
     }
 
     static FP_LONG Acos(FP_LONG x)
     {
-        FP_ASSERT(x >= -One && x <= One);
+        // Return 0 for invalid values
+        if (x < -One || x > One)
+            return 0;
+
         return Atan2(Sqrt(Mul(One + x, One - x)), x);
     }
 
     static FP_LONG AcosFast(FP_LONG x)
     {
-        FP_ASSERT(x >= -One && x <= One);
+        // Return 0 for invalid values
+        if (x < -One || x > One)
+            return 0;
+
         return Atan2Fast(SqrtFast(Mul(One + x, One - x)), x);
     }
 
     static FP_LONG AcosFastest(FP_LONG x)
     {
-        FP_ASSERT(x >= -One && x <= One);
+        // Return 0 for invalid values
+        if (x < -One || x > One)
+            return 0;
+
         return Atan2Fastest(SqrtFastest(Mul(One + x, One - x)), x);
     }
 
