@@ -406,7 +406,7 @@ namespace FixPointCSTest
     {
         private const int       PRECISION_NUM_ITERS         = 1000;
         private const int       PRECISION_CHUNK_SIZE        = 1024;
-        private const int       DETERMINISM_TEST_CASES      = 100;
+        private const int       UNITTEST_NUM_CASES          = 100;
         private const int       BENCHMARK_NUM_REPEATS       = 9;
         private const int       BENCHMARK_NUM_ITERS         = 10000;
         private const int       BENCHMARK_CHUNK_SIZE        = 128;
@@ -446,23 +446,74 @@ namespace FixPointCSTest
             return str.Substring(0, Math.Min(str.Length, numChars));
         }
 
-        public static Array[] GenerateOpInputs(Operation opImpl, InputGenerator inputGenerator, int count)
+        public static Array[] AllocateOpInputs(Operation opImpl, int count)
+        {
+            Array[] result = new Array[opImpl.InputTypes.Length];
+            for (int ndx = 0; ndx < opImpl.InputTypes.Length; ndx++)
+            {
+                Type type = opImpl.InputTypes[ndx];
+
+                if (type == typeof(F64))
+                    result[ndx] = new F64[count];
+                else if (type == typeof(F32))
+                    result[ndx] = new F32[count];
+                else
+                    throw new InvalidOperationException("Unknown input data type: " + type);
+            }
+            return result;
+        }
+
+        public static void GenerateOpInputRange(Array[] result, Operation opImpl, InputGenerator inputGenerator, int offset, int count)
         {
             Debug.Assert(opImpl.InputTypes.Length == inputGenerator.generators.Length);
 
-            Array[] result = new Array[opImpl.InputTypes.Length];
+            // Generate values
             for (int ndx = 0; ndx < opImpl.InputTypes.Length; ndx++)
             {
                 ValueGenerator generator = inputGenerator.generators[ndx];
                 Type type = opImpl.InputTypes[ndx];
 
                 if (type == typeof(F64))
-                    result[ndx] = generator(rnd, count).Select(d => F64.FromDouble(d)).ToArray();
+                {
+                    F64[] tmp = generator(rnd, count).Select(d => F64.FromDouble(d)).ToArray();
+                    Array.Copy(tmp, 0, result[ndx], offset, count);
+                }
                 else if (type == typeof(F32))
-                    result[ndx] = generator(rnd, count).Select(d => F32.FromDouble(d)).ToArray();
+                {
+                    F32[] tmp = generator(rnd, count).Select(d => F32.FromDouble(d)).ToArray();
+                    Array.Copy(tmp, 0, result[ndx], offset, count);
+                }
                 else
                     throw new InvalidOperationException("Unknown input data type: " + type);
             }
+        }
+
+        public static Array[] GenerateOpInputs(Operation opImpl, InputGenerator inputGenerator, int count)
+        {
+            Debug.Assert(opImpl.InputTypes.Length == inputGenerator.generators.Length);
+
+            // Allocate & generate inputs
+            Array[] result = AllocateOpInputs(opImpl, count);
+            GenerateOpInputRange(result, opImpl, inputGenerator, 0, count);
+            return result;
+        }
+
+        public static Array[] GenerateOpInputs(Operation opImpl, InputGenerator[] inputGenerators, int count)
+        {
+            // Allocate result
+            Array[] result = AllocateOpInputs(opImpl, count);
+
+            // Generate subblock with each generator
+            int numGenerators = inputGenerators.Length;
+            int countPerGenerator = (count + numGenerators - 1) / numGenerators;
+            int offset = 0;
+            foreach (InputGenerator inputGenerator in inputGenerators)
+            {
+                int blockSize = Math.Min(count - offset, countPerGenerator);
+                GenerateOpInputRange(result, opImpl, inputGenerator, offset, blockSize);
+                offset += blockSize;
+            }
+
             return result;
         }
 
@@ -576,18 +627,18 @@ namespace FixPointCSTest
                 return "UNKNOWN";
         }
 
-        public static void GenerateDeterminismTestCases(StreamWriter file, OpFamilyBase opFamily, Operation opImpl)
+        public static void GenerateUnitTestCases(StreamWriter file, OpFamilyBase opFamily, Operation opImpl)
         {
             Console.WriteLine("{0}", opImpl.FuncName);
             file.WriteLine($"\t// {opImpl.FuncName}");
 
             // Input generators for operation's data type.
-            InputGenerator inputGenerator = opFamily.inputFactory(opImpl.ValueBounds)[0];
+            InputGenerator[] inputGenerators = opFamily.inputFactory(opImpl.ValueBounds);
 
             // Generate inputs & execute operation.
-            Array[] inputs = GenerateOpInputs(opImpl, inputGenerator, DETERMINISM_TEST_CASES);
-            Array[] outputs = GenerateOpOutputs(opImpl, DETERMINISM_TEST_CASES);
-            opImpl.ArrayExecute(DETERMINISM_TEST_CASES, inputs, outputs);
+            Array[] inputs = GenerateOpInputs(opImpl, inputGenerators, UNITTEST_NUM_CASES);
+            Array[] outputs = GenerateOpOutputs(opImpl, UNITTEST_NUM_CASES);
+            opImpl.ArrayExecute(UNITTEST_NUM_CASES, inputs, outputs);
 
             string opName = opImpl.FuncName;
             string testFuncName = opName.Replace(".", "_");
@@ -610,14 +661,14 @@ namespace FixPointCSTest
             }
 
             // Write out values
-            for (int ndx = 0; ndx < DETERMINISM_TEST_CASES; ndx++)
+            for (int ndx = 0; ndx < UNITTEST_NUM_CASES; ndx++)
             {
                 //ValueBounds bounds = opImpl.ValueBounds;
             }
 
             string inputArgs = String.Join(", ", Enumerable.Range(0, inputs.Length).Select(inputNdx => $"input{inputNdx}[ndx]"));
 
-            file.WriteLine($"\t\tfor (int ndx = 0; ndx < {DETERMINISM_TEST_CASES}; ndx++)");
+            file.WriteLine($"\t\tfor (int ndx = 0; ndx < {UNITTEST_NUM_CASES}; ndx++)");
             file.WriteLine("\t\t{");
             file.WriteLine($"\t\t\tUtil.Check(\"{opName}\", {opName}({inputArgs}), output0[ndx], {inputArgs});");
             file.WriteLine("\t\t}");
@@ -822,7 +873,8 @@ namespace FixPointCSTest
                 ),
                 bounds => new[] {
                     InputGenerator.Binary(Input.Uniform(-1000.0, 1000.0), Input.Exponential(1.0, bounds.InputPosMax, Input.SignMode.Random)),
-                    InputGenerator.Binary(Input.Uniform(bounds.InputNegMax, bounds.InputPosMax), Input.Uniform(bounds.InputNegMax, bounds.InputPosMax)),
+                    InputGenerator.Binary(Input.Uniform(bounds.InputNegMax, bounds.InputPosMax), Input.Uniform(bounds.InputNegMax, -0.001)),
+                    InputGenerator.Binary(Input.Uniform(bounds.InputNegMax, bounds.InputPosMax), Input.Uniform(0.001, bounds.InputPosMax)),
                     InputGenerator.Binary(Input.Uniform(999.0, 1000.0), Input.Uniform(-999.0, -1000.0)),
                 }
             ),
@@ -1291,17 +1343,17 @@ namespace FixPointCSTest
             Console.WriteLine();
         }
 
-        static void GenerateDeterminismTests(string testFilter)
+        static void GenerateUnitTests(string testFilter)
         {
-            Console.WriteLine("Generating determinism test cases..");
+            Console.WriteLine("Generating unittest cases..");
 
-            using (StreamWriter file = new StreamWriter("../../../Java/DeterminismTest.java"))
+            using (StreamWriter file = new StreamWriter("../../../Java/UnitTest.java"))
             {
                 file.WriteLine("package fixpointcs.test;");
                 file.WriteLine("");
                 file.WriteLine("import fixpointcs.*;");
                 file.WriteLine("");
-                file.WriteLine("class DeterminismTester");
+                file.WriteLine("class UnitTest");
                 file.WriteLine("{");
 
                 List<string> funcNames = new List<string>();
@@ -1310,9 +1362,13 @@ namespace FixPointCSTest
                 {
                     foreach (Operation opImpl in opFamily.operations)
                     {
+                        // Skip Nop()
+                        if (opImpl.FuncName.EndsWith(".Nop"))
+                            continue;
+
                         if (opImpl.FuncName != null && opImpl.FuncName.Contains(testFilter))
                         {
-                            TestRunner.GenerateDeterminismTestCases(file, opFamily, opImpl);
+                            TestRunner.GenerateUnitTestCases(file, opFamily, opImpl);
                             funcNames.Add(opImpl.FuncName.Replace(".", "_"));
                         }
                     }
@@ -1348,8 +1404,8 @@ namespace FixPointCSTest
             // Console.WriteLine("Atan2(): {0} vs {1}", F32.Atan2(F32.FromDouble(-4.4691772460937), F32.FromDouble(-3.9427642822265)), Math.Atan2(-4.4691772460937, -3.9427642822265));
             // Console.WriteLine();
 
-            // Determinism testing
-            //GenerateDeterminismTests("");
+            // Generate unit tests for Java & C++
+            GenerateUnitTests("");
 
             // Filter for choosing which tests to run. Empty runs all tests
             // Examples:
@@ -1360,7 +1416,7 @@ namespace FixPointCSTest
             string testFilter = "";
 
             // Run precision and performance tests.
-            TestOperations(testFilter);
+            //TestOperations(testFilter);
 
             /*Console.WriteLine("-ENTER-");
             Console.ReadLine();*/
