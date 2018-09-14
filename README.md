@@ -76,7 +76,6 @@ that is exactly correct within representable fixed-point numbers.
 
 ## Known Limitations
 
-- The determinism tester doesn't currently cover the C++ implementation
 - Few operations are much slower without a 64-bit CPU, most notably s32.32 multiply and division
 - The library opts for performance and determinism over full correctness in edge cases like overflows
 

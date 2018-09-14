@@ -14,6 +14,9 @@
     <ClCompile Include="CppTest.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="UnitTest.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Fixed64.h">
@@ -23,6 +26,9 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="FixedUtil.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="UnitTest.h">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>

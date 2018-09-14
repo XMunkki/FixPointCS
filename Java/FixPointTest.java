@@ -34,7 +34,8 @@ public class FixPointTest
 {
 	public static void main(String[] args)
 	{
+		System.out.println("Executing all unit tests..");
 		UnitTest.TestAll();
-		System.out.println("Tests done!");
+		System.out.println("Unit tests finished!");
 	}
 }

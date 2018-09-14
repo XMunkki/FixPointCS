@@ -33,6 +33,12 @@ using FixMath;
 
 namespace FixPointCSTest
 {
+    enum TargetLanguage
+    {
+        Java,
+        Cpp
+    }
+
     struct OperationError
     {
         public double measured;     // Measured error
@@ -246,19 +252,39 @@ namespace FixPointCSTest
         public abstract OperationError[] EvaluateErrors(int count, double[][] inputs, double[][] outputs, double ulpScale);
         public abstract double[] ComputeReferences(double[][] inputs);
 
-        public static string ToString(Array values)
+        public static string ValuesToString(TargetLanguage language, Array values)
         {
+            string longPostfix = (language == TargetLanguage.Java) ? "L" : "LL";
             Type fromType = values.GetType().GetElementType();
-            if (fromType == typeof(F32))
-                return String.Join(", ", ((F32[])values).Select(v => v.raw.ToString()));
-            else if (fromType == typeof(int))
-                return String.Join(", ", ((int[])values).Select(v => v.ToString()));
-            else if (fromType == typeof(F64))
-                return String.Join(", ", ((F64[])values).Select(v => v.raw.ToString() + "L"));
-            else if (fromType == typeof(long))
-                return String.Join(", ", ((long[])values).Select(v => v.ToString() + "L"));
-            else
-                throw new InvalidOperationException("Invalid array type: " + fromType);
+            switch (language)
+            {
+                case TargetLanguage.Java:
+                    if (fromType == typeof(F32))
+                        return String.Join(", ", ((F32[])values).Select(v => v.raw.ToString()));
+                    else if (fromType == typeof(int))
+                        return String.Join(", ", ((int[])values).Select(v => v.ToString()));
+                    else if (fromType == typeof(F64))
+                        return String.Join(", ", ((F64[])values).Select(v => v.raw.ToString() + longPostfix));
+                    else if (fromType == typeof(long))
+                        return String.Join(", ", ((long[])values).Select(v => v.ToString() + longPostfix));
+                    else
+                        throw new InvalidOperationException("Invalid array type: " + fromType);
+
+                case TargetLanguage.Cpp:
+                    if (fromType == typeof(F32))
+                        return String.Join(", ", ((F32[])values).Select(v => "(int32_t)0x" + v.raw.ToString("X")));
+                    else if (fromType == typeof(int))
+                        return String.Join(", ", ((int[])values).Select(v => "(int32_t)0x" + v.ToString("X")));
+                    else if (fromType == typeof(F64))
+                        return String.Join(", ", ((F64[])values).Select(v => "(int64_t)0x" + v.raw.ToString("X") + longPostfix));
+                    else if (fromType == typeof(long))
+                        return String.Join(", ", ((long[])values).Select(v => "(int64_t)0x" + v.ToString("X") + longPostfix));
+                    else
+                        throw new InvalidOperationException("Invalid array type: " + fromType);
+
+                default:
+                    throw new InvalidOperationException("Invalid language: " + language);
+            }
         }
 
         public static double[] ConvertToDouble(Array values)
@@ -613,24 +639,45 @@ namespace FixPointCSTest
             return new PrecisionResult(avgErr, maxErr, numBits, worstInput);
         }
 
-        private static string MapTypeName(Type type)
+        private static string MapTypeName(TargetLanguage language, Type type)
         {
-            if (type == typeof(F64))
-                return "long";
-            else if (type == typeof(F32))
-                return "int";
-            else if (type == typeof(long))
-                return "long";
-            else if (type == typeof(int))
-                return "int";
-            else
-                return "UNKNOWN";
+            switch (language)
+            {
+                case TargetLanguage.Java:
+                    if (type == typeof(F64))
+                        return "long";
+                    else if (type == typeof(F32))
+                        return "int";
+                    else if (type == typeof(long))
+                        return "long";
+                    else if (type == typeof(int))
+                        return "int";
+                    else
+                        throw new InvalidOperationException("Invalid type: " + type);
+
+                case TargetLanguage.Cpp:
+                    if (type == typeof(F64))
+                        return "int64_t";
+                    else if (type == typeof(F32))
+                        return "int32_t";
+                    else if (type == typeof(long))
+                        return "int64_t";
+                    else if (type == typeof(int))
+                        return "int32_t";
+                    else
+                        throw new InvalidOperationException("Invalid type: " + type);
+
+                default:
+                    throw new InvalidOperationException("Invalid language: " + language);
+            }
         }
 
-        public static void GenerateUnitTestCases(StreamWriter file, OpFamilyBase opFamily, Operation opImpl)
+        public static void GenerateUnitTestCases(TargetLanguage language, StreamWriter file, OpFamilyBase opFamily, Operation opImpl)
         {
-            Console.WriteLine("{0}", opImpl.FuncName);
-            file.WriteLine($"\t// {opImpl.FuncName}");
+            file.WriteLine($"\t// {opImpl.FuncName}()");
+
+            string funcType = (language == TargetLanguage.Java) ? "public static void" : "static void";
+            string checkFuncName = (language == TargetLanguage.Java) ? "Util.Check" : "Util::Check";
 
             // Input generators for operation's data type.
             InputGenerator[] inputGenerators = opFamily.inputFactory(opImpl.ValueBounds);
@@ -640,38 +687,37 @@ namespace FixPointCSTest
             Array[] outputs = GenerateOpOutputs(opImpl, UNITTEST_NUM_CASES);
             opImpl.ArrayExecute(UNITTEST_NUM_CASES, inputs, outputs);
 
-            string opName = opImpl.FuncName;
-            string testFuncName = opName.Replace(".", "_");
+            string testFuncName = opImpl.FuncName.Replace(".", "_");
+            string opName = (language == TargetLanguage.Java) ? opImpl.FuncName : opImpl.FuncName.Replace(".", "::");
 
-            file.WriteLine($"\tpublic static void {testFuncName}()");
+            file.WriteLine($"\t{funcType} {testFuncName}()");
             file.WriteLine("\t{");
 
             for (int inputNdx = 0; inputNdx < inputs.Length; inputNdx++)
             {
-                string typeName = MapTypeName(inputs[inputNdx].GetType().GetElementType());
-                string values = OpFamilyBase.ToString(inputs[inputNdx]);
-                file.WriteLine($"\t\t{typeName}[] input{inputNdx} = new {typeName}[]{{ {values} }};");
+                string typeName = MapTypeName(language, inputs[inputNdx].GetType().GetElementType());
+                string values = OpFamilyBase.ValuesToString(language, inputs[inputNdx]);
+
+                if (language == TargetLanguage.Java)
+                    file.WriteLine($"\t\t{typeName}[] input{inputNdx} = new {typeName}[]{{ {values} }};");
+                else
+                    file.WriteLine($"\t\tstatic const {typeName} input{inputNdx}[] = {{ {values} }};");
             }
 
             for (int outputNdx = 0; outputNdx < outputs.Length; outputNdx++)
             {
-                string typeName = MapTypeName(outputs[outputNdx].GetType().GetElementType());
-                string values = OpFamilyBase.ToString(outputs[outputNdx]);
-                file.WriteLine($"\t\t{typeName}[] output{outputNdx} = new {typeName}[]{{ {values} }};");
-            }
-
-            // Write out values
-            for (int ndx = 0; ndx < UNITTEST_NUM_CASES; ndx++)
-            {
-                //ValueBounds bounds = opImpl.ValueBounds;
+                string typeName = MapTypeName(language, outputs[outputNdx].GetType().GetElementType());
+                string values = OpFamilyBase.ValuesToString(language, outputs[outputNdx]);
+                if (language == TargetLanguage.Java)
+                    file.WriteLine($"\t\t{typeName}[] output{outputNdx} = new {typeName}[]{{ {values} }};");
+                else
+                    file.WriteLine($"\t\tstatic const {typeName} output{outputNdx}[] = {{ {values} }};");
             }
 
             string inputArgs = String.Join(", ", Enumerable.Range(0, inputs.Length).Select(inputNdx => $"input{inputNdx}[ndx]"));
 
             file.WriteLine($"\t\tfor (int ndx = 0; ndx < {UNITTEST_NUM_CASES}; ndx++)");
-            file.WriteLine("\t\t{");
-            file.WriteLine($"\t\t\tUtil.Check(\"{opName}\", {opName}({inputArgs}), output0[ndx], {inputArgs});");
-            file.WriteLine("\t\t}");
+            file.WriteLine($"\t\t\t{checkFuncName}(\"{opName}\", {opName}({inputArgs}), output0[ndx], {inputArgs});");
             file.WriteLine("\t}");
             file.WriteLine();
         }
@@ -1343,9 +1389,9 @@ namespace FixPointCSTest
             Console.WriteLine();
         }
 
-        static void GenerateUnitTests(string testFilter)
+        static void GenerateUnitTestsJava(string testFilter)
         {
-            Console.WriteLine("Generating unittest cases..");
+            Console.WriteLine("Generating Java unit tests..");
 
             using (StreamWriter file = new StreamWriter("../../../Java/UnitTest.java"))
             {
@@ -1368,7 +1414,8 @@ namespace FixPointCSTest
 
                         if (opImpl.FuncName != null && opImpl.FuncName.Contains(testFilter))
                         {
-                            TestRunner.GenerateUnitTestCases(file, opFamily, opImpl);
+                            Console.WriteLine("  {0}", opImpl.FuncName);
+                            TestRunner.GenerateUnitTestCases(TargetLanguage.Java, file, opFamily, opImpl);
                             funcNames.Add(opImpl.FuncName.Replace(".", "_"));
                         }
                     }
@@ -1382,6 +1429,60 @@ namespace FixPointCSTest
 
                 file.WriteLine("}");
             }
+
+            Console.WriteLine("");
+        }
+
+        static void GenerateUnitTestsCpp(string testFilter)
+        {
+            Console.WriteLine("Generating C++ unit tests..");
+
+            using (StreamWriter file = new StreamWriter("../../../Cpp/UnitTest.cpp"))
+            {
+                file.WriteLine("#include \"UnitTest.h\"");
+                file.WriteLine("#include \"Fixed32.h\"");
+                file.WriteLine("#include \"Fixed64.h\"");
+                file.WriteLine("");
+
+                List<string> funcNames = new List<string>();
+
+                file.WriteLine("namespace UnitTest");
+                file.WriteLine("{");
+
+                foreach (OpFamilyBase opFamily in operations)
+                {
+                    foreach (Operation opImpl in opFamily.operations)
+                    {
+                        // Skip Nop()
+                        if (opImpl.FuncName.EndsWith(".Nop"))
+                            continue;
+
+                        if (opImpl.FuncName != null && opImpl.FuncName.Contains(testFilter))
+                        {
+                            Console.WriteLine("  {0}", opImpl.FuncName);
+                            TestRunner.GenerateUnitTestCases(TargetLanguage.Cpp, file, opFamily, opImpl);
+                            funcNames.Add(opImpl.FuncName.Replace(".", "_"));
+                        }
+                    }
+                }
+
+                file.WriteLine("}");
+                file.WriteLine("");
+
+                file.WriteLine("void UnitTest_TestAll()");
+                file.WriteLine("{");
+                foreach (string funcName in funcNames)
+                    file.WriteLine($"\t\tUnitTest::{funcName}();");
+                file.WriteLine("}");
+            }
+
+            Console.WriteLine("");
+        }
+
+        static void GenerateUnitTests(string testFilter)
+        {
+            GenerateUnitTestsJava(testFilter);
+            GenerateUnitTestsCpp(testFilter);
         }
 
         static void Main(string[] args)
@@ -1413,7 +1514,7 @@ namespace FixPointCSTest
             // - "ToInt" runs all the XxxToInt family
             // - "Fixed32.Rcp"
             // - "Fixed32" executes all the whole s16.16 ops
-            string testFilter = "";
+            //string testFilter = "";
 
             // Run precision and performance tests.
             //TestOperations(testFilter);
