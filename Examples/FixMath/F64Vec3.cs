@@ -31,7 +31,7 @@ namespace FixMath
     /// Vector2 struct with signed 32.32 fixed point components.
     /// </summary>
     [Serializable]
-    public struct F64Vec3
+    public struct F64Vec3 : IEquatable<F64Vec3>
     {
         // Constants
         public static F64Vec3 Zero     { get { return new F64Vec3(F64.Zero, F64.Zero, F64.Zero); } }
@@ -144,6 +144,11 @@ namespace FixMath
 
         public static F64Vec3 Min(F64Vec3 a, F64Vec3 b) { return new F64Vec3(F64.Min(a.x, b.x), F64.Min(a.y, b.y), F64.Min(a.z, b.z)); }
         public static F64Vec3 Max(F64Vec3 a, F64Vec3 b) { return new F64Vec3(F64.Max(a.x, b.x), F64.Max(a.y, b.y), F64.Max(a.z, b.z)); }
+
+        public bool Equals(F64Vec3 other)
+        {
+            return (this == other);
+        }
 
         public override bool Equals(object obj)
         {

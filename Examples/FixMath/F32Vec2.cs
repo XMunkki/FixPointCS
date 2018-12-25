@@ -31,7 +31,7 @@ namespace FixMath
     /// Vector2 struct with signed 32.32 fixed point components.
     /// </summary>
     [Serializable]
-    public struct F32Vec2
+    public struct F32Vec2 : IEquatable<F32Vec2>
     {
         // Constants
         public static F32Vec2 Zero     { get { return new F32Vec2(F32.Zero, F32.Zero); } }
@@ -134,6 +134,11 @@ namespace FixMath
 
         public static F32Vec2 Min(F32Vec2 a, F32Vec2 b) { return new F32Vec2(F32.Min(a.x, b.x), F32.Min(a.y, b.y)); }
         public static F32Vec2 Max(F32Vec2 a, F32Vec2 b) { return new F32Vec2(F32.Max(a.x, b.x), F32.Max(a.y, b.y)); }
+
+        public bool Equals(F32Vec2 other)
+        {
+            return (this == other);
+        }
 
         public override bool Equals(object obj)
         {

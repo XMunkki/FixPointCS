@@ -31,7 +31,7 @@ namespace FixMath
     /// Signed 32.32 fixed point value struct.
     /// </summary>
     [Serializable]
-    public struct F64 : IComparable<F64>
+    public struct F64 : IComparable<F64>, IEquatable<F64>
     {
         // Constants
         public static F64 Neg1 { get { return FromRaw(Fixed64.Neg1); } }
@@ -178,6 +178,11 @@ namespace FixMath
         public static F64 FromFloat(float v) { return new F64(v); }
         public static F64 FromDouble(double v) { return new F64(v); }
         public static F64 FromF32(F32 v) { return new F64(v); }
+
+        public bool Equals(F64 other)
+        {
+            return (this == other);
+        }
 
         public override bool Equals(object obj)
         {
