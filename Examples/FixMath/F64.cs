@@ -109,6 +109,19 @@ namespace FixMath
         public static bool operator >=(int v1, F64 v2) { return Fixed64.FromInt(v1) >= v2.raw; }
         public static bool operator >=(F64 v1, int v2) { return v1.raw >= Fixed64.FromInt(v2); }
 
+        public static bool operator ==(F32 a, F64 b) { return F64.FromF32(a) == b; }
+        public static bool operator ==(F64 a, F32 b) { return a == F64.FromF32(b); }
+        public static bool operator !=(F32 a, F64 b) { return F64.FromF32(a) != b; }
+        public static bool operator !=(F64 a, F32 b) { return a != F64.FromF32(b); }
+        public static bool operator <(F32 a, F64 b) { return F64.FromF32(a) < b; }
+        public static bool operator <(F64 a, F32 b) { return a < F64.FromF32(b); }
+        public static bool operator <=(F32 a, F64 b) { return F64.FromF32(a) <= b; }
+        public static bool operator <=(F64 a, F32 b) { return a <= F64.FromF32(b); }
+        public static bool operator >(F32 a, F64 b) { return F64.FromF32(a) > b; }
+        public static bool operator >(F64 a, F32 b) { return a > F64.FromF32(b); }
+        public static bool operator >=(F32 a, F64 b) { return F64.FromF32(a) >= b; }
+        public static bool operator >=(F64 a, F32 b) { return a >= F64.FromF32(b); }
+
         public static F64 Abs(F64 a) { return FromRaw(Fixed64.Abs(a.raw)); }
         public static F64 Nabs(F64 a) { return FromRaw(Fixed64.Nabs(a.raw)); }
         public static F64 Ceil(F64 a) { return FromRaw(Fixed64.Ceil(a.raw)); }
