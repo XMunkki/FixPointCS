@@ -63,6 +63,8 @@ namespace FixMath
         public float Float { get { return Fixed32.ToFloat(raw); } }
         public double Double { get { return Fixed32.ToDouble(raw); } }
 
+        public static F32 Ratio(int a, int b) { return F32.FromRaw((int)(((long)a << 16) / b)); }
+
         // Operators
         public static F32 operator -(F32 v1) { return FromRaw(-v1.raw); }
 

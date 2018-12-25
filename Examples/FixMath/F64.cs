@@ -64,6 +64,8 @@ namespace FixMath
         public double Double { get { return Fixed64.ToDouble(raw); } }
         public F32 F32 { get { return F32.FromRaw((int)(raw >> 16)); } }
 
+        public static F64 Ratio(int a, int b) { return F64.FromRaw(((long)a << 32) / b); }
+
         // Operators
         public static F64 operator -(F64 v1) { return FromRaw(-v1.raw); }
 
