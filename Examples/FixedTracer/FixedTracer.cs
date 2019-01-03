@@ -60,7 +60,7 @@ namespace FixedTracer
             {
                 F64Vec3 ldis = light.Pos - pos;
                 F64Vec3 livec = F64Vec3.NormalizeFast(ldis);
-                F64 neatIsect = TestRay(new Ray() { Start = pos, Dir = livec }, scene);
+                F64 neatIsect = TestRay(new Ray(pos, livec), scene);
                 bool isInShadow = !((neatIsect * neatIsect > F64Vec3.LengthSqr(ldis)) || (neatIsect == 0));
                 if (!isInShadow)
                 {
@@ -76,20 +76,20 @@ namespace FixedTracer
 
         private static Color GetReflectionColor(Material material, F64Vec3 pos, F64Vec3 norm, F64Vec3 rd, Scene scene, int depth)
         {
-            return material.Reflect * TraceRay(new Ray() { Start = pos, Dir = rd }, scene, depth + 1);
+            return material.Reflect * TraceRay(new Ray(pos, rd), scene, depth + 1);
         }
 
         private static Color Shade(Ray ray, ISect isect, Scene scene, int depth)
         {
             var pos = isect.Pos;
             var normal = isect.Normal;
-            var reflectDir = ray.Dir - F64.FromInt(2) * F64Vec3.Dot(normal, ray.Dir) * normal;
+            var reflectDir = ray.Dir - F64.Two * F64Vec3.Dot(normal, ray.Dir) * normal;
             Color ret = Color.Black;
             Material material = isect.Material;
             ret += GetNaturalColor(material, pos, normal, reflectDir, scene);
             if (depth >= MaxDepth)
                 return ret + new Color(F32.Half, F32.Half, F32.Half);
-            return ret + GetReflectionColor(material, pos + F64.FromDouble(.001) * reflectDir, normal, reflectDir, scene, depth);
+            return ret + GetReflectionColor(material, pos + F64.Ratio(1, 1000) * reflectDir, normal, reflectDir, scene, depth);
         }
 
         internal static System.Drawing.Color[,] Render(int screenWidth, int screenHeight, int numSamples, Scene scene)
@@ -114,7 +114,7 @@ namespace FixedTracer
                         F64 xx = (F64.FromInt(x) + F64.FromDouble(rnd.NextDouble() - 0.5) - ox) * sx;
                         F64 yy = (F64.FromInt(y) + F64.FromDouble(rnd.NextDouble() - 0.5) - oy) * sy;
                         F64Vec3 rayDir = F64Vec3.Normalize(camera.Forward + xx * camera.Right + yy * camera.Up);
-                        Color color = TraceRay(new Ray() { Start = scene.Camera.Pos, Dir = rayDir }, scene, 0);
+                        Color color = TraceRay(new Ray(scene.Camera.Pos, rayDir), scene, 0);
                         accum += color;
                     }
                     pixels[x, y] = (ooNumSamples * accum).ToDrawingColor();
@@ -149,7 +149,7 @@ namespace FixedTracer
         {
             Diffuse = Color.White,
             Specular = Color.White,
-            Reflect = F32.FromDouble(0.1),
+            Reflect = F32.Ratio(1, 10),
             Roughness = F32.FromInt(150)
         };
 
@@ -157,7 +157,7 @@ namespace FixedTracer
         {
             Diffuse = Color.Black,
             Specular = Color.White,
-            Reflect = F32.FromDouble(0.7),
+            Reflect = F32.Ratio(7, 10),
             Roughness = F32.FromInt(150)
         };
 
@@ -165,7 +165,7 @@ namespace FixedTracer
         {
             Diffuse = Color.White,
             Specular = new Color(F32.Half, F32.Half, F32.Half),
-            Reflect = F32.FromDouble(.6),
+            Reflect = F32.Ratio(6, 10),
             Roughness = F32.FromInt(50)
         };
     }
@@ -205,24 +205,30 @@ namespace FixedTracer
 
     struct Ray
     {
-        public F64Vec3 Start;
-        public F64Vec3 Dir;
+        public readonly F64Vec3 Start;
+        public readonly F64Vec3 Dir;
+
+        public Ray(F64Vec3 start, F64Vec3 dir)
+        {
+            Start = start;
+            Dir = dir;
+        }
     }
 
     class ISect
     {
         public Material Material;
-        public F64 Dist;
-        public F64Vec3 Pos;
-        public F64Vec3 Normal;
+        public F64      Dist;
+        public F64Vec3  Pos;
+        public F64Vec3  Normal;
     }
 
     class Material
     {
-        public Color Diffuse;
-        public Color Specular;
-        public F32 Reflect;
-        public F32 Roughness;
+        public Color    Diffuse;
+        public Color    Specular;
+        public F32      Reflect;
+        public F32      Roughness;
     }
 
     class Camera
@@ -245,8 +251,8 @@ namespace FixedTracer
 
     class Light
     {
-        public F64Vec3 Pos;
-        public Color Color;
+        public F64Vec3  Pos;
+        public Color    Color;
 
         public Light(F64Vec3 pos, Color color)
         {
@@ -262,9 +268,9 @@ namespace FixedTracer
 
     class Sphere : SceneObject
     {
-        public F64Vec3 Center;
-        public F64 Radius;
-        public Material Material;
+        public readonly F64Vec3     Center;
+        public readonly F64         Radius;
+        public readonly Material    Material;
 
         public Sphere(F64Vec3 center, F64 radius, Material material)
         {
@@ -286,7 +292,7 @@ namespace FixedTracer
             if (dist == F64.Zero)
                 return null;
 
-            F64Vec3 pos = (ray.Start + dist * ray.Dir);
+            F64Vec3 pos = ray.Start + dist * ray.Dir;
             return new ISect
             {
                 Material = Material,
@@ -299,8 +305,8 @@ namespace FixedTracer
 
     class Checkerboard : SceneObject
     {
-        public F64Vec3 Norm;
-        public F64 Offset;
+        public F64Vec3  Norm;
+        public F64      Offset;
         public Material White;
         public Material Black;
 
@@ -314,7 +320,7 @@ namespace FixedTracer
 
         public override ISect Intersect(Ray ray)
         {
-            F64 epsilon = F64.FromRaw(256 * 65536);
+            F64 epsilon = F64.FromRaw(1 << 24);
             F64 denom = F64Vec3.Dot(Norm, ray.Dir);
             if (denom > -epsilon) return null;
 
@@ -331,9 +337,10 @@ namespace FixedTracer
         }
     }
 
-    class Scene {
-        public SceneObject[] Things;
-        public Light[] Lights;
-        public Camera Camera;
+    class Scene
+    {
+        public SceneObject[]    Things;
+        public Light[]          Lights;
+        public Camera           Camera;
     }
 }
