@@ -108,6 +108,9 @@ namespace FixMath
         public static bool operator >=(int v1, F32 v2) { return Fixed32.FromInt(v1) >= v2.raw; }
         public static bool operator >=(F32 v1, int v2) { return v1.raw >= Fixed32.FromInt(v2); }
 
+        public static F32 RadToDeg(F32 a) { return FromRaw(Fixed32.Mul(a.raw, 3754943)); }  // 180 / F32.Pi
+        public static F32 DegToRad(F32 a) { return FromRaw(Fixed32.Mul(a.raw, 1143)); }     // F32.Pi / 180
+
         public static F32 Abs(F32 a) { return FromRaw(Fixed32.Abs(a.raw)); }
         public static F32 Nabs(F32 a) { return FromRaw(Fixed32.Nabs(a.raw)); }
         public static F32 Ceil(F32 a) { return FromRaw(Fixed32.Ceil(a.raw)); }

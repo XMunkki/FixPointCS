@@ -122,6 +122,9 @@ namespace FixMath
         public static bool operator >=(F32 a, F64 b) { return F64.FromF32(a) >= b; }
         public static bool operator >=(F64 a, F32 b) { return a >= F64.FromF32(b); }
 
+        public static F64 RadToDeg(F64 a) { return FromRaw(Fixed64.Mul(a.raw, 246083499198)); } // 180 / F64.Pi
+        public static F64 DegToRad(F64 a) { return FromRaw(Fixed64.Mul(a.raw, 74961320)); }     // F64.Pi / 180
+
         public static F64 Abs(F64 a) { return FromRaw(Fixed64.Abs(a.raw)); }
         public static F64 Nabs(F64 a) { return FromRaw(Fixed64.Nabs(a.raw)); }
         public static F64 Ceil(F64 a) { return FromRaw(Fixed64.Ceil(a.raw)); }
