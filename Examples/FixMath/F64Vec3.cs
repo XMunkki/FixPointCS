@@ -80,6 +80,12 @@ namespace FixMath
         public static bool operator ==(F64Vec3 a, F64Vec3 b) { return a.x == b.x && a.y == b.y && a.z == b.z; }
         public static bool operator !=(F64Vec3 a, F64Vec3 b) { return a.x != b.x || a.y != b.y || a.z != b.z; }
 
+        public static F64Vec3 Div(F64Vec3 a, F64 b) { F64 oob = F64.Rcp(b); return new F64Vec3(a.x * oob, a.y * oob, a.z * oob); }
+        public static F64Vec3 DivFast(F64Vec3 a, F64 b) { F64 oob = F64.RcpFast(b); return new F64Vec3(a.x * oob, a.y * oob, a.z * oob); }
+        public static F64Vec3 DivFastest(F64Vec3 a, F64 b) { F64 oob = F64.RcpFastest(b); return new F64Vec3(a.x * oob, a.y * oob, a.z * oob); }
+        public static F64Vec3 Div(F64Vec3 a, F64Vec3 b) { return new F64Vec3(F64.Div(a.x, b.x), F64.Div(a.y, b.y), F64.Div(a.z, b.z)); }
+        public static F64Vec3 DivFast(F64Vec3 a, F64Vec3 b) { return new F64Vec3(F64.DivFast(a.x, b.x), F64.DivFast(a.y, b.y), F64.DivFast(a.z, b.z)); }
+        public static F64Vec3 DivFastest(F64Vec3 a, F64Vec3 b) { return new F64Vec3(F64.DivFastest(a.x, b.x), F64.DivFastest(a.y, b.y), F64.DivFastest(a.z, b.z)); }
         public static F64Vec3 SqrtPrecise(F64Vec3 a) { return new F64Vec3(F64.SqrtPrecise(a.x), F64.SqrtPrecise(a.y), F64.SqrtPrecise(a.z)); }
         public static F64Vec3 Sqrt(F64Vec3 a) { return new F64Vec3(F64.Sqrt(a.x), F64.Sqrt(a.y), F64.Sqrt(a.z)); }
         public static F64Vec3 SqrtFast(F64Vec3 a) { return new F64Vec3(F64.SqrtFast(a.x), F64.SqrtFast(a.y), F64.SqrtFast(a.z)); }

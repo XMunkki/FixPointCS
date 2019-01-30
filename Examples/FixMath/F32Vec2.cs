@@ -78,7 +78,13 @@ namespace FixMath
         public static bool operator ==(F32Vec2 a, F32Vec2 b) { return a.x == b.x && a.y == b.y; }
         public static bool operator !=(F32Vec2 a, F32Vec2 b) { return a.x != b.x || a.y != b.y; }
 
-        // public static F32Vec2 SqrtPrecise(F32Vec2 a) { return new F32Vec2(F32.SqrtPrecise(a.x), F32.SqrtPrecise(a.y)); }
+        public static F32Vec2 Div(F32Vec2 a, F32 b) { F32 oob = F32.Rcp(b); return new F32Vec2(a.x * oob, a.y * oob); }
+        public static F32Vec2 DivFast(F32Vec2 a, F32 b) { F32 oob = F32.RcpFast(b); return new F32Vec2(a.x * oob, a.y * oob); }
+        public static F32Vec2 DivFastest(F32Vec2 a, F32 b) { F32 oob = F32.RcpFastest(b); return new F32Vec2(a.x * oob, a.y * oob); }
+        public static F32Vec2 Div(F32Vec2 a, F32Vec2 b) { return new F32Vec2(F32.Div(a.x, b.x), F32.Div(a.y, b.y)); }
+        public static F32Vec2 DivFast(F32Vec2 a, F32Vec2 b) { return new F32Vec2(F32.DivFast(a.x, b.x), F32.DivFast(a.y, b.y)); }
+        public static F32Vec2 DivFastest(F32Vec2 a, F32Vec2 b) { return new F32Vec2(F32.DivFastest(a.x, b.x), F32.DivFastest(a.y, b.y)); }
+        public static F32Vec2 SqrtPrecise(F32Vec2 a) { return new F32Vec2(F32.SqrtPrecise(a.x), F32.SqrtPrecise(a.y)); }
         public static F32Vec2 Sqrt(F32Vec2 a) { return new F32Vec2(F32.Sqrt(a.x), F32.Sqrt(a.y)); }
         public static F32Vec2 SqrtFast(F32Vec2 a) { return new F32Vec2(F32.SqrtFast(a.x), F32.SqrtFast(a.y)); }
         public static F32Vec2 SqrtFastest(F32Vec2 a) { return new F32Vec2(F32.SqrtFastest(a.x), F32.SqrtFastest(a.y)); }

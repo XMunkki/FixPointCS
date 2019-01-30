@@ -80,6 +80,12 @@ namespace FixMath
         public static bool operator ==(F32Vec3 a, F32Vec3 b) { return a.x == b.x && a.y == b.y && a.z == b.z; }
         public static bool operator !=(F32Vec3 a, F32Vec3 b) { return a.x != b.x || a.y != b.y || a.z != b.z; }
 
+        public static F32Vec3 Div(F32Vec3 a, F32 b) { F32 oob = F32.Rcp(b); return new F32Vec3(a.x * oob, a. y * oob, a.z * oob); }
+        public static F32Vec3 DivFast(F32Vec3 a, F32 b) { F32 oob = F32.RcpFast(b); return new F32Vec3(a.x * oob, a.y * oob, a.z * oob); }
+        public static F32Vec3 DivFastest(F32Vec3 a, F32 b) { F32 oob = F32.RcpFastest(b); return new F32Vec3(a.x * oob, a.y * oob, a.z * oob); }
+        public static F32Vec3 Div(F32Vec3 a, F32Vec3 b) { return new F32Vec3(F32.Div(a.x, b.x), F32.Div(a.y, b.y), F32.Div(a.z, b.z)); }
+        public static F32Vec3 DivFast(F32Vec3 a, F32Vec3 b) { return new F32Vec3(F32.DivFast(a.x, b.x), F32.DivFast(a.y, b.y), F32.DivFast(a.z, b.z)); }
+        public static F32Vec3 DivFastest(F32Vec3 a, F32Vec3 b) { return new F32Vec3(F32.DivFastest(a.x, b.x), F32.DivFastest(a.y, b.y), F32.DivFastest(a.z, b.z)); }
         public static F32Vec3 SqrtPrecise(F32Vec3 a) { return new F32Vec3(F32.SqrtPrecise(a.x), F32.SqrtPrecise(a.y), F32.SqrtPrecise(a.z)); }
         public static F32Vec3 Sqrt(F32Vec3 a) { return new F32Vec3(F32.Sqrt(a.x), F32.Sqrt(a.y), F32.Sqrt(a.z)); }
         public static F32Vec3 SqrtFast(F32Vec3 a) { return new F32Vec3(F32.SqrtFast(a.x), F32.SqrtFast(a.y), F32.SqrtFast(a.z)); }
