@@ -1,7 +1,7 @@
 ﻿//
 // FixPointCS
 //
-// Copyright(c) 2018 Jere Sanisalo, Petri Kero
+// Copyright(c) 2018-2019 Jere Sanisalo, Petri Kero
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -28,7 +28,6 @@ using System.Linq;
 using System.Diagnostics;
 using System.Collections.Generic;
 
-using FixPointCS;
 using FixMath;
 
 namespace FixPointCSTest
@@ -260,11 +259,11 @@ namespace FixPointCSTest
             {
                 case TargetLanguage.Java:
                     if (fromType == typeof(F32))
-                        return String.Join(", ", ((F32[])values).Select(v => v.raw.ToString()));
+                        return String.Join(", ", ((F32[])values).Select(v => v.Raw.ToString()));
                     else if (fromType == typeof(int))
                         return String.Join(", ", ((int[])values).Select(v => v.ToString()));
                     else if (fromType == typeof(F64))
-                        return String.Join(", ", ((F64[])values).Select(v => v.raw.ToString() + longPostfix));
+                        return String.Join(", ", ((F64[])values).Select(v => v.Raw.ToString() + longPostfix));
                     else if (fromType == typeof(long))
                         return String.Join(", ", ((long[])values).Select(v => v.ToString() + longPostfix));
                     else
@@ -272,11 +271,11 @@ namespace FixPointCSTest
 
                 case TargetLanguage.Cpp:
                     if (fromType == typeof(F32))
-                        return String.Join(", ", ((F32[])values).Select(v => "(int32_t)0x" + v.raw.ToString("X")));
+                        return String.Join(", ", ((F32[])values).Select(v => "(int32_t)0x" + v.Raw.ToString("X")));
                     else if (fromType == typeof(int))
                         return String.Join(", ", ((int[])values).Select(v => "(int32_t)0x" + v.ToString("X")));
                     else if (fromType == typeof(F64))
-                        return String.Join(", ", ((F64[])values).Select(v => "(int64_t)0x" + v.raw.ToString("X") + longPostfix));
+                        return String.Join(", ", ((F64[])values).Select(v => "(int64_t)0x" + v.Raw.ToString("X") + longPostfix));
                     else if (fromType == typeof(long))
                         return String.Join(", ", ((long[])values).Select(v => "(int64_t)0x" + v.ToString("X") + longPostfix));
                     else
@@ -967,6 +966,21 @@ namespace FixPointCSTest
                     InputGenerator.Binary(Input.Uniform(bounds.InputNegMax, bounds.InputPosMax), Input.Uniform(bounds.InputNegMax, bounds.InputPosMax)),
                 }
             ),
+
+            // \todo [petri] implement clamp
+            //new TernaryOpFamily(
+            //    (double i0, double i1, double i2) => { return Math.Clamp(i0, i1, i2); },
+            //    AbsoluteBinaryErrorEvaluator(),
+            //    Operation.Multi(
+            //        Operation.F64_F64_F64_F64("Fixed64.Clamp", (int n, F64[] i0, F64[] i1, F64[] i2, F64[] o) => { for (int i=0; i<n; i++) { o[i] = F64.Clamp(i0[i], i1[i], i2[i]); } }),
+            //        Operation.F32_F32_F32_F32("Fixed32.Clamp", (int n, F32[] i0, F32[] i1, F32[] i2, F32[] o) => { for (int i=0; i<n; i++) { o[i] = F32.Clamp(i0[i], i1[i], i2[i]); } })
+            //    ),
+            //    bounds => new[] {
+            //        InputGenerator.Ternary(Input.Uniform(-1.0, 1.0), Input.Uniform(-1.0, 1.0), Input.Uniform(-1.0, 1.0)),
+            //        InputGenerator.Ternary(Input.Uniform(-1e5, 1e5), Input.Uniform(-1e5, 1e5), Input.Uniform(-1e5, 1e5)),
+            //        InputGenerator.Ternary(Input.Uniform(bounds.InputNegMax, bounds.InputPosMax), Input.Uniform(bounds.InputNegMax, bounds.InputPosMax), Input.Uniform(bounds.InputNegMax, bounds.InputPosMax)),
+            //    }
+            //),
 
             new UnaryOpFamily(
                 (double i0) => { return Math.Ceiling(i0); },

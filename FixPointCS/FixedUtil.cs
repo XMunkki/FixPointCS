@@ -1,7 +1,7 @@
 //
 // FixPointCS
 //
-// Copyright(c) 2018 Jere Sanisalo, Petri Kero
+// Copyright(c) 2018-2019 Jere Sanisalo, Petri Kero
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -66,7 +66,7 @@ namespace FixPointCS
     /// <summary>
     /// Utility functions for the fixed point library.
     /// </summary>
-    static class FixedUtil
+    public static class FixedUtil
     {
 #endif
 

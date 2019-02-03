@@ -1,6 +1,7 @@
 using System;
 using System.Threading.Tasks;
 
+using FixPointCS;
 using FixMath;
 
 // Based on https://blogs.msdn.microsoft.com/lukeh/2007/04/03/a-ray-tracer-in-c3-0/
@@ -37,14 +38,6 @@ namespace FixedTracer
             return best;
         }
 
-        private static F64 TestRay(Ray ray, Scene scene)
-        {
-            ISect isect = IntersectRay(ray, scene);
-            if (isect == null)
-                return F64.Zero;
-            return isect.Dist;
-        }
-
         private static Color TraceRay(Ray ray, Scene scene, int depth)
         {
             ISect isect = IntersectRay(ray, scene);
@@ -59,14 +52,14 @@ namespace FixedTracer
             foreach (Light light in scene.Lights)
             {
                 F64Vec3 ldis = light.Pos - pos;
-                F64Vec3 livec = F64Vec3.NormalizeFast(ldis);
-                F64 neatIsect = TestRay(new Ray(pos, livec), scene);
-                bool isInShadow = !((neatIsect * neatIsect > F64Vec3.LengthSqr(ldis)) || (neatIsect == 0));
+                F64Vec3 livec = F64Vec3.NormalizeFastest(ldis);
+                ISect isect = IntersectRay(new Ray(pos, livec), scene);
+                bool isInShadow = (isect != null) && (isect.Dist * isect.Dist) < F64Vec3.LengthSqr(ldis);
                 if (!isInShadow)
                 {
                     F32 illum = F32.Max(F32.Zero, F64Vec3.Dot(livec, norm).F32);
                     Color lcolor = illum * light.Color;
-                    F32 specular = F64Vec3.Dot(livec, F64Vec3.NormalizeFast(rd)).F32;
+                    F32 specular = F64Vec3.Dot(livec, F64Vec3.NormalizeFastest(rd)).F32;
                     Color scolor = specular > 0 ? F32.PowFastest(specular, material.Roughness) * light.Color : Color.Black;
                     ret += material.Diffuse * lcolor + material.Specular * scolor;
                 }
@@ -83,7 +76,7 @@ namespace FixedTracer
         {
             var pos = isect.Pos;
             var normal = isect.Normal;
-            var reflectDir = ray.Dir - F64.Two * F64Vec3.Dot(normal, ray.Dir) * normal;
+            var reflectDir = ray.Dir - 2 * F64Vec3.Dot(normal, ray.Dir) * normal;
             Color ret = Color.Black;
             Material material = isect.Material;
             ret += GetNaturalColor(material, pos, normal, reflectDir, scene);
@@ -96,11 +89,11 @@ namespace FixedTracer
         {
             System.Drawing.Color[,] pixels = new System.Drawing.Color[screenWidth, screenHeight];
             Camera camera = scene.Camera;
-            F64 sx = F64.One / (F64.Two * F64.FromInt(screenWidth));
+            F64 sx = F64.Ratio(1, 2 * screenWidth);
             F64 ox = F64.Half * F64.FromInt(screenWidth);
-            F64 sy = -F64.One / (F64.Two * F64.FromInt(screenHeight));
+            F64 sy = -F64.Ratio(1, 2 * screenHeight);
             F64 oy = F64.Half * F64.FromInt(screenHeight);
-            F32 ooNumSamples = F32.FromInt(1) / F32.FromInt(numSamples);
+            F32 ooNumSamples = F32.Ratio(1, numSamples);
 
             //for (int y = 0; y < screenHeight; y++)
             Parallel.For(0, screenHeight, y =>
@@ -134,10 +127,10 @@ namespace FixedTracer
                 },
                 Lights = new Light[]
                 {
-                    new Light(F64Vec3.FromDouble(-2,2.5,0), Color.FromDouble(.49,.07,.07)),
-                    new Light(F64Vec3.FromDouble(1.5,2.5,1.5), Color.FromDouble(.07,.07,.49)),
-                    new Light(F64Vec3.FromDouble(1.5,2.5,-1.5), Color.FromDouble(.07,.49,.071)),
-                    new Light(F64Vec3.FromDouble(0,3.5,0), Color.FromDouble(.21,.21,.35)),
+                    new Light(F64Vec3.FromDouble(-2,2.5,0), Color.Ratio100(49, 7, 7)),
+                    new Light(F64Vec3.FromDouble(1.5,2.5,1.5), Color.Ratio100(7, 7, 49)),
+                    new Light(F64Vec3.FromDouble(1.5,2.5,-1.5), Color.Ratio100(7, 49, 7)),
+                    new Light(F64Vec3.FromDouble(0,3.5,0), Color.Ratio100(21, 21, 35)),
                 },
                 Camera = Camera.Create(F64Vec3.FromDouble(3,2,4), F64Vec3.FromDouble(-1,.5,0))
             };
@@ -164,7 +157,7 @@ namespace FixedTracer
         public static readonly Material Shiny = new Material
         {
             Diffuse = Color.White,
-            Specular = new Color(F32.Half, F32.Half, F32.Half),
+            Specular = Color.Ratio100(50, 50, 50),
             Reflect = F32.Ratio(6, 10),
             Roughness = F32.FromInt(50)
         };
@@ -172,34 +165,34 @@ namespace FixedTracer
 
     public struct Color
     {
-        public F32 R;
-        public F32 G;
-        public F32 B;
+        public int RawR;
+        public int RawG;
+        public int RawB;
 
-        public Color(F32 r, F32 g, F32 b) { R = r; G = g; B = b; }
+        private Color(int r, int g, int b) { RawR = r; RawG = g; RawB = b; }
+        public Color(F32 r, F32 g, F32 b) { RawR = r.Raw; RawG = g.Raw; RawB = b.Raw; }
 
-        public static Color FromInt(int r, int g, int b) { return new Color(F32.FromInt(r), F32.FromInt(g), F32.FromInt(b)); }
-        public static Color FromDouble(double r, double g, double b) { return new Color(F32.FromDouble(r), F32.FromDouble(g), F32.FromDouble(b)); }
+        public static Color Ratio100(int r, int g, int b) { return new Color((r << 16) / 100, (g << 16) / 100, (b << 16) / 100); }
 
-        public static Color operator +(Color a, Color b) { return new Color(a.R + b.R, a.G + b.G, a.B + b.B); }
-        public static Color operator -(Color a, Color b) { return new Color(a.R - b.R, a.G - b.G, a.B - b.B); }
-        public static Color operator *(Color a, Color b) { return new Color(a.R * b.R, a.G * b.G, a.B * b.B); }
-        public static Color operator *(F32 a, Color b) { return new Color(a * b.R, a * b.G, a * b.B); }
-        public static Color operator *(Color a, F32 b) { return new Color(a.R * b, a.G * b, a.B * b); }
+        public static Color operator +(Color a, Color b) { return new Color(a.RawR + b.RawR, a.RawG + b.RawG, a.RawB + b.RawB); }
+        public static Color operator -(Color a, Color b) { return new Color(a.RawR - b.RawR, a.RawG - b.RawG, a.RawB - b.RawB); }
+        public static Color operator *(Color a, Color b) { return new Color(Fixed32.Mul(a.RawR, b.RawR), Fixed32.Mul(a.RawG, b.RawG), Fixed32.Mul(a.RawB, b.RawB)); }
+        public static Color operator *(F32 a, Color b) { return new Color(Fixed32.Mul(a.Raw, b.RawR), Fixed32.Mul(a.Raw, b.RawG), Fixed32.Mul(a.Raw, b.RawB)); }
+        public static Color operator *(Color a, F32 b) { return new Color(Fixed32.Mul(a.RawR, b.Raw), Fixed32.Mul(a.RawG, b.Raw), Fixed32.Mul(a.RawB, b.Raw)); }
 
-        public static Color Black { get { return new Color(F32.Zero, F32.Zero, F32.Zero); } }
-        public static Color White { get { return new Color(F32.One, F32.One, F32.One); } }
-        public static Color Background { get { return Color.FromDouble(0.4, 0.6, 1.0); } }
+        public static Color Black { get { return new Color(0, 0, 0); } }
+        public static Color White { get { return new Color(Fixed32.One, Fixed32.One, Fixed32.One); } }
+        public static Color Background { get { return new Color(F32.Ratio(4, 10), F32.Ratio(6, 10), F32.One); } }
 
-        public int ToInt(F32 d)
+        private int ToInt(int raw)
         {
-            F32 clamped = F32.Max(F32.Zero, F32.Min(d, F32.One));
-            return F32.RoundToInt(clamped * 255);
+            int clamped = Fixed32.Clamp(raw, 0, Fixed32.One);
+            return Fixed32.RoundToInt(clamped * 255);
         }
 
         internal System.Drawing.Color ToDrawingColor()
         {
-            return System.Drawing.Color.FromArgb(ToInt(R), ToInt(G), ToInt(B));
+            return System.Drawing.Color.FromArgb(ToInt(RawR), ToInt(RawG), ToInt(RawB));
         }
     }
 
@@ -326,7 +319,7 @@ namespace FixedTracer
 
             F64 dist = (F64Vec3.Dot(Norm, ray.Start) + Offset) * F64.RcpFast(-denom);
             F64Vec3 pos = ray.Start + dist * ray.Dir;
-            bool isWhite = ((F64.FloorToInt(pos.z) + F64.FloorToInt(pos.x)) & 1) != 0;
+            bool isWhite = ((F64.FloorToInt(pos.Z) + F64.FloorToInt(pos.X)) & 1) != 0;
             return new ISect
             {
                 Material = isWhite ? White : Black,

@@ -1,7 +1,7 @@
 ﻿//
 // FixPointCS
 //
-// Copyright(c) 2018 Jere Sanisalo, Petri Kero
+// Copyright(c) 2018-2019 Jere Sanisalo, Petri Kero
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -28,128 +28,159 @@ using FixPointCS;
 namespace FixMath
 {
     /// <summary>
-    /// Vector2 struct with signed 32.32 fixed point components.
+    /// Vector3 struct with signed 32.32 fixed point components.
     /// </summary>
     [Serializable]
     public struct F64Vec3 : IEquatable<F64Vec3>
     {
-        // Constants
-        public static F64Vec3 Zero     { get { return new F64Vec3(F64.Zero, F64.Zero, F64.Zero); } }
-        public static F64Vec3 One      { get { return new F64Vec3(F64.One, F64.One, F64.One); } }
-        public static F64Vec3 Down     { get { return new F64Vec3(F64.Zero, F64.Neg1, F64.Zero); } }
-        public static F64Vec3 Up       { get { return new F64Vec3(F64.Zero, F64.One, F64.Zero); } }
-        public static F64Vec3 Left     { get { return new F64Vec3(F64.Neg1, F64.Zero, F64.Zero); } }
-        public static F64Vec3 Right    { get { return new F64Vec3(F64.One, F64.Zero, F64.Zero); } }
+        public static F64Vec3 Zero      { get { return new F64Vec3(Fixed64.Zero, Fixed64.Zero, Fixed64.Zero); } }
+        public static F64Vec3 One       { get { return new F64Vec3(Fixed64.One, Fixed64.One, Fixed64.One); } }
+        public static F64Vec3 Down      { get { return new F64Vec3(Fixed64.Zero, Fixed64.Neg1, Fixed64.Zero); } }
+        public static F64Vec3 Up        { get { return new F64Vec3(Fixed64.Zero, Fixed64.One, Fixed64.Zero); } }
+        public static F64Vec3 Left      { get { return new F64Vec3(Fixed64.Neg1, Fixed64.Zero, Fixed64.Zero); } }
+        public static F64Vec3 Right     { get { return new F64Vec3(Fixed64.One, Fixed64.Zero, Fixed64.Zero); } }
+        public static F64Vec3 Forward   { get { return new F64Vec3(Fixed64.Zero, Fixed64.Zero, Fixed64.One); } }
+        public static F64Vec3 Back      { get { return new F64Vec3(Fixed64.Zero, Fixed64.Zero, Fixed64.Neg1); } }
 
-        // Components
-        public F64 x;
-        public F64 y;
-        public F64 z;
+        public long RawX;
+        public long RawY;
+        public long RawZ;
 
-        public F64Vec3 (F64 x, F64 y, F64 z)
+        public F64 X { get { return F64.FromRaw(RawX); } set { RawX = value.Raw; } }
+        public F64 Y { get { return F64.FromRaw(RawY); } set { RawY = value.Raw; } }
+        public F64 Z { get { return F64.FromRaw(RawZ); } set { RawZ = value.Raw; } }
+
+        public F64Vec3(F64 x, F64 y, F64 z)
         {
-            this.x = x;
-            this.y = y;
-            this.z = z;
+            RawX = x.Raw;
+            RawY = y.Raw;
+            RawZ = z.Raw;
         }
 
-        public static F64Vec3 FromInt(int x, int y, int z) { return new F64Vec3(F64.FromInt(x), F64.FromInt(y), F64.FromInt(z)); }
-        public static F64Vec3 FromFloat(float x, float y, float z) { return new F64Vec3(F64.FromFloat(x), F64.FromFloat(y), F64.FromFloat(z)); }
-        public static F64Vec3 FromDouble(double x, double y, double z) { return new F64Vec3(F64.FromDouble(x), F64.FromDouble(y), F64.FromDouble(z)); }
+        // raw ctor for internal use only
+        private F64Vec3(long x, long y, long z)
+        {
+            RawX = x;
+            RawY = y;
+            RawZ = z;
+        }
 
-        // Operators
-        public static F64Vec3 operator -(F64Vec3 a) { return new F64Vec3(-a.x, -a.y, -a.z); }
+        public static F64Vec3 FromInt(int x, int y, int z) { return new F64Vec3(Fixed64.FromInt(x), Fixed64.FromInt(y), Fixed64.FromInt(z)); }
+        public static F64Vec3 FromFloat(float x, float y, float z) { return new F64Vec3(Fixed64.FromFloat(x), Fixed64.FromFloat(y), Fixed64.FromFloat(z)); }
+        public static F64Vec3 FromDouble(double x, double y, double z) { return new F64Vec3(Fixed64.FromDouble(x), Fixed64.FromDouble(y), Fixed64.FromDouble(z)); }
 
-        public static F64Vec3 operator +(F64Vec3 a, F64Vec3 b) { return new F64Vec3(a.x + b.x, a.y + b.y, a.z + b.z); }
-        public static F64Vec3 operator -(F64Vec3 a, F64Vec3 b) { return new F64Vec3(a.x - b.x, a.y - b.y, a.z - b.z); }
-        public static F64Vec3 operator *(F64Vec3 a, F64Vec3 b) { return new F64Vec3(a.x * b.x, a.y * b.y, a.z * b.z); }
-        public static F64Vec3 operator /(F64Vec3 a, F64Vec3 b) { return new F64Vec3(a.x / b.x, a.y / b.y, a.z / b.z); }
-        public static F64Vec3 operator %(F64Vec3 a, F64Vec3 b) { return new F64Vec3(a.x % b.x, a.y % b.y, a.z % b.z); }
+        public static F64Vec3 operator -(F64Vec3 a) { return new F64Vec3(-a.RawX, -a.RawY, -a.RawZ); }
+        public static F64Vec3 operator +(F64Vec3 a, F64Vec3 b) { return new F64Vec3(a.RawX + b.RawX, a.RawY + b.RawY, a.RawZ + b.RawZ); }
+        public static F64Vec3 operator -(F64Vec3 a, F64Vec3 b) { return new F64Vec3(a.RawX - b.RawX, a.RawY - b.RawY, a.RawZ - b.RawZ); }
+        public static F64Vec3 operator *(F64Vec3 a, F64Vec3 b) { return new F64Vec3(Fixed64.Mul(a.RawX, b.RawX), Fixed64.Mul(a.RawY, b.RawY), Fixed64.Mul(a.RawZ, b.RawZ)); }
+        public static F64Vec3 operator /(F64Vec3 a, F64Vec3 b) { return new F64Vec3(Fixed64.DivPrecise(a.RawX, b.RawX), Fixed64.DivPrecise(a.RawY, b.RawY), Fixed64.DivPrecise(a.RawZ, b.RawZ)); }
+        public static F64Vec3 operator %(F64Vec3 a, F64Vec3 b) { return new F64Vec3(a.RawX % b.RawX, a.RawY % b.RawY, a.RawZ % b.RawZ); }
 
-        public static F64Vec3 operator +(F64 a, F64Vec3 b) { return new F64Vec3(a + b.x, a + b.y, a + b.z); }
-        public static F64Vec3 operator +(F64Vec3 a, F64 b) { return new F64Vec3(a.x + b, a.y + b, a.z + b); }
-        public static F64Vec3 operator -(F64 a, F64Vec3 b) { return new F64Vec3(a - b.x, a - b.y, a - b.z); }
-        public static F64Vec3 operator -(F64Vec3 a, F64 b) { return new F64Vec3(a.x - b, a.y - b, a.z - b); }
-        public static F64Vec3 operator *(F64 a, F64Vec3 b) { return new F64Vec3(a * b.x, a * b.y, a * b.z); }
-        public static F64Vec3 operator *(F64Vec3 a, F64 b) { return new F64Vec3(a.x * b, a.y * b, a.z * b); }
-        public static F64Vec3 operator /(F64 a, F64Vec3 b) { return new F64Vec3(a / b.x, a / b.y, a / b.z); }
-        public static F64Vec3 operator /(F64Vec3 a, F64 b) { return new F64Vec3(a.x / b, a.y / b, a.z / b); }
-        public static F64Vec3 operator %(F64 a, F64Vec3 b) { return new F64Vec3(a % b.x, a % b.y, a % b.z); }
-        public static F64Vec3 operator %(F64Vec3 a, F64 b) { return new F64Vec3(a.x % b, a.y % b, a.z % b); }
+        public static F64Vec3 operator +(F64 a, F64Vec3 b) { return new F64Vec3(a.Raw + b.RawX, a.Raw + b.RawY, a.Raw + b.RawZ); }
+        public static F64Vec3 operator +(F64Vec3 a, F64 b) { return new F64Vec3(a.RawX + b.Raw, a.RawY + b.Raw, a.RawZ + b.Raw); }
+        public static F64Vec3 operator -(F64 a, F64Vec3 b) { return new F64Vec3(a.Raw - b.RawX, a.Raw - b.RawY, a.Raw - b.RawZ); }
+        public static F64Vec3 operator -(F64Vec3 a, F64 b) { return new F64Vec3(a.RawX - b.Raw, a.RawY - b.Raw, a.RawZ - b.Raw); }
+        public static F64Vec3 operator *(F64 a, F64Vec3 b) { return new F64Vec3(Fixed64.Mul(a.Raw, b.RawX), Fixed64.Mul(a.Raw, b.RawY), Fixed64.Mul(a.Raw, b.RawZ)); }
+        public static F64Vec3 operator *(F64Vec3 a, F64 b) { return new F64Vec3(Fixed64.Mul(a.RawX, b.Raw), Fixed64.Mul(a.RawY, b.Raw), Fixed64.Mul(a.RawZ, b.Raw)); }
+        public static F64Vec3 operator /(F64 a, F64Vec3 b) { return new F64Vec3(Fixed64.DivPrecise(a.Raw, b.RawX), Fixed64.DivPrecise(a.Raw, b.RawY), Fixed64.DivPrecise(a.Raw, b.RawZ)); }
+        public static F64Vec3 operator /(F64Vec3 a, F64 b) { return new F64Vec3(Fixed64.DivPrecise(a.RawX, b.Raw), Fixed64.DivPrecise(a.RawY, b.Raw), Fixed64.DivPrecise(a.RawZ, b.Raw)); }
+        public static F64Vec3 operator %(F64 a, F64Vec3 b) { return new F64Vec3(a.Raw % b.RawX, a.Raw % b.RawY, a.Raw % b.RawZ); }
+        public static F64Vec3 operator %(F64Vec3 a, F64 b) { return new F64Vec3(a.RawX % b.Raw, a.RawY % b.Raw, a.RawZ % b.Raw); }
 
-        public static bool operator ==(F64Vec3 a, F64Vec3 b) { return a.x == b.x && a.y == b.y && a.z == b.z; }
-        public static bool operator !=(F64Vec3 a, F64Vec3 b) { return a.x != b.x || a.y != b.y || a.z != b.z; }
+        public static bool operator ==(F64Vec3 a, F64Vec3 b) { return a.RawX == b.RawX && a.RawY == b.RawY && a.RawZ == b.RawZ; }
+        public static bool operator !=(F64Vec3 a, F64Vec3 b) { return a.RawX != b.RawX || a.RawY != b.RawY || a.RawZ != b.RawZ; }
 
-        public static F64Vec3 Div(F64Vec3 a, F64 b) { F64 oob = F64.Rcp(b); return new F64Vec3(a.x * oob, a.y * oob, a.z * oob); }
-        public static F64Vec3 DivFast(F64Vec3 a, F64 b) { F64 oob = F64.RcpFast(b); return new F64Vec3(a.x * oob, a.y * oob, a.z * oob); }
-        public static F64Vec3 DivFastest(F64Vec3 a, F64 b) { F64 oob = F64.RcpFastest(b); return new F64Vec3(a.x * oob, a.y * oob, a.z * oob); }
-        public static F64Vec3 Div(F64Vec3 a, F64Vec3 b) { return new F64Vec3(F64.Div(a.x, b.x), F64.Div(a.y, b.y), F64.Div(a.z, b.z)); }
-        public static F64Vec3 DivFast(F64Vec3 a, F64Vec3 b) { return new F64Vec3(F64.DivFast(a.x, b.x), F64.DivFast(a.y, b.y), F64.DivFast(a.z, b.z)); }
-        public static F64Vec3 DivFastest(F64Vec3 a, F64Vec3 b) { return new F64Vec3(F64.DivFastest(a.x, b.x), F64.DivFastest(a.y, b.y), F64.DivFastest(a.z, b.z)); }
-        public static F64Vec3 SqrtPrecise(F64Vec3 a) { return new F64Vec3(F64.SqrtPrecise(a.x), F64.SqrtPrecise(a.y), F64.SqrtPrecise(a.z)); }
-        public static F64Vec3 Sqrt(F64Vec3 a) { return new F64Vec3(F64.Sqrt(a.x), F64.Sqrt(a.y), F64.Sqrt(a.z)); }
-        public static F64Vec3 SqrtFast(F64Vec3 a) { return new F64Vec3(F64.SqrtFast(a.x), F64.SqrtFast(a.y), F64.SqrtFast(a.z)); }
-        public static F64Vec3 SqrtFastest(F64Vec3 a) { return new F64Vec3(F64.SqrtFastest(a.x), F64.SqrtFastest(a.y), F64.SqrtFastest(a.z)); }
-        public static F64Vec3 RSqrt(F64Vec3 a) { return new F64Vec3(F64.RSqrt(a.x), F64.RSqrt(a.y), F64.RSqrt(a.z)); }
-        public static F64Vec3 RSqrtFast(F64Vec3 a) { return new F64Vec3(F64.RSqrtFast(a.x), F64.RSqrtFast(a.y), F64.RSqrtFast(a.z)); }
-        public static F64Vec3 RSqrtFastest(F64Vec3 a) { return new F64Vec3(F64.RSqrtFastest(a.x), F64.RSqrtFastest(a.y), F64.RSqrtFastest(a.z)); }
-        public static F64Vec3 Rcp(F64Vec3 a) { return new F64Vec3(F64.Rcp(a.x), F64.Rcp(a.y), F64.Rcp(a.z)); }
-        public static F64Vec3 RcpFast(F64Vec3 a) { return new F64Vec3(F64.RcpFast(a.x), F64.RcpFast(a.y), F64.RcpFast(a.z)); }
-        public static F64Vec3 RcpFastest(F64Vec3 a) { return new F64Vec3(F64.RcpFastest(a.x), F64.RcpFastest(a.y), F64.RcpFastest(a.z)); }
-        public static F64Vec3 Exp(F64Vec3 a) { return new F64Vec3(F64.Exp(a.x), F64.Exp(a.y), F64.Exp(a.z)); }
-        public static F64Vec3 ExpFast(F64Vec3 a) { return new F64Vec3(F64.ExpFast(a.x), F64.ExpFast(a.y), F64.ExpFast(a.z)); }
-        public static F64Vec3 ExpFastest(F64Vec3 a) { return new F64Vec3(F64.ExpFastest(a.x), F64.ExpFastest(a.y), F64.ExpFastest(a.z)); }
-        public static F64Vec3 Exp2(F64Vec3 a) { return new F64Vec3(F64.Exp2(a.x), F64.Exp2(a.y), F64.Exp2(a.z)); }
-        public static F64Vec3 Exp2Fast(F64Vec3 a) { return new F64Vec3(F64.Exp2Fast(a.x), F64.Exp2Fast(a.y), F64.Exp2Fast(a.z)); }
-        public static F64Vec3 Exp2Fastest(F64Vec3 a) { return new F64Vec3(F64.Exp2Fastest(a.x), F64.Exp2Fastest(a.y), F64.Exp2Fastest(a.z)); }
-        public static F64Vec3 Log(F64Vec3 a) { return new F64Vec3(F64.Log(a.x), F64.Log(a.y), F64.Log(a.z)); }
-        public static F64Vec3 LogFast(F64Vec3 a) { return new F64Vec3(F64.LogFast(a.x), F64.LogFast(a.y), F64.LogFast(a.z)); }
-        public static F64Vec3 LogFastest(F64Vec3 a) { return new F64Vec3(F64.LogFastest(a.x), F64.LogFastest(a.y), F64.LogFastest(a.z)); }
-        public static F64Vec3 Log2(F64Vec3 a) { return new F64Vec3(F64.Log2(a.x), F64.Log2(a.y), F64.Log2(a.z)); }
-        public static F64Vec3 Log2Fast(F64Vec3 a) { return new F64Vec3(F64.Log2Fast(a.x), F64.Log2Fast(a.y), F64.Log2Fast(a.z)); }
-        public static F64Vec3 Log2Fastest(F64Vec3 a) { return new F64Vec3(F64.Log2Fastest(a.x), F64.Log2Fastest(a.y), F64.Log2Fastest(a.z)); }
-        public static F64Vec3 Sin(F64Vec3 a) { return new F64Vec3(F64.Sin(a.x), F64.Sin(a.y), F64.Sin(a.z)); }
-        public static F64Vec3 SinFast(F64Vec3 a) { return new F64Vec3(F64.SinFast(a.x), F64.SinFast(a.y), F64.SinFast(a.z)); }
-        public static F64Vec3 SinFastest(F64Vec3 a) { return new F64Vec3(F64.SinFastest(a.x), F64.SinFastest(a.y), F64.SinFastest(a.z)); }
-        public static F64Vec3 Cos(F64Vec3 a) { return new F64Vec3(F64.Cos(a.x), F64.Cos(a.y), F64.Cos(a.z)); }
-        public static F64Vec3 CosFast(F64Vec3 a) { return new F64Vec3(F64.CosFast(a.x), F64.CosFast(a.y), F64.CosFast(a.z)); }
-        public static F64Vec3 CosFastest(F64Vec3 a) { return new F64Vec3(F64.CosFastest(a.x), F64.CosFastest(a.y), F64.CosFastest(a.z)); }
+        public static F64Vec3 Div(F64Vec3 a, F64 b) { long oob = Fixed64.Rcp(b.Raw); return new F64Vec3(Fixed64.Mul(a.RawX, oob), Fixed64.Mul(a.RawY, oob), Fixed64.Mul(a.RawZ, oob)); }
+        public static F64Vec3 DivFast(F64Vec3 a, F64 b) { long oob = Fixed64.RcpFast(b.Raw); return new F64Vec3(Fixed64.Mul(a.RawX, oob), Fixed64.Mul(a.RawY, oob), Fixed64.Mul(a.RawZ, oob)); }
+        public static F64Vec3 DivFastest(F64Vec3 a, F64 b) { long oob = Fixed64.RcpFastest(b.Raw); return new F64Vec3(Fixed64.Mul(a.RawX, oob), Fixed64.Mul(a.RawY, oob), Fixed64.Mul(a.RawZ, oob)); }
+        public static F64Vec3 Div(F64Vec3 a, F64Vec3 b) { return new F64Vec3(Fixed64.Div(a.RawX, b.RawX), Fixed64.Div(a.RawY, b.RawY), Fixed64.Div(a.RawZ, b.RawZ)); }
+        public static F64Vec3 DivFast(F64Vec3 a, F64Vec3 b) { return new F64Vec3(Fixed64.DivFast(a.RawX, b.RawX), Fixed64.DivFast(a.RawY, b.RawY), Fixed64.DivFast(a.RawZ, b.RawZ)); }
+        public static F64Vec3 DivFastest(F64Vec3 a, F64Vec3 b) { return new F64Vec3(Fixed64.DivFastest(a.RawX, b.RawX), Fixed64.DivFastest(a.RawY, b.RawY), Fixed64.DivFastest(a.RawZ, b.RawZ)); }
+        public static F64Vec3 SqrtPrecise(F64Vec3 a) { return new F64Vec3(Fixed64.SqrtPrecise(a.RawX), Fixed64.SqrtPrecise(a.RawY), Fixed64.SqrtPrecise(a.RawZ)); }
+        public static F64Vec3 Sqrt(F64Vec3 a) { return new F64Vec3(Fixed64.Sqrt(a.RawX), Fixed64.Sqrt(a.RawY), Fixed64.Sqrt(a.RawZ)); }
+        public static F64Vec3 SqrtFast(F64Vec3 a) { return new F64Vec3(Fixed64.SqrtFast(a.RawX), Fixed64.SqrtFast(a.RawY), Fixed64.SqrtFast(a.RawZ)); }
+        public static F64Vec3 SqrtFastest(F64Vec3 a) { return new F64Vec3(Fixed64.SqrtFastest(a.RawX), Fixed64.SqrtFastest(a.RawY), Fixed64.SqrtFastest(a.RawZ)); }
+        public static F64Vec3 RSqrt(F64Vec3 a) { return new F64Vec3(Fixed64.RSqrt(a.RawX), Fixed64.RSqrt(a.RawY), Fixed64.RSqrt(a.RawZ)); }
+        public static F64Vec3 RSqrtFast(F64Vec3 a) { return new F64Vec3(Fixed64.RSqrtFast(a.RawX), Fixed64.RSqrtFast(a.RawY), Fixed64.RSqrtFast(a.RawZ)); }
+        public static F64Vec3 RSqrtFastest(F64Vec3 a) { return new F64Vec3(Fixed64.RSqrtFastest(a.RawX), Fixed64.RSqrtFastest(a.RawY), Fixed64.RSqrtFastest(a.RawZ)); }
+        public static F64Vec3 Rcp(F64Vec3 a) { return new F64Vec3(Fixed64.Rcp(a.RawX), Fixed64.Rcp(a.RawY), Fixed64.Rcp(a.RawZ)); }
+        public static F64Vec3 RcpFast(F64Vec3 a) { return new F64Vec3(Fixed64.RcpFast(a.RawX), Fixed64.RcpFast(a.RawY), Fixed64.RcpFast(a.RawZ)); }
+        public static F64Vec3 RcpFastest(F64Vec3 a) { return new F64Vec3(Fixed64.RcpFastest(a.RawX), Fixed64.RcpFastest(a.RawY), Fixed64.RcpFastest(a.RawZ)); }
+        public static F64Vec3 Exp(F64Vec3 a) { return new F64Vec3(Fixed64.Exp(a.RawX), Fixed64.Exp(a.RawY), Fixed64.Exp(a.RawZ)); }
+        public static F64Vec3 ExpFast(F64Vec3 a) { return new F64Vec3(Fixed64.ExpFast(a.RawX), Fixed64.ExpFast(a.RawY), Fixed64.ExpFast(a.RawZ)); }
+        public static F64Vec3 ExpFastest(F64Vec3 a) { return new F64Vec3(Fixed64.ExpFastest(a.RawX), Fixed64.ExpFastest(a.RawY), Fixed64.ExpFastest(a.RawZ)); }
+        public static F64Vec3 Exp2(F64Vec3 a) { return new F64Vec3(Fixed64.Exp2(a.RawX), Fixed64.Exp2(a.RawY), Fixed64.Exp2(a.RawZ)); }
+        public static F64Vec3 Exp2Fast(F64Vec3 a) { return new F64Vec3(Fixed64.Exp2Fast(a.RawX), Fixed64.Exp2Fast(a.RawY), Fixed64.Exp2Fast(a.RawZ)); }
+        public static F64Vec3 Exp2Fastest(F64Vec3 a) { return new F64Vec3(Fixed64.Exp2Fastest(a.RawX), Fixed64.Exp2Fastest(a.RawY), Fixed64.Exp2Fastest(a.RawZ)); }
+        public static F64Vec3 Log(F64Vec3 a) { return new F64Vec3(Fixed64.Log(a.RawX), Fixed64.Log(a.RawY), Fixed64.Log(a.RawZ)); }
+        public static F64Vec3 LogFast(F64Vec3 a) { return new F64Vec3(Fixed64.LogFast(a.RawX), Fixed64.LogFast(a.RawY), Fixed64.LogFast(a.RawZ)); }
+        public static F64Vec3 LogFastest(F64Vec3 a) { return new F64Vec3(Fixed64.LogFastest(a.RawX), Fixed64.LogFastest(a.RawY), Fixed64.LogFastest(a.RawZ)); }
+        public static F64Vec3 Log2(F64Vec3 a) { return new F64Vec3(Fixed64.Log2(a.RawX), Fixed64.Log2(a.RawY), Fixed64.Log2(a.RawZ)); }
+        public static F64Vec3 Log2Fast(F64Vec3 a) { return new F64Vec3(Fixed64.Log2Fast(a.RawX), Fixed64.Log2Fast(a.RawY), Fixed64.Log2Fast(a.RawZ)); }
+        public static F64Vec3 Log2Fastest(F64Vec3 a) { return new F64Vec3(Fixed64.Log2Fastest(a.RawX), Fixed64.Log2Fastest(a.RawY), Fixed64.Log2Fastest(a.RawZ)); }
+        public static F64Vec3 Sin(F64Vec3 a) { return new F64Vec3(Fixed64.Sin(a.RawX), Fixed64.Sin(a.RawY), Fixed64.Sin(a.RawZ)); }
+        public static F64Vec3 SinFast(F64Vec3 a) { return new F64Vec3(Fixed64.SinFast(a.RawX), Fixed64.SinFast(a.RawY), Fixed64.SinFast(a.RawZ)); }
+        public static F64Vec3 SinFastest(F64Vec3 a) { return new F64Vec3(Fixed64.SinFastest(a.RawX), Fixed64.SinFastest(a.RawY), Fixed64.SinFastest(a.RawZ)); }
+        public static F64Vec3 Cos(F64Vec3 a) { return new F64Vec3(Fixed64.Cos(a.RawX), Fixed64.Cos(a.RawY), Fixed64.Cos(a.RawZ)); }
+        public static F64Vec3 CosFast(F64Vec3 a) { return new F64Vec3(Fixed64.CosFast(a.RawX), Fixed64.CosFast(a.RawY), Fixed64.CosFast(a.RawZ)); }
+        public static F64Vec3 CosFastest(F64Vec3 a) { return new F64Vec3(Fixed64.CosFastest(a.RawX), Fixed64.CosFastest(a.RawY), Fixed64.CosFastest(a.RawZ)); }
 
-        public static F64Vec3 Pow(F64Vec3 a, F64 b) { return new F64Vec3(F64.Pow(a.x, b), F64.Pow(a.y, b), F64.Pow(a.z, b)); }
-        public static F64Vec3 PowFast(F64Vec3 a, F64 b) { return new F64Vec3(F64.PowFast(a.x, b), F64.PowFast(a.y, b), F64.PowFast(a.z, b)); }
-        public static F64Vec3 PowFastest(F64Vec3 a, F64 b) { return new F64Vec3(F64.PowFastest(a.x, b), F64.PowFastest(a.y, b), F64.PowFastest(a.z, b)); }
-        public static F64Vec3 Pow(F64 a, F64Vec3 b) { return new F64Vec3(F64.Pow(a, b.x), F64.Pow(a, b.y), F64.Pow(a, b.z)); }
-        public static F64Vec3 PowFast(F64 a, F64Vec3 b) { return new F64Vec3(F64.PowFast(a, b.x), F64.PowFast(a, b.y), F64.PowFast(a, b.z)); }
-        public static F64Vec3 PowFastest(F64 a, F64Vec3 b) { return new F64Vec3(F64.PowFastest(a, b.x), F64.PowFastest(a, b.y), F64.PowFastest(a, b.z)); }
-        public static F64Vec3 Pow(F64Vec3 a, F64Vec3 b) { return new F64Vec3(F64.Pow(a.x, b.x), F64.Pow(a.y, b.y), F64.Pow(a.z, b.z)); }
-        public static F64Vec3 PowFast(F64Vec3 a, F64Vec3 b) { return new F64Vec3(F64.PowFast(a.x, b.x), F64.PowFast(a.y, b.y), F64.PowFast(a.z, b.z)); }
-        public static F64Vec3 PowFastest(F64Vec3 a, F64Vec3 b) { return new F64Vec3(F64.PowFastest(a.x, b.x), F64.PowFastest(a.y, b.y), F64.PowFastest(a.z, b.z)); }
+        public static F64Vec3 Pow(F64Vec3 a, F64 b) { return new F64Vec3(Fixed64.Pow(a.RawX, b.Raw), Fixed64.Pow(a.RawY, b.Raw), Fixed64.Pow(a.RawZ, b.Raw)); }
+        public static F64Vec3 PowFast(F64Vec3 a, F64 b) { return new F64Vec3(Fixed64.PowFast(a.RawX, b.Raw), Fixed64.PowFast(a.RawY, b.Raw), Fixed64.PowFast(a.RawZ, b.Raw)); }
+        public static F64Vec3 PowFastest(F64Vec3 a, F64 b) { return new F64Vec3(Fixed64.PowFastest(a.RawX, b.Raw), Fixed64.PowFastest(a.RawY, b.Raw), Fixed64.PowFastest(a.RawZ, b.Raw)); }
+        public static F64Vec3 Pow(F64 a, F64Vec3 b) { return new F64Vec3(Fixed64.Pow(a.Raw, b.RawX), Fixed64.Pow(a.Raw, b.RawY), Fixed64.Pow(a.Raw, b.RawZ)); }
+        public static F64Vec3 PowFast(F64 a, F64Vec3 b) { return new F64Vec3(Fixed64.PowFast(a.Raw, b.RawX), Fixed64.PowFast(a.Raw, b.RawY), Fixed64.PowFast(a.Raw, b.RawZ)); }
+        public static F64Vec3 PowFastest(F64 a, F64Vec3 b) { return new F64Vec3(Fixed64.PowFastest(a.Raw, b.RawX), Fixed64.PowFastest(a.Raw, b.RawY), Fixed64.PowFastest(a.Raw, b.RawZ)); }
+        public static F64Vec3 Pow(F64Vec3 a, F64Vec3 b) { return new F64Vec3(Fixed64.Pow(a.RawX, b.RawX), Fixed64.Pow(a.RawY, b.RawY), Fixed64.Pow(a.RawZ, b.RawZ)); }
+        public static F64Vec3 PowFast(F64Vec3 a, F64Vec3 b) { return new F64Vec3(Fixed64.PowFast(a.RawX, b.RawX), Fixed64.PowFast(a.RawY, b.RawY), Fixed64.PowFast(a.RawZ, b.RawZ)); }
+        public static F64Vec3 PowFastest(F64Vec3 a, F64Vec3 b) { return new F64Vec3(Fixed64.PowFastest(a.RawX, b.RawX), Fixed64.PowFastest(a.RawY, b.RawY), Fixed64.PowFastest(a.RawZ, b.RawZ)); }
 
-        public static F64 Length(F64Vec3 a) { return F64.Sqrt(a.x * a.x + a.y * a.y + a.z * a.z); }
-        public static F64 LengthFast(F64Vec3 a) { return F64.SqrtFast(a.x * a.x + a.y * a.y + a.z * a.z); }
-        public static F64 LengthFastest(F64Vec3 a) { return F64.SqrtFastest(a.x * a.x + a.y * a.y + a.z * a.z); }
-        public static F64 LengthSqr(F64Vec3 a) { return (a.x * a.x + a.y * a.y + a.z * a.z); }
-        public static F64Vec3 Normalize(F64Vec3 a) { F64 ooLen = F64.RSqrt(LengthSqr(a)); return ooLen * a; }
-        public static F64Vec3 NormalizeFast(F64Vec3 a) { F64 ooLen = F64.RSqrtFast(LengthSqr(a)); return ooLen * a; }
-        public static F64Vec3 NormalizeFastest(F64Vec3 a) { F64 ooLen = F64.RSqrtFastest(LengthSqr(a)); return ooLen * a; }
+        public static F64 Length(F64Vec3 a) { return F64.FromRaw(Fixed64.Sqrt(Fixed64.Mul(a.RawX, a.RawX) + Fixed64.Mul(a.RawY, a.RawY) + Fixed64.Mul(a.RawZ, a.RawZ))); }
+        public static F64 LengthFast(F64Vec3 a) { return F64.FromRaw(Fixed64.SqrtFast(Fixed64.Mul(a.RawX, a.RawX) + Fixed64.Mul(a.RawY, a.RawY) + Fixed64.Mul(a.RawZ, a.RawZ))); }
+        public static F64 LengthFastest(F64Vec3 a) { return F64.FromRaw(Fixed64.SqrtFastest(Fixed64.Mul(a.RawX, a.RawX) + Fixed64.Mul(a.RawY, a.RawY) + Fixed64.Mul(a.RawZ, a.RawZ))); }
+        public static F64 LengthSqr(F64Vec3 a) { return F64.FromRaw(Fixed64.Mul(a.RawX, a.RawX) + Fixed64.Mul(a.RawY, a.RawY) + Fixed64.Mul(a.RawZ, a.RawZ)); }
+        public static F64Vec3 Normalize(F64Vec3 a) { F64 ooLen = F64.FromRaw(Fixed64.RSqrt(Fixed64.Mul(a.RawX, a.RawX) + Fixed64.Mul(a.RawY, a.RawY) + Fixed64.Mul(a.RawZ, a.RawZ))); return ooLen * a; }
+        public static F64Vec3 NormalizeFast(F64Vec3 a) { F64 ooLen = F64.FromRaw(Fixed64.RSqrtFast(Fixed64.Mul(a.RawX, a.RawX) + Fixed64.Mul(a.RawY, a.RawY) + Fixed64.Mul(a.RawZ, a.RawZ))); return ooLen * a; }
+        public static F64Vec3 NormalizeFastest(F64Vec3 a) { F64 ooLen = F64.FromRaw(Fixed64.RSqrtFastest(Fixed64.Mul(a.RawX, a.RawX) + Fixed64.Mul(a.RawY, a.RawY) + Fixed64.Mul(a.RawZ, a.RawZ))); return ooLen * a; }
 
-        public static F64 Dot(F64Vec3 a, F64Vec3 b) { return (a.x * b.x + a.y * b.y + a.z * b.z); }
+        public static F64 Dot(F64Vec3 a, F64Vec3 b) { return F64.FromRaw(Fixed64.Mul(a.RawX, b.RawX) + Fixed64.Mul(a.RawY, b.RawY) + Fixed64.Mul(a.RawZ, b.RawZ)); }
         public static F64 Distance(F64Vec3 a, F64Vec3 b) { return Length(a - b); }
         public static F64 DistanceFast(F64Vec3 a, F64Vec3 b) { return LengthFast(a - b); }
         public static F64 DistanceFastest(F64Vec3 a, F64Vec3 b) { return LengthFastest(a - b); }
 
-        public static F64Vec3 Lerp(F64Vec3 a, F64Vec3 b, F64 t) { return a + t*(b - a); }
+        public static F64Vec3 Min(F64Vec3 a, F64Vec3 b) { return new F64Vec3(Fixed64.Min(a.RawX, b.RawX), Fixed64.Min(a.RawY, b.RawY), Fixed64.Min(a.RawZ, b.RawZ)); }
+        public static F64Vec3 Max(F64Vec3 a, F64Vec3 b) { return new F64Vec3(Fixed64.Max(a.RawX, b.RawX), Fixed64.Max(a.RawY, b.RawY), Fixed64.Max(a.RawZ, b.RawZ)); }
+
+        public static F64Vec3 Clamp(F64Vec3 a, F64 min, F64 max)
+        {
+            return new F64Vec3(
+                Fixed64.Clamp(a.RawX, min.Raw, max.Raw),
+                Fixed64.Clamp(a.RawY, min.Raw, max.Raw),
+                Fixed64.Clamp(a.RawZ, min.Raw, max.Raw));
+        }
+
+        public static F64Vec3 Clamp(F64Vec3 a, F64Vec3 min, F64Vec3 max)
+        {
+            return new F64Vec3(
+                Fixed64.Clamp(a.RawX, min.RawX, max.RawX),
+                Fixed64.Clamp(a.RawY, min.RawY, max.RawY),
+                Fixed64.Clamp(a.RawZ, min.RawZ, max.RawZ));
+        }
+
+        public static F64Vec3 Lerp(F64Vec3 a, F64Vec3 b, F64 t)
+        {
+            long tb = t.Raw;
+            long ta = Fixed64.One - tb;
+            return new F64Vec3(Fixed64.Mul(a.RawX, ta) + Fixed64.Mul(b.RawX, tb), Fixed64.Mul(a.RawY, ta) + Fixed64.Mul(b.RawY, tb), Fixed64.Mul(a.RawZ, ta) + Fixed64.Mul(b.RawZ, tb));
+        }
 
         public static F64Vec3 Cross(F64Vec3 a, F64Vec3 b)
         {
             return new F64Vec3(
-                (a.y * b.z) - (a.z * b.y),
-                (a.z * b.x) - (a.x * b.z),
-                (a.x * b.y) - (a.y * b.x));
+                Fixed64.Mul(a.RawY, b.RawZ) - Fixed64.Mul(a.RawZ, b.RawY),
+                Fixed64.Mul(a.RawZ, b.RawX) - Fixed64.Mul(a.RawX, b.RawZ),
+                Fixed64.Mul(a.RawX, b.RawY) - Fixed64.Mul(a.RawY, b.RawX));
         }
-
-        public static F64Vec3 Min(F64Vec3 a, F64Vec3 b) { return new F64Vec3(F64.Min(a.x, b.x), F64.Min(a.y, b.y), F64.Min(a.z, b.z)); }
-        public static F64Vec3 Max(F64Vec3 a, F64Vec3 b) { return new F64Vec3(F64.Max(a.x, b.x), F64.Max(a.y, b.y), F64.Max(a.z, b.z)); }
 
         public bool Equals(F64Vec3 other)
         {
@@ -165,12 +196,12 @@ namespace FixMath
 
         public override string ToString()
         {
-            return "(" + x.ToString() + ", " + y.ToString() + ", " + z.ToString() + ")";
+            return "(" + Fixed64.ToString(RawX) + ", " + Fixed64.ToString(RawY) + ", " + Fixed64.ToString(RawZ) + ")";
         }
 
         public override int GetHashCode()
         {
-            return x.GetHashCode() ^ y.GetHashCode()*7919 ^ z.GetHashCode()*4513;
+            return RawX.GetHashCode() ^ RawY.GetHashCode() * 7919 ^ RawZ.GetHashCode() * 4513;
         }
     }
 }

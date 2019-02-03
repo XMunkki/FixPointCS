@@ -1,7 +1,7 @@
 ﻿//
 // FixPointCS
 //
-// Copyright(c) 2018 Jere Sanisalo, Petri Kero
+// Copyright(c) 2018-2019 Jere Sanisalo, Petri Kero
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -97,6 +97,7 @@ namespace FixPointCS
         /// <summary>
         /// Converts an integer to a fixed-point value.
         /// </summary>
+        [MethodImpl(FixedUtil.AggressiveInlining)]
         public static long FromInt(int v)
         {
             return (long)v << Shift;
@@ -105,6 +106,7 @@ namespace FixPointCS
         /// <summary>
         /// Converts a double to a fixed-point value.
         /// </summary>
+        [MethodImpl(FixedUtil.AggressiveInlining)]
         public static long FromDouble(double v)
         {
             return (long)(v * 4294967296.0);
@@ -113,6 +115,7 @@ namespace FixPointCS
         /// <summary>
         /// Converts a float to a fixed-point value.
         /// </summary>
+        [MethodImpl(FixedUtil.AggressiveInlining)]
         public static long FromFloat(float v)
         {
             return (long)(v * 4294967296.0f);
@@ -121,6 +124,7 @@ namespace FixPointCS
         /// <summary>
         /// Converts a fixed-point value into an integer by rounding it up to nearest integer.
         /// </summary>
+        [MethodImpl(FixedUtil.AggressiveInlining)]
         public static int CeilToInt(long v)
         {
             return (int)((v + (One - 1)) >> Shift);
@@ -129,6 +133,7 @@ namespace FixPointCS
         /// <summary>
         /// Converts a fixed-point value into an integer by rounding it down to nearest integer.
         /// </summary>
+        [MethodImpl(FixedUtil.AggressiveInlining)]
         public static int FloorToInt(long v)
         {
             return (int)(v >> Shift);
@@ -137,6 +142,7 @@ namespace FixPointCS
         /// <summary>
         /// Converts a fixed-point value into an integer by rounding it to nearest integer.
         /// </summary>
+        [MethodImpl(FixedUtil.AggressiveInlining)]
         public static int RoundToInt(long v)
         {
             return (int)((v + Half) >> Shift);
@@ -145,6 +151,7 @@ namespace FixPointCS
         /// <summary>
         /// Converts a fixed-point value into a double.
         /// </summary>
+        [MethodImpl(FixedUtil.AggressiveInlining)]
         public static double ToDouble(long v)
         {
             return (double)v * (1.0 / 4294967296.0);
@@ -153,6 +160,7 @@ namespace FixPointCS
         /// <summary>
         /// Converts a FP value into a float.
         /// </summary>
+        [MethodImpl(FixedUtil.AggressiveInlining)]
         public static float ToFloat(long v)
         {
             return (float)v * (1.0f / 4294967296.0f);
@@ -197,6 +205,7 @@ namespace FixPointCS
         /// <summary>
         /// Round up to nearest integer.
         /// </summary>
+        [MethodImpl(FixedUtil.AggressiveInlining)]
         public static long Ceil(long x)
         {
             return (x + FractionMask) & IntegerMask;
@@ -205,6 +214,7 @@ namespace FixPointCS
         /// <summary>
         /// Round down to nearest integer.
         /// </summary>
+        [MethodImpl(FixedUtil.AggressiveInlining)]
         public static long Floor(long x)
         {
             return x & IntegerMask;
@@ -213,6 +223,7 @@ namespace FixPointCS
         /// <summary>
         /// Round to nearest integer.
         /// </summary>
+        [MethodImpl(FixedUtil.AggressiveInlining)]
         public static long Round(long x)
         {
             return (x + Half) & IntegerMask;
@@ -221,6 +232,7 @@ namespace FixPointCS
         /// <summary>
         /// Returns the fractional part of x. Equal to 'x - floor(x)'.
         /// </summary>
+        [MethodImpl(FixedUtil.AggressiveInlining)]
         public static long Fract(long x)
         {
             return x & FractionMask;
@@ -229,6 +241,7 @@ namespace FixPointCS
         /// <summary>
         /// Returns the minimum of the two values.
         /// </summary>
+        [MethodImpl(FixedUtil.AggressiveInlining)]
         public static long Min(long a, long b)
         {
             return (a < b) ? a : b;
@@ -237,14 +250,25 @@ namespace FixPointCS
         /// <summary>
         /// Returns the maximum of the two values.
         /// </summary>
+        [MethodImpl(FixedUtil.AggressiveInlining)]
         public static long Max(long a, long b)
         {
             return (a > b) ? a : b;
         }
 
         /// <summary>
+        /// Returns the value clamped between min and max.
+        /// </summary>
+        [MethodImpl(FixedUtil.AggressiveInlining)]
+        public static long Clamp(long a, long min, long max)
+        {
+            return (a > max) ? max : (a < min) ? min : a;
+        }
+
+        /// <summary>
         /// Returns the sign of the value (-1 if negative, 0 if zero, 1 if positive).
         /// </summary>
+        [MethodImpl(FixedUtil.AggressiveInlining)]
         public static int Sign(long x)
         {
             if (x == 0) return 0;
@@ -272,6 +296,7 @@ namespace FixPointCS
         /// <summary>
         /// Multiplies two FP values together.
         /// </summary>
+        [MethodImpl(FixedUtil.AggressiveInlining)]
         public static long Mul(long a, long b)
         {
             long ai = a >> Shift;
@@ -1138,16 +1163,19 @@ namespace FixPointCS
             return (long)UnitSinFastest(z) << 2;
         }
 
+        [MethodImpl(FixedUtil.AggressiveInlining)]
         public static long Cos(long x)
         {
             return Sin(x + PiHalf);
         }
 
+        [MethodImpl(FixedUtil.AggressiveInlining)]
         public static long CosFast(long x)
         {
             return SinFast(x + PiHalf);
         }
 
+        [MethodImpl(FixedUtil.AggressiveInlining)]
         public static long CosFastest(long x)
         {
             return SinFastest(x + PiHalf);
@@ -1393,16 +1421,19 @@ namespace FixPointCS
             return Atan2Fastest(SqrtFastest(Mul(One + x, One - x)), x);
         }
 
+        [MethodImpl(FixedUtil.AggressiveInlining)]
         public static long Atan(long x)
         {
             return Atan2(x, One);
         }
 
+        [MethodImpl(FixedUtil.AggressiveInlining)]
         public static long AtanFast(long x)
         {
             return Atan2Fast(x, One);
         }
 
+        [MethodImpl(FixedUtil.AggressiveInlining)]
         public static long AtanFastest(long x)
         {
             return Atan2Fastest(x, One);

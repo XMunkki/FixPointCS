@@ -1,7 +1,7 @@
 ﻿//
 // FixPointCS
 //
-// Copyright(c) 2018 Jere Sanisalo, Petri Kero
+// Copyright(c) 2018-2019 Jere Sanisalo, Petri Kero
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -22,134 +22,166 @@
 // SOFTWARE.
 //
 using System;
-
 using FixPointCS;
 
 namespace FixMath
 {
     /// <summary>
-    /// Vector2 struct with signed 32.32 fixed point components.
+    /// Vector3 struct with signed 16.16 fixed point components.
     /// </summary>
     [Serializable]
     public struct F32Vec3 : IEquatable<F32Vec3>
     {
-        // Constants
-        public static F32Vec3 Zero     { get { return new F32Vec3(F32.Zero, F32.Zero, F32.Zero); } }
-        public static F32Vec3 One      { get { return new F32Vec3(F32.One, F32.One, F32.One); } }
-        public static F32Vec3 Down     { get { return new F32Vec3(F32.Zero, F32.Neg1, F32.Zero); } }
-        public static F32Vec3 Up       { get { return new F32Vec3(F32.Zero, F32.One, F32.Zero); } }
-        public static F32Vec3 Left     { get { return new F32Vec3(F32.Neg1, F32.Zero, F32.Zero); } }
-        public static F32Vec3 Right    { get { return new F32Vec3(F32.One, F32.Zero, F32.Zero); } }
+        public static F32Vec3 Zero      { get { return new F32Vec3(F32.Zero, F32.Zero, F32.Zero); } }
+        public static F32Vec3 One       { get { return new F32Vec3(F32.One, F32.One, F32.One); } }
+        public static F32Vec3 Down      { get { return new F32Vec3(F32.Zero, F32.Neg1, F32.Zero); } }
+        public static F32Vec3 Up        { get { return new F32Vec3(F32.Zero, F32.One, F32.Zero); } }
+        public static F32Vec3 Left      { get { return new F32Vec3(F32.Neg1, F32.Zero, F32.Zero); } }
+        public static F32Vec3 Right     { get { return new F32Vec3(F32.One, F32.Zero, F32.Zero); } }
+        public static F32Vec3 Forward   { get { return new F32Vec3(F32.Zero, F32.Zero, F32.One); } }
+        public static F32Vec3 Back      { get { return new F32Vec3(F32.Zero, F32.Zero, F32.Neg1); } }
 
-        // Components
-        public F32 x;
-        public F32 y;
-        public F32 z;
+        // Raw components
+        public int RawX;
+        public int RawY;
+        public int RawZ;
 
-        public F32Vec3 (F32 x, F32 y, F32 z)
+        // F32 accessors
+        public F32 X { get { return F32.FromRaw(RawX); } set { RawX = value.Raw; } }
+        public F32 Y { get { return F32.FromRaw(RawY); } set { RawY = value.Raw; } }
+        public F32 Z { get { return F32.FromRaw(RawZ); } set { RawZ = value.Raw; } }
+
+        public F32Vec3(F32 x, F32 y, F32 z)
         {
-            this.x = x;
-            this.y = y;
-            this.z = z;
+            RawX = x.Raw;
+            RawY = y.Raw;
+            RawZ = z.Raw;
+        }
+
+        // raw ctor only for internal usage
+        private F32Vec3(int x, int y, int z)
+        {
+            RawX = x;
+            RawY = y;
+            RawZ = z;
         }
 
         public static F32Vec3 FromInt(int x, int y, int z) { return new F32Vec3(F32.FromInt(x), F32.FromInt(y), F32.FromInt(z)); }
         public static F32Vec3 FromFloat(float x, float y, float z) { return new F32Vec3(F32.FromFloat(x), F32.FromFloat(y), F32.FromFloat(z)); }
         public static F32Vec3 FromDouble(double x, double y, double z) { return new F32Vec3(F32.FromDouble(x), F32.FromDouble(y), F32.FromDouble(z)); }
 
-        // Operators
-        public static F32Vec3 operator -(F32Vec3 a) { return new F32Vec3(-a.x, -a.y, -a.z); }
+        public static F32Vec3 operator -(F32Vec3 a) { return new F32Vec3(-a.RawX, -a.RawY, -a.RawZ); }
+        public static F32Vec3 operator +(F32Vec3 a, F32Vec3 b) { return new F32Vec3(a.RawX + b.RawX, a.RawY + b.RawY, a.RawZ + b.RawZ); }
+        public static F32Vec3 operator -(F32Vec3 a, F32Vec3 b) { return new F32Vec3(a.RawX - b.RawX, a.RawY - b.RawY, a.RawZ - b.RawZ); }
+        public static F32Vec3 operator *(F32Vec3 a, F32Vec3 b) { return new F32Vec3(Fixed32.Mul(a.RawX, b.RawX), Fixed32.Mul(a.RawY, b.RawY), Fixed32.Mul(a.RawZ, b.RawZ)); }
+        public static F32Vec3 operator /(F32Vec3 a, F32Vec3 b) { return new F32Vec3(Fixed32.DivPrecise(a.RawX, b.RawX), Fixed32.DivPrecise(a.RawY, b.RawY), Fixed32.DivPrecise(a.RawZ, b.RawZ)); }
+        public static F32Vec3 operator %(F32Vec3 a, F32Vec3 b) { return new F32Vec3(a.RawX % b.RawX, a.RawY % b.RawY, a.RawZ % b.RawZ); }
 
-        public static F32Vec3 operator +(F32Vec3 a, F32Vec3 b) { return new F32Vec3(a.x + b.x, a.y + b.y, a.z + b.z); }
-        public static F32Vec3 operator -(F32Vec3 a, F32Vec3 b) { return new F32Vec3(a.x - b.x, a.y - b.y, a.z - b.z); }
-        public static F32Vec3 operator *(F32Vec3 a, F32Vec3 b) { return new F32Vec3(a.x * b.x, a.y * b.y, a.z * b.z); }
-        public static F32Vec3 operator /(F32Vec3 a, F32Vec3 b) { return new F32Vec3(a.x / b.x, a.y / b.y, a.z / b.z); }
-        public static F32Vec3 operator %(F32Vec3 a, F32Vec3 b) { return new F32Vec3(a.x % b.x, a.y % b.y, a.z % b.z); }
+        public static F32Vec3 operator +(F32 a, F32Vec3 b) { return new F32Vec3(a.Raw + b.RawX, a.Raw + b.RawY, a.Raw + b.RawZ); }
+        public static F32Vec3 operator +(F32Vec3 a, F32 b) { return new F32Vec3(a.RawX + b.Raw, a.RawY + b.Raw, a.RawZ + b.Raw); }
+        public static F32Vec3 operator -(F32 a, F32Vec3 b) { return new F32Vec3(a.Raw - b.RawX, a.Raw - b.RawY, a.Raw - b.RawZ); }
+        public static F32Vec3 operator -(F32Vec3 a, F32 b) { return new F32Vec3(a.RawX - b.Raw, a.RawY - b.Raw, a.RawZ - b.Raw); }
+        public static F32Vec3 operator *(F32 a, F32Vec3 b) { return new F32Vec3(Fixed32.Mul(a.Raw, b.RawX), Fixed32.Mul(a.Raw, b.RawY), Fixed32.Mul(a.Raw, b.RawZ)); }
+        public static F32Vec3 operator *(F32Vec3 a, F32 b) { return new F32Vec3(Fixed32.Mul(a.RawX, b.Raw), Fixed32.Mul(a.RawY, b.Raw), Fixed32.Mul(a.RawZ, b.Raw)); }
+        public static F32Vec3 operator /(F32 a, F32Vec3 b) { return new F32Vec3(Fixed32.DivPrecise(a.Raw, b.RawX), Fixed32.DivPrecise(a.Raw, b.RawY), Fixed32.DivPrecise(a.Raw, b.RawZ)); }
+        public static F32Vec3 operator /(F32Vec3 a, F32 b) { return new F32Vec3(Fixed32.DivPrecise(a.RawX, b.Raw), Fixed32.DivPrecise(a.RawY, b.Raw), Fixed32.DivPrecise(a.RawZ, b.Raw)); }
+        public static F32Vec3 operator %(F32 a, F32Vec3 b) { return new F32Vec3(a % b.RawX, a % b.RawY, a % b.RawZ); }
+        public static F32Vec3 operator %(F32Vec3 a, F32 b) { return new F32Vec3(a.RawX % b, a.RawY % b, a.RawZ % b); }
 
-        public static F32Vec3 operator +(F32 a, F32Vec3 b) { return new F32Vec3(a + b.x, a + b.y, a + b.z); }
-        public static F32Vec3 operator +(F32Vec3 a, F32 b) { return new F32Vec3(a.x + b, a.y + b, a.z + b); }
-        public static F32Vec3 operator -(F32 a, F32Vec3 b) { return new F32Vec3(a - b.x, a - b.y, a - b.z); }
-        public static F32Vec3 operator -(F32Vec3 a, F32 b) { return new F32Vec3(a.x - b, a.y - b, a.z - b); }
-        public static F32Vec3 operator *(F32 a, F32Vec3 b) { return new F32Vec3(a * b.x, a * b.y, a * b.z); }
-        public static F32Vec3 operator *(F32Vec3 a, F32 b) { return new F32Vec3(a.x * b, a.y * b, a.z * b); }
-        public static F32Vec3 operator /(F32 a, F32Vec3 b) { return new F32Vec3(a / b.x, a / b.y, a / b.z); }
-        public static F32Vec3 operator /(F32Vec3 a, F32 b) { return new F32Vec3(a.x / b, a.y / b, a.z / b); }
-        public static F32Vec3 operator %(F32 a, F32Vec3 b) { return new F32Vec3(a % b.x, a % b.y, a % b.z); }
-        public static F32Vec3 operator %(F32Vec3 a, F32 b) { return new F32Vec3(a.x % b, a.y % b, a.z % b); }
+        public static bool operator ==(F32Vec3 a, F32Vec3 b) { return a.RawX == b.RawX && a.RawY == b.RawY && a.RawZ == b.RawZ; }
+        public static bool operator !=(F32Vec3 a, F32Vec3 b) { return a.RawX != b.RawX || a.RawY != b.RawY || a.RawZ != b.RawZ; }
 
-        public static bool operator ==(F32Vec3 a, F32Vec3 b) { return a.x == b.x && a.y == b.y && a.z == b.z; }
-        public static bool operator !=(F32Vec3 a, F32Vec3 b) { return a.x != b.x || a.y != b.y || a.z != b.z; }
+        public static F32Vec3 Div(F32Vec3 a, F32 b) { int oob = Fixed32.Rcp(b.Raw); return new F32Vec3(Fixed32.Mul(a.RawX, oob), Fixed32.Mul(a.RawY, oob), Fixed32.Mul(a.RawZ, oob)); }
+        public static F32Vec3 DivFast(F32Vec3 a, F32 b) { int oob = Fixed32.RcpFast(b.Raw); return new F32Vec3(Fixed32.Mul(a.RawX, oob), Fixed32.Mul(a.RawY, oob), Fixed32.Mul(a.RawZ, oob)); }
+        public static F32Vec3 DivFastest(F32Vec3 a, F32 b) { int oob = Fixed32.RcpFastest(b.Raw); return new F32Vec3(Fixed32.Mul(a.RawX, oob), Fixed32.Mul(a.RawY, oob), Fixed32.Mul(a.RawZ, oob)); }
+        public static F32Vec3 Div(F32Vec3 a, F32Vec3 b) { return new F32Vec3(Fixed32.Div(a.RawX, b.RawX), Fixed32.Div(a.RawY, b.RawY), Fixed32.Div(a.RawZ, b.RawZ)); }
+        public static F32Vec3 DivFast(F32Vec3 a, F32Vec3 b) { return new F32Vec3(Fixed32.DivFast(a.RawX, b.RawX), Fixed32.DivFast(a.RawY, b.RawY), Fixed32.DivFast(a.RawZ, b.RawZ)); }
+        public static F32Vec3 DivFastest(F32Vec3 a, F32Vec3 b) { return new F32Vec3(Fixed32.DivFastest(a.RawX, b.RawX), Fixed32.DivFastest(a.RawY, b.RawY), Fixed32.DivFastest(a.RawZ, b.RawZ)); }
+        public static F32Vec3 SqrtPrecise(F32Vec3 a) { return new F32Vec3(Fixed32.SqrtPrecise(a.RawX), Fixed32.SqrtPrecise(a.RawY), Fixed32.SqrtPrecise(a.RawZ)); }
+        public static F32Vec3 Sqrt(F32Vec3 a) { return new F32Vec3(Fixed32.Sqrt(a.RawX), Fixed32.Sqrt(a.RawY), Fixed32.Sqrt(a.RawZ)); }
+        public static F32Vec3 SqrtFast(F32Vec3 a) { return new F32Vec3(Fixed32.SqrtFast(a.RawX), Fixed32.SqrtFast(a.RawY), Fixed32.SqrtFast(a.RawZ)); }
+        public static F32Vec3 SqrtFastest(F32Vec3 a) { return new F32Vec3(Fixed32.SqrtFastest(a.RawX), Fixed32.SqrtFastest(a.RawY), Fixed32.SqrtFastest(a.RawZ)); }
+        public static F32Vec3 RSqrt(F32Vec3 a) { return new F32Vec3(Fixed32.RSqrt(a.RawX), Fixed32.RSqrt(a.RawY), Fixed32.RSqrt(a.RawZ)); }
+        public static F32Vec3 RSqrtFast(F32Vec3 a) { return new F32Vec3(Fixed32.RSqrtFast(a.RawX), Fixed32.RSqrtFast(a.RawY), Fixed32.RSqrtFast(a.RawZ)); }
+        public static F32Vec3 RSqrtFastest(F32Vec3 a) { return new F32Vec3(Fixed32.RSqrtFastest(a.RawX), Fixed32.RSqrtFastest(a.RawY), Fixed32.RSqrtFastest(a.RawZ)); }
+        public static F32Vec3 Rcp(F32Vec3 a) { return new F32Vec3(Fixed32.Rcp(a.RawX), Fixed32.Rcp(a.RawY), Fixed32.Rcp(a.RawZ)); }
+        public static F32Vec3 RcpFast(F32Vec3 a) { return new F32Vec3(Fixed32.RcpFast(a.RawX), Fixed32.RcpFast(a.RawY), Fixed32.RcpFast(a.RawZ)); }
+        public static F32Vec3 RcpFastest(F32Vec3 a) { return new F32Vec3(Fixed32.RcpFastest(a.RawX), Fixed32.RcpFastest(a.RawY), Fixed32.RcpFastest(a.RawZ)); }
+        public static F32Vec3 Exp(F32Vec3 a) { return new F32Vec3(Fixed32.Exp(a.RawX), Fixed32.Exp(a.RawY), Fixed32.Exp(a.RawZ)); }
+        public static F32Vec3 ExpFast(F32Vec3 a) { return new F32Vec3(Fixed32.ExpFast(a.RawX), Fixed32.ExpFast(a.RawY), Fixed32.ExpFast(a.RawZ)); }
+        public static F32Vec3 ExpFastest(F32Vec3 a) { return new F32Vec3(Fixed32.ExpFastest(a.RawX), Fixed32.ExpFastest(a.RawY), Fixed32.ExpFastest(a.RawZ)); }
+        public static F32Vec3 Exp2(F32Vec3 a) { return new F32Vec3(Fixed32.Exp2(a.RawX), Fixed32.Exp2(a.RawY), Fixed32.Exp2(a.RawZ)); }
+        public static F32Vec3 Exp2Fast(F32Vec3 a) { return new F32Vec3(Fixed32.Exp2Fast(a.RawX), Fixed32.Exp2Fast(a.RawY), Fixed32.Exp2Fast(a.RawZ)); }
+        public static F32Vec3 Exp2Fastest(F32Vec3 a) { return new F32Vec3(Fixed32.Exp2Fastest(a.RawX), Fixed32.Exp2Fastest(a.RawY), Fixed32.Exp2Fastest(a.RawZ)); }
+        public static F32Vec3 Log(F32Vec3 a) { return new F32Vec3(Fixed32.Log(a.RawX), Fixed32.Log(a.RawY), Fixed32.Log(a.RawZ)); }
+        public static F32Vec3 LogFast(F32Vec3 a) { return new F32Vec3(Fixed32.LogFast(a.RawX), Fixed32.LogFast(a.RawY), Fixed32.LogFast(a.RawZ)); }
+        public static F32Vec3 LogFastest(F32Vec3 a) { return new F32Vec3(Fixed32.LogFastest(a.RawX), Fixed32.LogFastest(a.RawY), Fixed32.LogFastest(a.RawZ)); }
+        public static F32Vec3 Log2(F32Vec3 a) { return new F32Vec3(Fixed32.Log2(a.RawX), Fixed32.Log2(a.RawY), Fixed32.Log2(a.RawZ)); }
+        public static F32Vec3 Log2Fast(F32Vec3 a) { return new F32Vec3(Fixed32.Log2Fast(a.RawX), Fixed32.Log2Fast(a.RawY), Fixed32.Log2Fast(a.RawZ)); }
+        public static F32Vec3 Log2Fastest(F32Vec3 a) { return new F32Vec3(Fixed32.Log2Fastest(a.RawX), Fixed32.Log2Fastest(a.RawY), Fixed32.Log2Fastest(a.RawZ)); }
+        public static F32Vec3 Sin(F32Vec3 a) { return new F32Vec3(Fixed32.Sin(a.RawX), Fixed32.Sin(a.RawY), Fixed32.Sin(a.RawZ)); }
+        public static F32Vec3 SinFast(F32Vec3 a) { return new F32Vec3(Fixed32.SinFast(a.RawX), Fixed32.SinFast(a.RawY), Fixed32.SinFast(a.RawZ)); }
+        public static F32Vec3 SinFastest(F32Vec3 a) { return new F32Vec3(Fixed32.SinFastest(a.RawX), Fixed32.SinFastest(a.RawY), Fixed32.SinFastest(a.RawZ)); }
+        public static F32Vec3 Cos(F32Vec3 a) { return new F32Vec3(Fixed32.Cos(a.RawX), Fixed32.Cos(a.RawY), Fixed32.Cos(a.RawZ)); }
+        public static F32Vec3 CosFast(F32Vec3 a) { return new F32Vec3(Fixed32.CosFast(a.RawX), Fixed32.CosFast(a.RawY), Fixed32.CosFast(a.RawZ)); }
+        public static F32Vec3 CosFastest(F32Vec3 a) { return new F32Vec3(Fixed32.CosFastest(a.RawX), Fixed32.CosFastest(a.RawY), Fixed32.CosFastest(a.RawZ)); }
 
-        public static F32Vec3 Div(F32Vec3 a, F32 b) { F32 oob = F32.Rcp(b); return new F32Vec3(a.x * oob, a. y * oob, a.z * oob); }
-        public static F32Vec3 DivFast(F32Vec3 a, F32 b) { F32 oob = F32.RcpFast(b); return new F32Vec3(a.x * oob, a.y * oob, a.z * oob); }
-        public static F32Vec3 DivFastest(F32Vec3 a, F32 b) { F32 oob = F32.RcpFastest(b); return new F32Vec3(a.x * oob, a.y * oob, a.z * oob); }
-        public static F32Vec3 Div(F32Vec3 a, F32Vec3 b) { return new F32Vec3(F32.Div(a.x, b.x), F32.Div(a.y, b.y), F32.Div(a.z, b.z)); }
-        public static F32Vec3 DivFast(F32Vec3 a, F32Vec3 b) { return new F32Vec3(F32.DivFast(a.x, b.x), F32.DivFast(a.y, b.y), F32.DivFast(a.z, b.z)); }
-        public static F32Vec3 DivFastest(F32Vec3 a, F32Vec3 b) { return new F32Vec3(F32.DivFastest(a.x, b.x), F32.DivFastest(a.y, b.y), F32.DivFastest(a.z, b.z)); }
-        public static F32Vec3 SqrtPrecise(F32Vec3 a) { return new F32Vec3(F32.SqrtPrecise(a.x), F32.SqrtPrecise(a.y), F32.SqrtPrecise(a.z)); }
-        public static F32Vec3 Sqrt(F32Vec3 a) { return new F32Vec3(F32.Sqrt(a.x), F32.Sqrt(a.y), F32.Sqrt(a.z)); }
-        public static F32Vec3 SqrtFast(F32Vec3 a) { return new F32Vec3(F32.SqrtFast(a.x), F32.SqrtFast(a.y), F32.SqrtFast(a.z)); }
-        public static F32Vec3 SqrtFastest(F32Vec3 a) { return new F32Vec3(F32.SqrtFastest(a.x), F32.SqrtFastest(a.y), F32.SqrtFastest(a.z)); }
-        public static F32Vec3 RSqrt(F32Vec3 a) { return new F32Vec3(F32.RSqrt(a.x), F32.RSqrt(a.y), F32.RSqrt(a.z)); }
-        public static F32Vec3 RSqrtFast(F32Vec3 a) { return new F32Vec3(F32.RSqrtFast(a.x), F32.RSqrtFast(a.y), F32.RSqrtFast(a.z)); }
-        public static F32Vec3 RSqrtFastest(F32Vec3 a) { return new F32Vec3(F32.RSqrtFastest(a.x), F32.RSqrtFastest(a.y), F32.RSqrtFastest(a.z)); }
-        public static F32Vec3 Rcp(F32Vec3 a) { return new F32Vec3(F32.Rcp(a.x), F32.Rcp(a.y), F32.Rcp(a.z)); }
-        public static F32Vec3 RcpFast(F32Vec3 a) { return new F32Vec3(F32.RcpFast(a.x), F32.RcpFast(a.y), F32.RcpFast(a.z)); }
-        public static F32Vec3 RcpFastest(F32Vec3 a) { return new F32Vec3(F32.RcpFastest(a.x), F32.RcpFastest(a.y), F32.RcpFastest(a.z)); }
-        public static F32Vec3 Exp(F32Vec3 a) { return new F32Vec3(F32.Exp(a.x), F32.Exp(a.y), F32.Exp(a.z)); }
-        public static F32Vec3 ExpFast(F32Vec3 a) { return new F32Vec3(F32.ExpFast(a.x), F32.ExpFast(a.y), F32.ExpFast(a.z)); }
-        public static F32Vec3 ExpFastest(F32Vec3 a) { return new F32Vec3(F32.ExpFastest(a.x), F32.ExpFastest(a.y), F32.ExpFastest(a.z)); }
-        public static F32Vec3 Exp2(F32Vec3 a) { return new F32Vec3(F32.Exp2(a.x), F32.Exp2(a.y), F32.Exp2(a.z)); }
-        public static F32Vec3 Exp2Fast(F32Vec3 a) { return new F32Vec3(F32.Exp2Fast(a.x), F32.Exp2Fast(a.y), F32.Exp2Fast(a.z)); }
-        public static F32Vec3 Exp2Fastest(F32Vec3 a) { return new F32Vec3(F32.Exp2Fastest(a.x), F32.Exp2Fastest(a.y), F32.Exp2Fastest(a.z)); }
-        public static F32Vec3 Log(F32Vec3 a) { return new F32Vec3(F32.Log(a.x), F32.Log(a.y), F32.Log(a.z)); }
-        public static F32Vec3 LogFast(F32Vec3 a) { return new F32Vec3(F32.LogFast(a.x), F32.LogFast(a.y), F32.LogFast(a.z)); }
-        public static F32Vec3 LogFastest(F32Vec3 a) { return new F32Vec3(F32.LogFastest(a.x), F32.LogFastest(a.y), F32.LogFastest(a.z)); }
-        public static F32Vec3 Log2(F32Vec3 a) { return new F32Vec3(F32.Log2(a.x), F32.Log2(a.y), F32.Log2(a.z)); }
-        public static F32Vec3 Log2Fast(F32Vec3 a) { return new F32Vec3(F32.Log2Fast(a.x), F32.Log2Fast(a.y), F32.Log2Fast(a.z)); }
-        public static F32Vec3 Log2Fastest(F32Vec3 a) { return new F32Vec3(F32.Log2Fastest(a.x), F32.Log2Fastest(a.y), F32.Log2Fastest(a.z)); }
-        public static F32Vec3 Sin(F32Vec3 a) { return new F32Vec3(F32.Sin(a.x), F32.Sin(a.y), F32.Sin(a.z)); }
-        public static F32Vec3 SinFast(F32Vec3 a) { return new F32Vec3(F32.SinFast(a.x), F32.SinFast(a.y), F32.SinFast(a.z)); }
-        public static F32Vec3 SinFastest(F32Vec3 a) { return new F32Vec3(F32.SinFastest(a.x), F32.SinFastest(a.y), F32.SinFastest(a.z)); }
-        public static F32Vec3 Cos(F32Vec3 a) { return new F32Vec3(F32.Cos(a.x), F32.Cos(a.y), F32.Cos(a.z)); }
-        public static F32Vec3 CosFast(F32Vec3 a) { return new F32Vec3(F32.CosFast(a.x), F32.CosFast(a.y), F32.CosFast(a.z)); }
-        public static F32Vec3 CosFastest(F32Vec3 a) { return new F32Vec3(F32.CosFastest(a.x), F32.CosFastest(a.y), F32.CosFastest(a.z)); }
+        public static F32Vec3 Pow(F32Vec3 a, F32 b) { return new F32Vec3(Fixed32.Pow(a.RawX, b.Raw), Fixed32.Pow(a.RawY, b.Raw), Fixed32.Pow(a.RawZ, b.Raw)); }
+        public static F32Vec3 PowFast(F32Vec3 a, F32 b) { return new F32Vec3(Fixed32.PowFast(a.RawX, b.Raw), Fixed32.PowFast(a.RawY, b.Raw), Fixed32.PowFast(a.RawZ, b.Raw)); }
+        public static F32Vec3 PowFastest(F32Vec3 a, F32 b) { return new F32Vec3(Fixed32.PowFastest(a.RawX, b.Raw), Fixed32.PowFastest(a.RawY, b.Raw), Fixed32.PowFastest(a.RawZ, b.Raw)); }
+        public static F32Vec3 Pow(F32 a, F32Vec3 b) { return new F32Vec3(Fixed32.Pow(a.Raw, b.RawX), Fixed32.Pow(a.Raw, b.RawY), Fixed32.Pow(a.Raw, b.RawZ)); }
+        public static F32Vec3 PowFast(F32 a, F32Vec3 b) { return new F32Vec3(Fixed32.PowFast(a.Raw, b.RawX), Fixed32.PowFast(a.Raw, b.RawY), Fixed32.PowFast(a.Raw, b.RawZ)); }
+        public static F32Vec3 PowFastest(F32 a, F32Vec3 b) { return new F32Vec3(Fixed32.PowFastest(a.Raw, b.RawX), Fixed32.PowFastest(a.Raw, b.RawY), Fixed32.PowFastest(a.Raw, b.RawZ)); }
+        public static F32Vec3 Pow(F32Vec3 a, F32Vec3 b) { return new F32Vec3(Fixed32.Pow(a.RawX, b.RawX), Fixed32.Pow(a.RawY, b.RawY), Fixed32.Pow(a.RawZ, b.RawZ)); }
+        public static F32Vec3 PowFast(F32Vec3 a, F32Vec3 b) { return new F32Vec3(Fixed32.PowFast(a.RawX, b.RawX), Fixed32.PowFast(a.RawY, b.RawY), Fixed32.PowFast(a.RawZ, b.RawZ)); }
+        public static F32Vec3 PowFastest(F32Vec3 a, F32Vec3 b) { return new F32Vec3(Fixed32.PowFastest(a.RawX, b.RawX), Fixed32.PowFastest(a.RawY, b.RawY), Fixed32.PowFastest(a.RawZ, b.RawZ)); }
 
-        public static F32Vec3 Pow(F32Vec3 a, F32 b) { return new F32Vec3(F32.Pow(a.x, b), F32.Pow(a.y, b), F32.Pow(a.z, b)); }
-        public static F32Vec3 PowFast(F32Vec3 a, F32 b) { return new F32Vec3(F32.PowFast(a.x, b), F32.PowFast(a.y, b), F32.PowFast(a.z, b)); }
-        public static F32Vec3 PowFastest(F32Vec3 a, F32 b) { return new F32Vec3(F32.PowFastest(a.x, b), F32.PowFastest(a.y, b), F32.PowFastest(a.z, b)); }
-        public static F32Vec3 Pow(F32 a, F32Vec3 b) { return new F32Vec3(F32.Pow(a, b.x), F32.Pow(a, b.y), F32.Pow(a, b.z)); }
-        public static F32Vec3 PowFast(F32 a, F32Vec3 b) { return new F32Vec3(F32.PowFast(a, b.x), F32.PowFast(a, b.y), F32.PowFast(a, b.z)); }
-        public static F32Vec3 PowFastest(F32 a, F32Vec3 b) { return new F32Vec3(F32.PowFastest(a, b.x), F32.PowFastest(a, b.y), F32.PowFastest(a, b.z)); }
-        public static F32Vec3 Pow(F32Vec3 a, F32Vec3 b) { return new F32Vec3(F32.Pow(a.x, b.x), F32.Pow(a.y, b.y), F32.Pow(a.z, b.z)); }
-        public static F32Vec3 PowFast(F32Vec3 a, F32Vec3 b) { return new F32Vec3(F32.PowFast(a.x, b.x), F32.PowFast(a.y, b.y), F32.PowFast(a.z, b.z)); }
-        public static F32Vec3 PowFastest(F32Vec3 a, F32Vec3 b) { return new F32Vec3(F32.PowFastest(a.x, b.x), F32.PowFastest(a.y, b.y), F32.PowFastest(a.z, b.z)); }
+        public static F32 Length(F32Vec3 a) { return F32.FromRaw(Fixed32.Sqrt(Fixed32.Mul(a.RawX, a.RawX) + Fixed32.Mul(a.RawY, a.RawY) + Fixed32.Mul(a.RawZ, a.RawZ))); }
+        public static F32 LengthFast(F32Vec3 a) { return F32.FromRaw(Fixed32.SqrtFast(Fixed32.Mul(a.RawX, a.RawX) + Fixed32.Mul(a.RawY, a.RawY) + Fixed32.Mul(a.RawZ, a.RawZ))); }
+        public static F32 LengthFastest(F32Vec3 a) { return F32.FromRaw(Fixed32.SqrtFastest(Fixed32.Mul(a.RawX, a.RawX) + Fixed32.Mul(a.RawY, a.RawY) + Fixed32.Mul(a.RawZ, a.RawZ))); }
+        public static F32 LengthSqr(F32Vec3 a) { return F32.FromRaw(Fixed32.Mul(a.RawX, a.RawX) + Fixed32.Mul(a.RawY, a.RawY) + Fixed32.Mul(a.RawZ, a.RawZ)); }
+        public static F32Vec3 Normalize(F32Vec3 a) { F32 ooLen = F32.FromRaw(Fixed32.RSqrt(Fixed32.Mul(a.RawX, a.RawX) + Fixed32.Mul(a.RawY, a.RawY) + Fixed32.Mul(a.RawZ, a.RawZ))); return ooLen * a; }
+        public static F32Vec3 NormalizeFast(F32Vec3 a) { F32 ooLen = F32.FromRaw(Fixed32.RSqrtFast(Fixed32.Mul(a.RawX, a.RawX) + Fixed32.Mul(a.RawY, a.RawY) + Fixed32.Mul(a.RawZ, a.RawZ))); return ooLen * a; }
+        public static F32Vec3 NormalizeFastest(F32Vec3 a) { F32 ooLen = F32.FromRaw(Fixed32.RSqrtFastest(Fixed32.Mul(a.RawX, a.RawX) + Fixed32.Mul(a.RawY, a.RawY) + Fixed32.Mul(a.RawZ, a.RawZ))); return ooLen * a; }
 
-        public static F32 Length(F32Vec3 a) { return F32.Sqrt(a.x * a.x + a.y * a.y + a.z * a.z); }
-        public static F32 LengthFast(F32Vec3 a) { return F32.SqrtFast(a.x * a.x + a.y * a.y + a.z * a.z); }
-        public static F32 LengthFastest(F32Vec3 a) { return F32.SqrtFastest(a.x * a.x + a.y * a.y + a.z * a.z); }
-        public static F32 LengthSqr(F32Vec3 a) { return (a.x * a.x + a.y * a.y + a.z * a.z); }
-        public static F32Vec3 Normalize(F32Vec3 a) { F32 ooLen = F32.RSqrt(LengthSqr(a)); return ooLen * a; }
-        public static F32Vec3 NormalizeFast(F32Vec3 a) { F32 ooLen = F32.RSqrtFast(LengthSqr(a)); return ooLen * a; }
-        public static F32Vec3 NormalizeFastest(F32Vec3 a) { F32 ooLen = F32.RSqrtFastest(LengthSqr(a)); return ooLen * a; }
-
-        public static F32 Dot(F32Vec3 a, F32Vec3 b) { return (a.x * b.x + a.y * b.y + a.z * b.z); }
+        public static F32 Dot(F32Vec3 a, F32Vec3 b) { return F32.FromRaw(Fixed32.Mul(a.RawX, b.RawX) + Fixed32.Mul(a.RawY, b.RawY) + Fixed32.Mul(a.RawZ, b.RawZ)); }
         public static F32 Distance(F32Vec3 a, F32Vec3 b) { return Length(a - b); }
         public static F32 DistanceFast(F32Vec3 a, F32Vec3 b) { return LengthFast(a - b); }
         public static F32 DistanceFastest(F32Vec3 a, F32Vec3 b) { return LengthFastest(a - b); }
 
-        public static F32Vec3 Lerp(F32Vec3 a, F32Vec3 b, F32 t) { return a + t*(b - a); }
+        public static F32Vec3 Min(F32Vec3 a, F32Vec3 b) { return new F32Vec3(Fixed32.Min(a.RawX, b.RawX), Fixed32.Min(a.RawY, b.RawY), Fixed32.Min(a.RawZ, b.RawZ)); }
+        public static F32Vec3 Max(F32Vec3 a, F32Vec3 b) { return new F32Vec3(Fixed32.Max(a.RawX, b.RawX), Fixed32.Max(a.RawY, b.RawY), Fixed32.Max(a.RawZ, b.RawZ)); }
+
+        public static F32Vec3 Clamp(F32Vec3 a, F32 min, F32 max)
+        {
+            return new F32Vec3(
+                Fixed32.Clamp(a.RawX, min.Raw, max.Raw),
+                Fixed32.Clamp(a.RawY, min.Raw, max.Raw),
+                Fixed32.Clamp(a.RawZ, min.Raw, max.Raw));
+        }
+
+        public static F32Vec3 Clamp(F32Vec3 a, F32Vec3 min, F32Vec3 max)
+        {
+            return new F32Vec3(
+                Fixed32.Clamp(a.RawX, min.RawX, max.RawX),
+                Fixed32.Clamp(a.RawY, min.RawY, max.RawY),
+                Fixed32.Clamp(a.RawZ, min.RawZ, max.RawZ));
+        }
+
+        public static F32Vec3 Lerp(F32Vec3 a, F32Vec3 b, F32 t)
+        {
+            int tb = t.Raw;
+            int ta = Fixed32.One - tb;
+            return new F32Vec3(Fixed32.Mul(a.RawX, ta) + Fixed32.Mul(b.RawX, tb), Fixed32.Mul(a.RawY, ta) + Fixed32.Mul(b.RawY, tb), Fixed32.Mul(a.RawZ, ta) + Fixed32.Mul(b.RawZ, tb));
+        }
 
         public static F32Vec3 Cross(F32Vec3 a, F32Vec3 b)
         {
             return new F32Vec3(
-                (a.y * b.z) - (a.z * b.y),
-                (a.z * b.x) - (a.x * b.z),
-                (a.x * b.y) - (a.y * b.x));
+                Fixed32.Mul(a.RawY, b.RawZ) - Fixed32.Mul(a.RawZ, b.RawY),
+                Fixed32.Mul(a.RawZ, b.RawX) - Fixed32.Mul(a.RawX, b.RawZ),
+                Fixed32.Mul(a.RawX, b.RawY) - Fixed32.Mul(a.RawY, b.RawX));
         }
-
-        public static F32Vec3 Min(F32Vec3 a, F32Vec3 b) { return new F32Vec3(F32.Min(a.x, b.x), F32.Min(a.y, b.y), F32.Min(a.z, b.z)); }
-        public static F32Vec3 Max(F32Vec3 a, F32Vec3 b) { return new F32Vec3(F32.Max(a.x, b.x), F32.Max(a.y, b.y), F32.Max(a.z, b.z)); }
 
         public bool Equals(F32Vec3 other)
         {
@@ -165,12 +197,12 @@ namespace FixMath
 
         public override string ToString()
         {
-            return "(" + x.ToString() + ", " + y.ToString() + ", " + z.ToString() + ")";
+            return "(" + Fixed32.ToString(RawX) + ", " + Fixed32.ToString(RawY) + ", " + Fixed32.ToString(RawZ) + ")";
         }
 
         public override int GetHashCode()
         {
-            return x.GetHashCode() ^ y.GetHashCode()*7919 ^ z.GetHashCode()*4513;
+            return RawX.GetHashCode() ^ RawY.GetHashCode() * 7919 ^ RawZ.GetHashCode() * 4513;
         }
     }
 }

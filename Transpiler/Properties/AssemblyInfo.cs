@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("Transpiler")]
-[assembly: AssemblyCopyright("Copyright ©  2018")]
+[assembly: AssemblyCopyright("Copyright © 2018-2019 Jere Sanisalo, Petri Kero")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
