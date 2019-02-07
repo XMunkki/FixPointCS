@@ -22,7 +22,7 @@
 // SOFTWARE.
 //
 using System;
-
+using System.Runtime.CompilerServices;
 using FixPointCS;
 
 namespace FixMath
@@ -33,14 +33,14 @@ namespace FixMath
     [Serializable]
     public struct F64Vec3 : IEquatable<F64Vec3>
     {
-        public static F64Vec3 Zero      { get { return new F64Vec3(Fixed64.Zero, Fixed64.Zero, Fixed64.Zero); } }
-        public static F64Vec3 One       { get { return new F64Vec3(Fixed64.One, Fixed64.One, Fixed64.One); } }
-        public static F64Vec3 Down      { get { return new F64Vec3(Fixed64.Zero, Fixed64.Neg1, Fixed64.Zero); } }
-        public static F64Vec3 Up        { get { return new F64Vec3(Fixed64.Zero, Fixed64.One, Fixed64.Zero); } }
-        public static F64Vec3 Left      { get { return new F64Vec3(Fixed64.Neg1, Fixed64.Zero, Fixed64.Zero); } }
-        public static F64Vec3 Right     { get { return new F64Vec3(Fixed64.One, Fixed64.Zero, Fixed64.Zero); } }
-        public static F64Vec3 Forward   { get { return new F64Vec3(Fixed64.Zero, Fixed64.Zero, Fixed64.One); } }
-        public static F64Vec3 Back      { get { return new F64Vec3(Fixed64.Zero, Fixed64.Zero, Fixed64.Neg1); } }
+        public static F64Vec3 Zero      { [MethodImpl(FixedUtil.AggressiveInlining)] get { return new F64Vec3(Fixed64.Zero, Fixed64.Zero, Fixed64.Zero); } }
+        public static F64Vec3 One       { [MethodImpl(FixedUtil.AggressiveInlining)] get { return new F64Vec3(Fixed64.One, Fixed64.One, Fixed64.One); } }
+        public static F64Vec3 Down      { [MethodImpl(FixedUtil.AggressiveInlining)] get { return new F64Vec3(Fixed64.Zero, Fixed64.Neg1, Fixed64.Zero); } }
+        public static F64Vec3 Up        { [MethodImpl(FixedUtil.AggressiveInlining)] get { return new F64Vec3(Fixed64.Zero, Fixed64.One, Fixed64.Zero); } }
+        public static F64Vec3 Left      { [MethodImpl(FixedUtil.AggressiveInlining)] get { return new F64Vec3(Fixed64.Neg1, Fixed64.Zero, Fixed64.Zero); } }
+        public static F64Vec3 Right     { [MethodImpl(FixedUtil.AggressiveInlining)] get { return new F64Vec3(Fixed64.One, Fixed64.Zero, Fixed64.Zero); } }
+        public static F64Vec3 Forward   { [MethodImpl(FixedUtil.AggressiveInlining)] get { return new F64Vec3(Fixed64.Zero, Fixed64.Zero, Fixed64.One); } }
+        public static F64Vec3 Back      { [MethodImpl(FixedUtil.AggressiveInlining)] get { return new F64Vec3(Fixed64.Zero, Fixed64.Zero, Fixed64.Neg1); } }
 
         public long RawX;
         public long RawY;

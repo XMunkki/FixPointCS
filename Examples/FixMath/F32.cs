@@ -34,18 +34,18 @@ namespace FixMath
     public struct F32 : IComparable<F32>, IEquatable<F32>
     {
         // Constants
-        public static F32 Neg1 { get { return FromRaw(Fixed32.Neg1); } }
-        public static F32 Zero { get { return FromRaw(Fixed32.Zero); } }
-        public static F32 Half { get { return FromRaw(Fixed32.Half); } }
-        public static F32 One { get { return FromRaw(Fixed32.One); } }
-        public static F32 Two { get { return FromRaw(Fixed32.Two); } }
-        public static F32 Pi { get { return FromRaw(Fixed32.Pi); } }
-        public static F32 Pi2 { get { return FromRaw(Fixed32.Pi2); } }
-        public static F32 PiHalf { get { return FromRaw(Fixed32.PiHalf); } }
-        public static F32 E { get { return FromRaw(Fixed32.E); } }
+        public static F32 Neg1      { [MethodImpl(FixedUtil.AggressiveInlining)] get { return FromRaw(Fixed32.Neg1); } }
+        public static F32 Zero      { [MethodImpl(FixedUtil.AggressiveInlining)] get { return FromRaw(Fixed32.Zero); } }
+        public static F32 Half      { [MethodImpl(FixedUtil.AggressiveInlining)] get { return FromRaw(Fixed32.Half); } }
+        public static F32 One       { [MethodImpl(FixedUtil.AggressiveInlining)] get { return FromRaw(Fixed32.One); } }
+        public static F32 Two       { [MethodImpl(FixedUtil.AggressiveInlining)] get { return FromRaw(Fixed32.Two); } }
+        public static F32 Pi        { [MethodImpl(FixedUtil.AggressiveInlining)] get { return FromRaw(Fixed32.Pi); } }
+        public static F32 Pi2       { [MethodImpl(FixedUtil.AggressiveInlining)] get { return FromRaw(Fixed32.Pi2); } }
+        public static F32 PiHalf    { [MethodImpl(FixedUtil.AggressiveInlining)] get { return FromRaw(Fixed32.PiHalf); } }
+        public static F32 E         { [MethodImpl(FixedUtil.AggressiveInlining)] get { return FromRaw(Fixed32.E); } }
 
-        public static F32 MinValue { get { return FromRaw(Fixed32.MinValue); } }
-        public static F32 MaxValue { get { return FromRaw(Fixed32.MaxValue); } }
+        public static F32 MinValue  { [MethodImpl(FixedUtil.AggressiveInlining)] get { return FromRaw(Fixed32.MinValue); } }
+        public static F32 MaxValue  { [MethodImpl(FixedUtil.AggressiveInlining)] get { return FromRaw(Fixed32.MaxValue); } }
 
         // Raw fixed point value
         public int Raw;
