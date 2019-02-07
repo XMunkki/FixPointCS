@@ -30,6 +30,7 @@ namespace FixMath
     /// <summary>
     /// Quaternion struct with signed 32.32 fixed point components.
     /// </summary>
+    [Serializable]
     public struct F64Quat : IEquatable<F64Quat>
     {
         // Constants
