@@ -22,26 +22,26 @@
 // SOFTWARE.
 //
 using System;
-
+using System.Runtime.CompilerServices;
 using FixPointCS;
 
 namespace FixMath
 {
     /// <summary>
-    /// Vector2 struct with signed 16.16 fixed point components.
+    /// Vector2 struct with signed 32.32 fixed point components.
     /// </summary>
     [Serializable]
     public struct F64Vec2 : IEquatable<F64Vec2>
     {
         // Constants
-        public static F64Vec2 Zero     { get { return new F64Vec2(Fixed64.Zero, Fixed64.Zero); } }
-        public static F64Vec2 One      { get { return new F64Vec2(Fixed64.One, Fixed64.One); } }
-        public static F64Vec2 Down     { get { return new F64Vec2(Fixed64.Zero, Fixed64.Neg1); } }
-        public static F64Vec2 Up       { get { return new F64Vec2(Fixed64.Zero, Fixed64.One); } }
-        public static F64Vec2 Left     { get { return new F64Vec2(Fixed64.Neg1, Fixed64.Zero); } }
-        public static F64Vec2 Right    { get { return new F64Vec2(Fixed64.One, Fixed64.Zero); } }
-        public static F64Vec2 AxisX    { get { return new F64Vec2(Fixed64.One, Fixed64.Zero); } }
-        public static F64Vec2 AxisY    { get { return new F64Vec2(Fixed64.Zero, Fixed64.One); } }
+        public static F64Vec2 Zero     { [MethodImpl(FixedUtil.AggressiveInlining)] get { return new F64Vec2(Fixed64.Zero, Fixed64.Zero); } }
+        public static F64Vec2 One      { [MethodImpl(FixedUtil.AggressiveInlining)] get { return new F64Vec2(Fixed64.One, Fixed64.One); } }
+        public static F64Vec2 Down     { [MethodImpl(FixedUtil.AggressiveInlining)] get { return new F64Vec2(Fixed64.Zero, Fixed64.Neg1); } }
+        public static F64Vec2 Up       { [MethodImpl(FixedUtil.AggressiveInlining)] get { return new F64Vec2(Fixed64.Zero, Fixed64.One); } }
+        public static F64Vec2 Left     { [MethodImpl(FixedUtil.AggressiveInlining)] get { return new F64Vec2(Fixed64.Neg1, Fixed64.Zero); } }
+        public static F64Vec2 Right    { [MethodImpl(FixedUtil.AggressiveInlining)] get { return new F64Vec2(Fixed64.One, Fixed64.Zero); } }
+        public static F64Vec2 AxisX    { [MethodImpl(FixedUtil.AggressiveInlining)] get { return new F64Vec2(Fixed64.One, Fixed64.Zero); } }
+        public static F64Vec2 AxisY    { [MethodImpl(FixedUtil.AggressiveInlining)] get { return new F64Vec2(Fixed64.Zero, Fixed64.One); } }
 
         // Raw components
         public long RawX;

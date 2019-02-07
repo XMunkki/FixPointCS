@@ -104,10 +104,13 @@ namespace FixedTracer
                     Color accum = Color.Black;
                     for (int i = 0; i < numSamples; i++)
                     {
-                        F64 xx = (F64.FromInt(x) + F64.FromDouble(rnd.NextDouble() - 0.5) - ox) * sx;
-                        F64 yy = (F64.FromInt(y) + F64.FromDouble(rnd.NextDouble() - 0.5) - oy) * sy;
+                        // rx, ry == random offset in range [-0.5, 0.5]
+                        F64 rx = F64.FromRaw(rnd.Next()) * 2 - F64.Half;
+                        F64 ry = F64.FromRaw(rnd.Next()) * 2 - F64.Half;
+                        F64 xx = (F64.FromInt(x) + rx - ox) * sx;
+                        F64 yy = (F64.FromInt(y) + ry - oy) * sy;
                         F64Vec3 rayDir = F64Vec3.Normalize(camera.Forward + xx * camera.Right + yy * camera.Up);
-                        Color color = TraceRay(new Ray(scene.Camera.Pos, rayDir), scene, 0);
+                        Color color = TraceRay(new Ray(camera.Pos, rayDir), scene, 0);
                         accum += color;
                     }
                     pixels[x, y] = (ooNumSamples * accum).ToDrawingColor();
@@ -116,23 +119,28 @@ namespace FixedTracer
             return pixels;
         }
 
+        static F64Vec3 F64Vec3Ratio100(int x, int y, int z)
+        {
+            return new F64Vec3(F64.Ratio100(x), F64.Ratio100(y), F64.Ratio100(z));
+        }
+
         internal static readonly Scene DefaultScene =
             new Scene()
             {
                 Things = new SceneObject[]
                 {
-                    new Checkerboard(F64Vec3.FromDouble(0,1,0), F64.FromDouble(0.0), Materials.White, Materials.Black),
-                    new Sphere(F64Vec3.FromDouble(0,1,0), F64.FromDouble(1.0), Materials.Shiny),
-                    new Sphere(F64Vec3.FromDouble(-1,.5,1.5), F64.FromDouble(.5), Materials.Shiny),
+                    new Checkerboard(F64Vec3Ratio100(0_00, 1_00, 0_00), F64.Zero, Materials.White, Materials.Black),
+                    new Sphere(F64Vec3Ratio100(0_00, 1_00, 0_00), F64.One, Materials.Shiny),
+                    new Sphere(F64Vec3Ratio100(-1_00, 0_50, 1_50), F64.Half, Materials.Shiny),
                 },
                 Lights = new Light[]
                 {
-                    new Light(F64Vec3.FromDouble(-2,2.5,0), Color.Ratio100(49, 7, 7)),
-                    new Light(F64Vec3.FromDouble(1.5,2.5,1.5), Color.Ratio100(7, 7, 49)),
-                    new Light(F64Vec3.FromDouble(1.5,2.5,-1.5), Color.Ratio100(7, 49, 7)),
-                    new Light(F64Vec3.FromDouble(0,3.5,0), Color.Ratio100(21, 21, 35)),
+                    new Light(F64Vec3Ratio100(-2_00, 2_50, 0_00), Color.Ratio100(49, 7, 7)),
+                    new Light(F64Vec3Ratio100(1_50, 2_50, 1_50), Color.Ratio100(7, 7, 49)),
+                    new Light(F64Vec3Ratio100(1_50, 2_50, -1_50), Color.Ratio100(7, 49, 7)),
+                    new Light(F64Vec3Ratio100(0_00, 3_50, 0_00), Color.Ratio100(21, 21, 35)),
                 },
-                Camera = Camera.Create(F64Vec3.FromDouble(3,2,4), F64Vec3.FromDouble(-1,.5,0))
+                Camera = Camera.Create(F64Vec3.FromInt(3, 2, 4), F64Vec3Ratio100(-1_00, 0_50, 0_00))
             };
     }
 
@@ -235,8 +243,8 @@ namespace FixedTracer
         {
             F64Vec3 forward = F64Vec3.Normalize(lookAt - pos);
             F64Vec3 down = new F64Vec3(F64.Zero, F64.Neg1, F64.Zero);
-            F64Vec3 right = F64.FromDouble(1.5) * F64Vec3.Normalize(F64Vec3.Cross(forward, down));
-            F64Vec3 up = F64.FromDouble(1.5) * F64Vec3.Normalize(F64Vec3.Cross(forward, right));
+            F64Vec3 right = F64.Ratio(15, 10) * F64Vec3.Normalize(F64Vec3.Cross(forward, down));
+            F64Vec3 up = F64.Ratio(15, 10) * F64Vec3.Normalize(F64Vec3.Cross(forward, right));
 
             return new Camera() { Pos = pos, Forward = forward, Up = up, Right = right };
         }

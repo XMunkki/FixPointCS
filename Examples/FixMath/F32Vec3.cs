@@ -22,6 +22,7 @@
 // SOFTWARE.
 //
 using System;
+using System.Runtime.CompilerServices;
 using FixPointCS;
 
 namespace FixMath
@@ -32,17 +33,17 @@ namespace FixMath
     [Serializable]
     public struct F32Vec3 : IEquatable<F32Vec3>
     {
-        public static F32Vec3 Zero      { get { return new F32Vec3(F32.Zero, F32.Zero, F32.Zero); } }
-        public static F32Vec3 One       { get { return new F32Vec3(F32.One, F32.One, F32.One); } }
-        public static F32Vec3 Down      { get { return new F32Vec3(F32.Zero, F32.Neg1, F32.Zero); } }
-        public static F32Vec3 Up        { get { return new F32Vec3(F32.Zero, F32.One, F32.Zero); } }
-        public static F32Vec3 Left      { get { return new F32Vec3(F32.Neg1, F32.Zero, F32.Zero); } }
-        public static F32Vec3 Right     { get { return new F32Vec3(F32.One, F32.Zero, F32.Zero); } }
-        public static F32Vec3 Forward   { get { return new F32Vec3(F32.Zero, F32.Zero, F32.One); } }
-        public static F32Vec3 Back      { get { return new F32Vec3(F32.Zero, F32.Zero, F32.Neg1); } }
-        public static F32Vec3 AxisX     { get { return new F32Vec3(Fixed32.One, Fixed32.Zero, Fixed32.Zero); } }
-        public static F32Vec3 AxisY     { get { return new F32Vec3(Fixed32.Zero, Fixed32.One, Fixed32.Zero); } }
-        public static F32Vec3 AxisZ     { get { return new F32Vec3(Fixed32.Zero, Fixed32.Zero, Fixed32.One); } }
+        public static F32Vec3 Zero      { [MethodImpl(FixedUtil.AggressiveInlining)] get { return new F32Vec3(Fixed32.Zero, Fixed32.Zero, Fixed32.Zero); } }
+        public static F32Vec3 One       { [MethodImpl(FixedUtil.AggressiveInlining)] get { return new F32Vec3(Fixed32.One, Fixed32.One, Fixed32.One); } }
+        public static F32Vec3 Down      { [MethodImpl(FixedUtil.AggressiveInlining)] get { return new F32Vec3(Fixed32.Zero, Fixed32.Neg1, Fixed32.Zero); } }
+        public static F32Vec3 Up        { [MethodImpl(FixedUtil.AggressiveInlining)] get { return new F32Vec3(Fixed32.Zero, Fixed32.One, Fixed32.Zero); } }
+        public static F32Vec3 Left      { [MethodImpl(FixedUtil.AggressiveInlining)] get { return new F32Vec3(Fixed32.Neg1, Fixed32.Zero, Fixed32.Zero); } }
+        public static F32Vec3 Right     { [MethodImpl(FixedUtil.AggressiveInlining)] get { return new F32Vec3(Fixed32.One, Fixed32.Zero, Fixed32.Zero); } }
+        public static F32Vec3 Forward   { [MethodImpl(FixedUtil.AggressiveInlining)] get { return new F32Vec3(Fixed32.Zero, Fixed32.Zero, Fixed32.One); } }
+        public static F32Vec3 Back      { [MethodImpl(FixedUtil.AggressiveInlining)] get { return new F32Vec3(Fixed32.Zero, Fixed32.Zero, Fixed32.Neg1); } }
+        public static F32Vec3 AxisX     { [MethodImpl(FixedUtil.AggressiveInlining)] get { return new F32Vec3(Fixed32.One, Fixed32.Zero, Fixed32.Zero); } }
+        public static F32Vec3 AxisY     { [MethodImpl(FixedUtil.AggressiveInlining)] get { return new F32Vec3(Fixed32.Zero, Fixed32.One, Fixed32.Zero); } }
+        public static F32Vec3 AxisZ     { [MethodImpl(FixedUtil.AggressiveInlining)] get { return new F32Vec3(Fixed32.Zero, Fixed32.Zero, Fixed32.One); } }
 
         // Raw components
         public int RawX;

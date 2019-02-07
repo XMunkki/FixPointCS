@@ -34,18 +34,18 @@ namespace FixMath
     public struct F64 : IComparable<F64>, IEquatable<F64>
     {
         // Constants
-        public static F64 Neg1 { get { return FromRaw(Fixed64.Neg1); } }
-        public static F64 Zero { get { return FromRaw(Fixed64.Zero); } }
-        public static F64 Half { get { return FromRaw(Fixed64.Half); } }
-        public static F64 One { get { return FromRaw(Fixed64.One); } }
-        public static F64 Two { get { return FromRaw(Fixed64.Two); } }
-        public static F64 Pi { get { return FromRaw(Fixed64.Pi); } }
-        public static F64 Pi2 { get { return FromRaw(Fixed64.Pi2); } }
-        public static F64 PiHalf { get { return FromRaw(Fixed64.PiHalf); } }
-        public static F64 E { get { return FromRaw(Fixed64.E); } }
+        public static F64 Neg1      { [MethodImpl(FixedUtil.AggressiveInlining)] get { return FromRaw(Fixed64.Neg1); } }
+        public static F64 Zero      { [MethodImpl(FixedUtil.AggressiveInlining)] get { return FromRaw(Fixed64.Zero); } }
+        public static F64 Half      { [MethodImpl(FixedUtil.AggressiveInlining)] get { return FromRaw(Fixed64.Half); } }
+        public static F64 One       { [MethodImpl(FixedUtil.AggressiveInlining)] get { return FromRaw(Fixed64.One); } }
+        public static F64 Two       { [MethodImpl(FixedUtil.AggressiveInlining)] get { return FromRaw(Fixed64.Two); } }
+        public static F64 Pi        { [MethodImpl(FixedUtil.AggressiveInlining)] get { return FromRaw(Fixed64.Pi); } }
+        public static F64 Pi2       { [MethodImpl(FixedUtil.AggressiveInlining)] get { return FromRaw(Fixed64.Pi2); } }
+        public static F64 PiHalf    { [MethodImpl(FixedUtil.AggressiveInlining)] get { return FromRaw(Fixed64.PiHalf); } }
+        public static F64 E         { [MethodImpl(FixedUtil.AggressiveInlining)] get { return FromRaw(Fixed64.E); } }
 
-        public static F64 MinValue { get { return FromRaw(Fixed64.MinValue); } }
-        public static F64 MaxValue { get { return FromRaw(Fixed64.MaxValue); } }
+        public static F64 MinValue  { [MethodImpl(FixedUtil.AggressiveInlining)] get { return FromRaw(Fixed64.MinValue); } }
+        public static F64 MaxValue  { [MethodImpl(FixedUtil.AggressiveInlining)] get { return FromRaw(Fixed64.MaxValue); } }
 
         // Raw fixed point value
         public long Raw;

@@ -22,7 +22,7 @@
 // SOFTWARE.
 //
 using System;
-
+using System.Runtime.CompilerServices;
 using FixPointCS;
 
 namespace FixMath
@@ -34,15 +34,15 @@ namespace FixMath
     public struct F32Vec2 : IEquatable<F32Vec2>
     {
         // Constants
-        public static F32Vec2 Zero     { get { return new F32Vec2(Fixed32.Zero, Fixed32.Zero); } }
-        public static F32Vec2 One      { get { return new F32Vec2(Fixed32.One, Fixed32.One); } }
-        public static F32Vec2 Down     { get { return new F32Vec2(Fixed32.Zero, Fixed32.Neg1); } }
-        public static F32Vec2 Up       { get { return new F32Vec2(Fixed32.Zero, Fixed32.One); } }
-        public static F32Vec2 Left     { get { return new F32Vec2(Fixed32.Neg1, Fixed32.Zero); } }
-        public static F32Vec2 Right    { get { return new F32Vec2(Fixed32.One, Fixed32.Zero); } }
-        public static F32Vec2 AxisX    { get { return new F32Vec2(Fixed32.One, Fixed32.Zero); } }
-        public static F32Vec2 AxisY    { get { return new F32Vec2(Fixed32.Zero, Fixed32.One); } }
-    
+        public static F32Vec2 Zero     { [MethodImpl(FixedUtil.AggressiveInlining)] get { return new F32Vec2(Fixed32.Zero, Fixed32.Zero); } }
+        public static F32Vec2 One      { [MethodImpl(FixedUtil.AggressiveInlining)] get { return new F32Vec2(Fixed32.One, Fixed32.One); } }
+        public static F32Vec2 Down     { [MethodImpl(FixedUtil.AggressiveInlining)] get { return new F32Vec2(Fixed32.Zero, Fixed32.Neg1); } }
+        public static F32Vec2 Up       { [MethodImpl(FixedUtil.AggressiveInlining)] get { return new F32Vec2(Fixed32.Zero, Fixed32.One); } }
+        public static F32Vec2 Left     { [MethodImpl(FixedUtil.AggressiveInlining)] get { return new F32Vec2(Fixed32.Neg1, Fixed32.Zero); } }
+        public static F32Vec2 Right    { [MethodImpl(FixedUtil.AggressiveInlining)] get { return new F32Vec2(Fixed32.One, Fixed32.Zero); } }
+        public static F32Vec2 AxisX    { [MethodImpl(FixedUtil.AggressiveInlining)] get { return new F32Vec2(Fixed32.One, Fixed32.Zero); } }
+        public static F32Vec2 AxisY    { [MethodImpl(FixedUtil.AggressiveInlining)] get { return new F32Vec2(Fixed32.Zero, Fixed32.One); } }
+
         // Raw components
         public int RawX;
         public int RawY;
