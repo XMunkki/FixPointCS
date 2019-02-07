@@ -119,6 +119,7 @@ namespace FixMath
         public static F32 RadToDeg(F32 a) { return FromRaw(Fixed32.Mul(a.Raw, 3754943)); }  // 180 / F32.Pi
         public static F32 DegToRad(F32 a) { return FromRaw(Fixed32.Mul(a.Raw, 1143)); }     // F32.Pi / 180
 
+        public static F32 Div2(F32 a) { return FromRaw(a.Raw >> 1); }
         public static F32 Abs(F32 a) { return FromRaw(Fixed32.Abs(a.Raw)); }
         public static F32 Nabs(F32 a) { return FromRaw(Fixed32.Nabs(a.Raw)); }
         public static F32 Ceil(F32 a) { return FromRaw(Fixed32.Ceil(a.Raw)); }

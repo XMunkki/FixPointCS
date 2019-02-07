@@ -41,6 +41,9 @@ namespace FixMath
         public static F64Vec3 Right     { get { return new F64Vec3(Fixed64.One, Fixed64.Zero, Fixed64.Zero); } }
         public static F64Vec3 Forward   { get { return new F64Vec3(Fixed64.Zero, Fixed64.Zero, Fixed64.One); } }
         public static F64Vec3 Back      { get { return new F64Vec3(Fixed64.Zero, Fixed64.Zero, Fixed64.Neg1); } }
+        public static F64Vec3 AxisX     { get { return new F64Vec3(Fixed64.One, Fixed64.Zero, Fixed64.Zero); } }
+        public static F64Vec3 AxisY     { get { return new F64Vec3(Fixed64.Zero, Fixed64.One, Fixed64.Zero); } }
+        public static F64Vec3 AxisZ     { get { return new F64Vec3(Fixed64.Zero, Fixed64.Zero, Fixed64.One); } }
 
         public long RawX;
         public long RawY;

@@ -40,6 +40,9 @@ namespace FixMath
         public static F32Vec3 Right     { get { return new F32Vec3(F32.One, F32.Zero, F32.Zero); } }
         public static F32Vec3 Forward   { get { return new F32Vec3(F32.Zero, F32.Zero, F32.One); } }
         public static F32Vec3 Back      { get { return new F32Vec3(F32.Zero, F32.Zero, F32.Neg1); } }
+        public static F32Vec3 AxisX     { get { return new F32Vec3(Fixed32.One, Fixed32.Zero, Fixed32.Zero); } }
+        public static F32Vec3 AxisY     { get { return new F32Vec3(Fixed32.Zero, Fixed32.One, Fixed32.Zero); } }
+        public static F32Vec3 AxisZ     { get { return new F32Vec3(Fixed32.Zero, Fixed32.Zero, Fixed32.One); } }
 
         // Raw components
         public int RawX;

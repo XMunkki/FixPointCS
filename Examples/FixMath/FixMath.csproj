@@ -86,6 +86,7 @@
     <Compile Include="F32Vec2.cs" />
     <Compile Include="F32Vec3.cs" />
     <Compile Include="F64.cs" />
+    <Compile Include="F64Quat.cs" />
     <Compile Include="F64Vec2.cs" />
     <Compile Include="F64Vec3.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

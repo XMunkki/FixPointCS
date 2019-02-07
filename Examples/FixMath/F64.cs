@@ -73,6 +73,16 @@ namespace FixMath
         // Creates the fixed point number that's a divided by 1000.
         public static F64 Ratio1000(int a) { return F64.FromRaw(((long)a << 32) / 1000); }
 
+        public void test()
+        {
+            int x = 123;
+            test2(ref x, out x);
+        }
+        public void test2(ref int a, out int b)
+        {
+            b = a;
+        }
+
         // Operators
         public static F64 operator -(F64 v1) { return FromRaw(-v1.Raw); }
 
@@ -132,6 +142,7 @@ namespace FixMath
         public static F64 RadToDeg(F64 a) { return FromRaw(Fixed64.Mul(a.Raw, 246083499198)); } // 180 / F64.Pi
         public static F64 DegToRad(F64 a) { return FromRaw(Fixed64.Mul(a.Raw, 74961320)); }     // F64.Pi / 180
 
+        public static F64 Div2(F64 a) { return FromRaw(a.Raw >> 1); }
         public static F64 Abs(F64 a) { return FromRaw(Fixed64.Abs(a.Raw)); }
         public static F64 Nabs(F64 a) { return FromRaw(Fixed64.Nabs(a.Raw)); }
         public static F64 Ceil(F64 a) { return FromRaw(Fixed64.Ceil(a.Raw)); }
