@@ -64,7 +64,14 @@ namespace FixMath
         public double Double { get { return Fixed64.ToDouble(Raw); } }
         public F32 F32 { get { return F32.FromRaw((int)(Raw >> 16)); } }
 
+        // Creates the fixed point number that's a divided by b.
         public static F64 Ratio(int a, int b) { return F64.FromRaw(((long)a << 32) / b); }
+        // Creates the fixed point number that's a divided by 10.
+        public static F64 Ratio10(int a) { return F64.FromRaw(((long)a << 32) / 10); }
+        // Creates the fixed point number that's a divided by 100.
+        public static F64 Ratio100(int a) { return F64.FromRaw(((long)a << 32) / 100); }
+        // Creates the fixed point number that's a divided by 1000.
+        public static F64 Ratio1000(int a) { return F64.FromRaw(((long)a << 32) / 1000); }
 
         // Operators
         public static F64 operator -(F64 v1) { return FromRaw(-v1.Raw); }
