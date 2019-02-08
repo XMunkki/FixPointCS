@@ -89,8 +89,8 @@ namespace FixMath
         public static F32Vec3 operator *(F32Vec3 a, F32 b) { return new F32Vec3(Fixed32.Mul(a.RawX, b.Raw), Fixed32.Mul(a.RawY, b.Raw), Fixed32.Mul(a.RawZ, b.Raw)); }
         public static F32Vec3 operator /(F32 a, F32Vec3 b) { return new F32Vec3(Fixed32.DivPrecise(a.Raw, b.RawX), Fixed32.DivPrecise(a.Raw, b.RawY), Fixed32.DivPrecise(a.Raw, b.RawZ)); }
         public static F32Vec3 operator /(F32Vec3 a, F32 b) { return new F32Vec3(Fixed32.DivPrecise(a.RawX, b.Raw), Fixed32.DivPrecise(a.RawY, b.Raw), Fixed32.DivPrecise(a.RawZ, b.Raw)); }
-        public static F32Vec3 operator %(F32 a, F32Vec3 b) { return new F32Vec3(a % b.RawX, a % b.RawY, a % b.RawZ); }
-        public static F32Vec3 operator %(F32Vec3 a, F32 b) { return new F32Vec3(a.RawX % b, a.RawY % b, a.RawZ % b); }
+        public static F32Vec3 operator %(F32 a, F32Vec3 b) { return new F32Vec3(a.Raw % b.RawX, a.Raw % b.RawY, a.Raw % b.RawZ); }
+        public static F32Vec3 operator %(F32Vec3 a, F32 b) { return new F32Vec3(a.RawX % b.Raw, a.RawY % b.Raw, a.RawZ % b.Raw); }
 
         public static bool operator ==(F32Vec3 a, F32Vec3 b) { return a.RawX == b.RawX && a.RawY == b.RawY && a.RawZ == b.RawZ; }
         public static bool operator !=(F32Vec3 a, F32Vec3 b) { return a.RawX != b.RawX || a.RawY != b.RawY || a.RawZ != b.RawZ; }
