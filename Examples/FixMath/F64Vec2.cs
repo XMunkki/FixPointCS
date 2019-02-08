@@ -166,9 +166,10 @@ namespace FixMath
 
         public static F64Vec2 Lerp(F64Vec2 a, F64Vec2 b, F64 t)
         {
-            long tb = t.Raw;
-            long ta = Fixed64.One - tb;
-            return new F64Vec2(Fixed64.Mul(a.RawX, ta) + Fixed64.Mul(b.RawX, tb), Fixed64.Mul(a.RawY, ta) + Fixed64.Mul(b.RawY, tb));
+            long tr = t.Raw;
+            return new F64Vec2(
+                Fixed64.Lerp(a.RawX, b.RawX, tr),
+                Fixed64.Lerp(a.RawY, b.RawY, tr));
         }
 
         public bool Equals(F64Vec2 other)

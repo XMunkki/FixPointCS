@@ -60,6 +60,13 @@ namespace FixMath
             RawZ = z.Raw;
         }
 
+        public F64Vec3(F32Vec3 src)
+        {
+            RawX = src.RawX << 16;
+            RawY = src.RawY << 16;
+            RawZ = src.RawZ << 16;
+        }
+
         // raw ctor for internal use only
         private F64Vec3(long x, long y, long z)
         {
@@ -172,9 +179,11 @@ namespace FixMath
 
         public static F64Vec3 Lerp(F64Vec3 a, F64Vec3 b, F64 t)
         {
-            long tb = t.Raw;
-            long ta = Fixed64.One - tb;
-            return new F64Vec3(Fixed64.Mul(a.RawX, ta) + Fixed64.Mul(b.RawX, tb), Fixed64.Mul(a.RawY, ta) + Fixed64.Mul(b.RawY, tb), Fixed64.Mul(a.RawZ, ta) + Fixed64.Mul(b.RawZ, tb));
+            long tr = t.Raw;
+            return new F64Vec3(
+                Fixed64.Lerp(a.RawX, b.RawX, tr),
+                Fixed64.Lerp(a.RawY, b.RawY, tr),
+                Fixed64.Lerp(a.RawZ, b.RawZ, tr));
         }
 
         public static F64Vec3 Cross(F64Vec3 a, F64Vec3 b)

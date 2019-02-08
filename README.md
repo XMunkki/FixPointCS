@@ -52,7 +52,7 @@ Supported operations include:
 - Trigonometry: Sin(), Cos(), Tan(), Asin(), Acos(), Atan(), Atan2()
 - Exponential: Exp(), Exp2(), Log(), Log2(), Pow()
 - Square root: Sqrt(), RSqrt() (reciprocal square root)
-- Utility: Abs(), Nabs(), Sign(), Ceil(), Floor(), Round(), Fract(), Min(), Max(), Clamp()
+- Utility: Abs(), Nabs(), Sign(), Ceil(), Floor(), Round(), Fract(), Min(), Max(), Clamp(), Lerp()
 - Conversions: CeilToInt(), FloorToInt(), RoundToInt(), FromDouble(), FromFloat(), ToDouble(), ToFloat()
 
 Note that the conversions to/from floating point values are not guaranteed to be deterministic.

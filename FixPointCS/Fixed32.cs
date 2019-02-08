@@ -266,6 +266,17 @@ namespace FixPointCS
         }
 
         /// <summary>
+        /// Linearly interpolate from a to b by t.
+        /// </summary>
+        [MethodImpl(FixedUtil.AggressiveInlining)]
+        public static int Lerp(int a, int b, int t)
+        {
+            long ta = (long)a * (Fixed32.One - (long)t);
+            long tb = (long)b * (long)t;
+            return (int)((ta + tb) >> Shift);
+        }
+
+        /// <summary>
         /// Returns the sign of the value (-1 if negative, 0 if zero, 1 if positive).
         /// </summary>
         [MethodImpl(FixedUtil.AggressiveInlining)]

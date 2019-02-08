@@ -174,9 +174,11 @@ namespace FixMath
 
         public static F32Vec3 Lerp(F32Vec3 a, F32Vec3 b, F32 t)
         {
-            int tb = t.Raw;
-            int ta = Fixed32.One - tb;
-            return new F32Vec3(Fixed32.Mul(a.RawX, ta) + Fixed32.Mul(b.RawX, tb), Fixed32.Mul(a.RawY, ta) + Fixed32.Mul(b.RawY, tb), Fixed32.Mul(a.RawZ, ta) + Fixed32.Mul(b.RawZ, tb));
+            int tr = t.Raw;
+            return new F32Vec3(
+                Fixed32.Lerp(a.RawX, b.RawX, tr),
+                Fixed32.Lerp(a.RawY, b.RawY, tr),
+                Fixed32.Lerp(a.RawZ, b.RawZ, tr));
         }
 
         public static F32Vec3 Cross(F32Vec3 a, F32Vec3 b)
