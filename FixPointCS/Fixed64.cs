@@ -280,8 +280,9 @@ namespace FixPointCS
         [MethodImpl(FixedUtil.AggressiveInlining)]
         public static int Sign(long x)
         {
-            if (x == 0) return 0;
-            return (x < 0) ? -1 : 1;
+            //https://stackoverflow.com/questions/14579920/fast-sign-of-integer-in-c/14612418#14612418
+            const int BITS_MINUS_ONE = sizeof(long) * 8 - 1;
+            return (int) (((long) x >> BITS_MINUS_ONE) | (long) (((ulong) -(long) x) >> BITS_MINUS_ONE));
         }
 
         /// <summary>
