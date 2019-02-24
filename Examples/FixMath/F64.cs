@@ -145,6 +145,7 @@ namespace FixMath
         public static F64 Div2(F64 a) { return FromRaw(a.Raw >> 1); }
         public static F64 Abs(F64 a) { return FromRaw(Fixed64.Abs(a.Raw)); }
         public static F64 Nabs(F64 a) { return FromRaw(Fixed64.Nabs(a.Raw)); }
+        public static int Sign(F64 a) { return Fixed64.Sign(a.Raw); }
         public static F64 Ceil(F64 a) { return FromRaw(Fixed64.Ceil(a.Raw)); }
         public static F64 Floor(F64 a) { return FromRaw(Fixed64.Floor(a.Raw)); }
         public static F64 Round(F64 a) { return FromRaw(Fixed64.Round(a.Raw)); }

@@ -189,8 +189,8 @@ namespace FixPointCS
         public static int Abs(int x)
         {
             // \note fails with MinValue
-            // \note for some reason this is twice as fast as (x > 0) ? x : -x
-            return (x < 0) ? -x : x;
+            int mask = x >> 31;
+            return (x + mask) ^ mask;
         }
 
         /// <summary>
@@ -199,7 +199,7 @@ namespace FixPointCS
         [MethodImpl(FixedUtil.AggressiveInlining)]
         public static int Nabs(int x)
         {
-            return (x > 0) ? -x : x;
+            return -Abs(x);
         }
 
         /// <summary>
@@ -282,8 +282,8 @@ namespace FixPointCS
         [MethodImpl(FixedUtil.AggressiveInlining)]
         public static int Sign(int x)
         {
-            if (x == 0) return 0;
-            return (x < 0) ? -1 : 1;
+            // https://stackoverflow.com/questions/14579920/fast-sign-of-integer-in-c/14612418#14612418
+            return ((x >> 31) | (int)(((uint)-x) >> 31));
         }
 
         /// <summary>

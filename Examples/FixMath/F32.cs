@@ -122,6 +122,7 @@ namespace FixMath
         public static F32 Div2(F32 a) { return FromRaw(a.Raw >> 1); }
         public static F32 Abs(F32 a) { return FromRaw(Fixed32.Abs(a.Raw)); }
         public static F32 Nabs(F32 a) { return FromRaw(Fixed32.Nabs(a.Raw)); }
+        public static int Sign(F32 a) { return Fixed32.Sign(a.Raw); }
         public static F32 Ceil(F32 a) { return FromRaw(Fixed32.Ceil(a.Raw)); }
         public static F32 Floor(F32 a) { return FromRaw(Fixed32.Floor(a.Raw)); }
         public static F32 Round(F32 a) { return FromRaw(Fixed32.Round(a.Raw)); }
