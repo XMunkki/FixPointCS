@@ -189,8 +189,12 @@ namespace FixPointCS
         public static long Abs(long x)
         {
             // \note fails with LONG_MIN
-            // \note for some reason this is twice as fast as (x > 0) ? x : -x
-            return (x < 0) ? -x : x;
+            // \note for some reason (x < 0) ? -x : x is twice as fast as (x > 0) ? x : -x
+            
+            // branchless implementation, see http://www.strchr.com/optimized_abs_function
+            const int BITS_MINUS_ONE = sizeof(long) * 8 - 1;
+            var mask = x >> BITS_MINUS_ONE;
+            return (x + mask) ^ mask;
         }
 
         /// <summary>
@@ -199,7 +203,7 @@ namespace FixPointCS
         [MethodImpl(FixedUtil.AggressiveInlining)]
         public static long Nabs(long x)
         {
-            return (x > 0) ? -x : x;
+            return -Abs(x);
         }
 
         /// <summary>
