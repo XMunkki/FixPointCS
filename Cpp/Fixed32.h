@@ -1,7 +1,7 @@
 //
 // FixPointCS
 //
-// Copyright(c) 2018 Jere Sanisalo, Petri Kero
+// Copyright(c) 2018-2019 Jere Sanisalo, Petri Kero
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -156,8 +156,8 @@ namespace Fixed32
     static FP_INT Abs(FP_INT x)
     {
         // \note fails with MinValue
-        // \note for some reason this is twice as fast as (x > 0) ? x : -x
-        return (x < 0) ? -x : x;
+        FP_INT mask = x >> 31;
+        return (x + mask) ^ mask;
     }
 
     /// <summary>
@@ -165,7 +165,7 @@ namespace Fixed32
     /// </summary>
     static FP_INT Nabs(FP_INT x)
     {
-        return (x > 0) ? -x : x;
+        return -Abs(x);
     }
 
     /// <summary>
@@ -217,12 +217,20 @@ namespace Fixed32
     }
 
     /// <summary>
+    /// Returns the value clamped between min and max.
+    /// </summary>
+    static FP_INT Clamp(FP_INT a, FP_INT min, FP_INT max)
+    {
+        return (a > max) ? max : (a < min) ? min : a;
+    }
+
+    /// <summary>
     /// Returns the sign of the value (-1 if negative, 0 if zero, 1 if positive).
     /// </summary>
     static FP_INT Sign(FP_INT x)
     {
-        if (x == 0) return 0;
-        return (x < 0) ? -1 : 1;
+        // https://stackoverflow.com/questions/14579920/fast-sign-of-integer-in-c/14612418#14612418
+        return ((x >> 31) | (FP_INT)(((FP_UINT)-x) >> 31));
     }
 
     /// <summary>
@@ -247,6 +255,16 @@ namespace Fixed32
     static FP_INT Mul(FP_INT a, FP_INT b)
     {
         return (FP_INT)(((FP_LONG)a * (FP_LONG)b) >> Shift);
+    }
+
+    /// <summary>
+    /// Linearly interpolate from a to b by t.
+    /// </summary>
+    static FP_INT Lerp(FP_INT a, FP_INT b, FP_INT t)
+    {
+        FP_LONG ta = (FP_LONG)a * (One - (FP_LONG)t);
+        FP_LONG tb = (FP_LONG)b * (FP_LONG)t;
+        return (FP_INT)((ta + tb) >> Shift);
     }
 
     static FP_INT Nlz(FP_UINT x)
@@ -353,7 +371,7 @@ namespace Fixed32
     {
         // Adapted from https://github.com/chmike/fpsqrt
         if (a < 0)
-            return -1;
+            return 0;
 
         FP_UINT r = (FP_UINT)a;
         FP_UINT b = 0x40000000;

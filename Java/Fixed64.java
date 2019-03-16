@@ -1,7 +1,7 @@
 //
 // FixPointCS
 //
-// Copyright(c) 2018 Jere Sanisalo, Petri Kero
+// Copyright(c) 2018-2019 Jere Sanisalo, Petri Kero
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -142,8 +142,8 @@ public class Fixed64
     public static long Abs(long x)
     {
         // \note fails with LONG_MIN
-        // \note for some reason this is twice as fast as (x > 0) ? x : -x
-        return (x < 0) ? -x : x;
+        long mask = x >> 63;
+        return (x + mask) ^ mask;
     }
 
     /// <summary>
@@ -151,7 +151,7 @@ public class Fixed64
     /// </summary>
     public static long Nabs(long x)
     {
-        return (x > 0) ? -x : x;
+        return -Abs(x);
     }
 
     /// <summary>
@@ -203,12 +203,20 @@ public class Fixed64
     }
 
     /// <summary>
+    /// Returns the value clamped between min and max.
+    /// </summary>
+    public static long Clamp(long a, long min, long max)
+    {
+        return (a > max) ? max : (a < min) ? min : a;
+    }
+
+    /// <summary>
     /// Returns the sign of the value (-1 if negative, 0 if zero, 1 if positive).
     /// </summary>
     public static int Sign(long x)
     {
-        if (x == 0) return 0;
-        return (x < 0) ? -1 : 1;
+        // https://stackoverflow.com/questions/14579920/fast-sign-of-integer-in-c/14612418#14612418
+        return (int)((x >> 63) | (long)(((ulong)-x) >> 63));
     }
 
     /// <summary>
@@ -253,6 +261,14 @@ public class Fixed64
         long bi = b >> Shift;
         long bf = b & FractionMask;
         return FixedUtil.LogicalShiftRight(a * bf, Shift) + a * bi;
+    }
+
+    /// <summary>
+    /// Linearly interpolate from a to b by t.
+    /// </summary>
+    public static long Lerp(long a, long b, long t)
+    {
+        return Mul(a, t) + Mul(b, One - t);
     }
 
     private static int Nlz(long x)
@@ -425,7 +441,7 @@ public class Fixed64
     {
         // Adapted from https://github.com/chmike/fpsqrt
         if (a < 0)
-            return -1;
+            return 0;
 
         long r = a;
         long b = 0x4000000000000000L;

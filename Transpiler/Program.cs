@@ -21,29 +21,27 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 //
-using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace Transpiler
 {
     class Program
     {
+        const string InputPath      = "../../../../FixPointCS";
+        const string CppOutputPath  = "../../../../Cpp";
+        const string JavaOutputPath = "../../../../Java";
+
         static void Main(string[] args)
         {
             // Generate C++ files
-            GenerateCpp.ConvertFile("../../../FixPointCS/FixedUtil.cs", "../../../Cpp/FixedUtil.h", GenerateCpp.Mode.Util);
-            GenerateCpp.ConvertFile("../../../FixPointCS/Fixed32.cs", "../../../Cpp/Fixed32.h", GenerateCpp.Mode.Fp32);
-            GenerateCpp.ConvertFile("../../../FixPointCS/Fixed64.cs", "../../../Cpp/Fixed64.h", GenerateCpp.Mode.Fp64);
+            GenerateCpp.ConvertFile(Path.Combine(InputPath, "FixedUtil.cs"), Path.Combine(CppOutputPath, "FixedUtil.h"), GenerateCpp.Mode.Util);
+            GenerateCpp.ConvertFile(Path.Combine(InputPath, "Fixed32.cs"),   Path.Combine(CppOutputPath, "Fixed32.h"), GenerateCpp.Mode.Fp32);
+            GenerateCpp.ConvertFile(Path.Combine(InputPath, "Fixed64.cs"),   Path.Combine(CppOutputPath, "Fixed64.h"), GenerateCpp.Mode.Fp64);
 
             // Generate Java files
-            GenerateJava.ConvertFile("../../../FixPointCS/FixedUtil.cs", "../../../Java/FixedUtil.java");
-            GenerateJava.ConvertFile("../../../FixPointCS/Fixed32.cs", "../../../Java/Fixed32.java");
-            GenerateJava.ConvertFile("../../../FixPointCS/Fixed64.cs", "../../../Java/Fixed64.java");
+            GenerateJava.ConvertFile(Path.Combine(InputPath, "FixedUtil.cs"), Path.Combine(JavaOutputPath, "FixedUtil.java"));
+            GenerateJava.ConvertFile(Path.Combine(InputPath, "Fixed32.cs"),   Path.Combine(JavaOutputPath, "Fixed32.java"));
+            GenerateJava.ConvertFile(Path.Combine(InputPath, "Fixed64.cs"),   Path.Combine(JavaOutputPath, "Fixed64.java"));
         }
     }
 }

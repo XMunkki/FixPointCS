@@ -1,7 +1,7 @@
 //
 // FixPointCS
 //
-// Copyright(c) 2018 Jere Sanisalo, Petri Kero
+// Copyright(c) 2018-2019 Jere Sanisalo, Petri Kero
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -155,8 +155,8 @@ namespace Fixed64
     static FP_LONG Abs(FP_LONG x)
     {
         // \note fails with LONG_MIN
-        // \note for some reason this is twice as fast as (x > 0) ? x : -x
-        return (x < 0) ? -x : x;
+        FP_LONG mask = x >> 63;
+        return (x + mask) ^ mask;
     }
 
     /// <summary>
@@ -164,7 +164,7 @@ namespace Fixed64
     /// </summary>
     static FP_LONG Nabs(FP_LONG x)
     {
-        return (x > 0) ? -x : x;
+        return -Abs(x);
     }
 
     /// <summary>
@@ -216,12 +216,20 @@ namespace Fixed64
     }
 
     /// <summary>
+    /// Returns the value clamped between min and max.
+    /// </summary>
+    static FP_LONG Clamp(FP_LONG a, FP_LONG min, FP_LONG max)
+    {
+        return (a > max) ? max : (a < min) ? min : a;
+    }
+
+    /// <summary>
     /// Returns the sign of the value (-1 if negative, 0 if zero, 1 if positive).
     /// </summary>
     static FP_INT Sign(FP_LONG x)
     {
-        if (x == 0) return 0;
-        return (x < 0) ? -1 : 1;
+        // https://stackoverflow.com/questions/14579920/fast-sign-of-integer-in-c/14612418#14612418
+        return (FP_INT)((x >> 63) | (FP_LONG)(((FP_ULONG)-x) >> 63));
     }
 
     /// <summary>
@@ -266,6 +274,14 @@ namespace Fixed64
         FP_LONG bi = b >> Shift;
         FP_LONG bf = b & FractionMask;
         return FixedUtil::LogicalShiftRight(a * bf, Shift) + a * bi;
+    }
+
+    /// <summary>
+    /// Linearly interpolate from a to b by t.
+    /// </summary>
+    static FP_LONG Lerp(FP_LONG a, FP_LONG b, FP_LONG t)
+    {
+        return Mul(a, t) + Mul(b, One - t);
     }
 
     static FP_INT Nlz(FP_ULONG x)
@@ -446,7 +462,7 @@ namespace Fixed64
     {
         // Adapted from https://github.com/chmike/fpsqrt
         if (a < 0)
-            return -1;
+            return 0;
 
         FP_ULONG r = (FP_ULONG)a;
         FP_ULONG b = INT64_C(0x4000000000000000);

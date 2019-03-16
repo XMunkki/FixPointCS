@@ -1,7 +1,7 @@
 //
 // FixPointCS
 //
-// Copyright(c) 2018 Jere Sanisalo, Petri Kero
+// Copyright(c) 2018-2019 Jere Sanisalo, Petri Kero
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -142,8 +142,8 @@ public class Fixed32
     public static int Abs(int x)
     {
         // \note fails with MinValue
-        // \note for some reason this is twice as fast as (x > 0) ? x : -x
-        return (x < 0) ? -x : x;
+        int mask = x >> 31;
+        return (x + mask) ^ mask;
     }
 
     /// <summary>
@@ -151,7 +151,7 @@ public class Fixed32
     /// </summary>
     public static int Nabs(int x)
     {
-        return (x > 0) ? -x : x;
+        return -Abs(x);
     }
 
     /// <summary>
@@ -203,12 +203,20 @@ public class Fixed32
     }
 
     /// <summary>
+    /// Returns the value clamped between min and max.
+    /// </summary>
+    public static int Clamp(int a, int min, int max)
+    {
+        return (a > max) ? max : (a < min) ? min : a;
+    }
+
+    /// <summary>
     /// Returns the sign of the value (-1 if negative, 0 if zero, 1 if positive).
     /// </summary>
     public static int Sign(int x)
     {
-        if (x == 0) return 0;
-        return (x < 0) ? -1 : 1;
+        // https://stackoverflow.com/questions/14579920/fast-sign-of-integer-in-c/14612418#14612418
+        return ((x >> 31) | (int)(((uint)-x) >> 31));
     }
 
     /// <summary>
@@ -233,6 +241,16 @@ public class Fixed32
     public static int Mul(int a, int b)
     {
         return (int)(((long)a * (long)b) >> Shift);
+    }
+
+    /// <summary>
+    /// Linearly interpolate from a to b by t.
+    /// </summary>
+    public static int Lerp(int a, int b, int t)
+    {
+        long ta = (long)a * (One - (long)t);
+        long tb = (long)b * (long)t;
+        return (int)((ta + tb) >> Shift);
     }
 
     private static int Nlz(int x)
@@ -332,7 +350,7 @@ public class Fixed32
     {
         // Adapted from https://github.com/chmike/fpsqrt
         if (a < 0)
-            return -1;
+            return 0;
 
         int r = a;
         int b = 0x40000000;
