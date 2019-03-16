@@ -1,4 +1,4 @@
-﻿//
+//
 // FixPointCS
 //
 // Copyright(c) 2018-2019 Jere Sanisalo, Petri Kero
@@ -425,7 +425,7 @@ namespace FixPointCS
         {
             // Adapted from https://github.com/chmike/fpsqrt
             if (a < 0)
-                return -1;
+                return 0;
 
 #if JAVA
             int r = a;
