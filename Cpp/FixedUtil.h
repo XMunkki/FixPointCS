@@ -41,6 +41,15 @@
 #   define FP_ASSERT(x) assert(x)
 #endif
 
+// If FP_CUSTOM_INVALID_ARGS is defined, then the used is expected to implement the following functions in
+// the FixedUtil namespace:
+//  void InvalidArgument(const char* funcName, const char* argName, FP_INT argValue);
+//  void InvalidArgument(const char* funcName, const char* argName, FP_INT argValue1, FP_INT argValue2);
+//	void InvalidArgument(const char* funcName, const char* argName, FP_LONG argValue);
+//	void InvalidArgument(const char* funcName, const char* argName, FP_LONG argValue1, FP_LONG argValue2);
+// These functions should handle the cases for invalid arguments in any desired way (assert, exception, log, ignore etc).
+//#define FP_CUSTOM_INVALID_ARGS
+
 namespace FixedUtil
 {
     typedef int32_t FP_INT;
@@ -53,9 +62,22 @@ namespace FixedUtil
     static_assert(sizeof(FP_LONG) == 8, "Wrong bytesize for FP_LONG");
     static_assert(sizeof(FP_ULONG) == 8, "Wrong bytesize for FP_ULONG");
 
+#ifdef FP_CUSTOM_INVALID_ARGS
+    extern void InvalidArgument(const char* funcName, const char* argName, FP_INT argValue);
+    extern void InvalidArgument(const char* funcName, const char* argName, FP_INT argValue1, FP_INT argValue2);
+    extern void InvalidArgument(const char* funcName, const char* argName, FP_LONG argValue);
+    extern void InvalidArgument(const char* funcName, const char* argName, FP_LONG argValue1, FP_LONG argValue2);
+#else
+    static inline void InvalidArgument(const char* funcName, const char* argName, FP_INT argValue) { }
+    static inline void InvalidArgument(const char* funcName, const char* argName, FP_INT argValue1, FP_INT argValue2) { }
+    static inline void InvalidArgument(const char* funcName, const char* argName, FP_LONG argValue) { }
+    static inline void InvalidArgument(const char* funcName, const char* argName, FP_LONG argValue1, FP_LONG argValue2) { }
+#endif
 
 
 
+
+    // InvalidArgument function defined in the transpiler generated header
 
     static FP_INT Qmul29(FP_INT a, FP_INT b)
     {

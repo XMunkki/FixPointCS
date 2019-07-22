@@ -64,11 +64,6 @@ public class Fixed64
     private static final long RCP_LOG2_E   = 2977044471L;  // 1.0 / log2(e) ~= 0.6931471805599453
     private static final int  RCP_HALF_PI  = 683565276; // 1.0 / (4.0 * 0.5 * Math.PI);  // the 4.0 factor converts directly to s2.30
 
-    public static void InvalidArgument(string funcName, string argName, long argValue)
-    {
-        throw new IllegalArgumentException(String.Format("Argument %s for %s() is invalid: %d", argName, funcName, argValue);
-    }
-
     /// <summary>
     /// Converts an integer to a fixed-point value.
     /// </summary>
@@ -221,7 +216,7 @@ public class Fixed64
     public static int Sign(long x)
     {
         // https://stackoverflow.com/questions/14579920/fast-sign-of-integer-in-c/14612418#14612418
-        return (int)((x >> 63) | (long)(((ulong)-x) >> 63));
+        return (int)((x >> 63) | (-x >>> 63));
     }
 
     /// <summary>
@@ -356,9 +351,9 @@ public class Fixed64
     /// </summary>
     public static long Div(long a, long b)
     {
-        if (b == MinValue)
+        if (b == MinValue || b == 0)
         {
-            InvalidArgument("Fixed64.Div", "b", b);
+            FixedUtil.InvalidArgument("Fixed64.Div", "b", b);
             return 0;
         }
 
@@ -385,9 +380,9 @@ public class Fixed64
     /// </summary>
     public static long DivFast(long a, long b)
     {
-        if (b == MinValue)
+        if (b == MinValue || b == 0)
         {
-            InvalidArgument("Fixed64.DivFast", "b", b);
+            FixedUtil.InvalidArgument("Fixed64.DivFast", "b", b);
             return 0;
         }
 
@@ -414,9 +409,9 @@ public class Fixed64
     /// </summary>
     public static long DivFastest(long a, long b)
     {
-        if (b == MinValue)
+        if (b == MinValue || b == 0)
         {
-            InvalidArgument("Fixed64.DivFastest", "b", b);
+            FixedUtil.InvalidArgument("Fixed64.DivFastest", "b", b);
             return 0;
         }
 
@@ -454,9 +449,10 @@ public class Fixed64
     public static long SqrtPrecise(long a)
     {
         // Adapted from https://github.com/chmike/fpsqrt
-        if (a < 0)
+        if (a <= 0)
         {
-            InvalidArgument("Fixed64.SqrtPrecise", "a", a);
+            if (a < 0)
+                FixedUtil.InvalidArgument("Fixed64.SqrtPrecise", "a", a);
             return 0;
         }
 
@@ -484,7 +480,7 @@ public class Fixed64
         if (x <= 0)
         {
             if (x < 0)
-                InvalidArgument("Fixed64.Sqrt", "x", x);
+                FixedUtil.InvalidArgument("Fixed64.Sqrt", "x", x);
             return 0;
         }
 
@@ -513,7 +509,7 @@ public class Fixed64
         if (x <= 0)
         {
             if (x < 0)
-                InvalidArgument("Fixed64.SqrtFast", "x", x);
+                FixedUtil.InvalidArgument("Fixed64.SqrtFast", "x", x);
             return 0;
         }
 
@@ -542,7 +538,7 @@ public class Fixed64
         if (x <= 0)
         {
             if (x < 0)
-                InvalidArgument("Fixed64.SqrtFastest", "x", x);
+                FixedUtil.InvalidArgument("Fixed64.SqrtFastest", "x", x);
             return 0;
         }
 
@@ -573,7 +569,7 @@ public class Fixed64
         // Return 0 for invalid values
         if (x <= 0)
         {
-            InvalidArgument("Fixed64.RSqrt", "x", x);
+            FixedUtil.InvalidArgument("Fixed64.RSqrt", "x", x);
             return 0;
         }
 
@@ -604,7 +600,7 @@ public class Fixed64
         // Return 0 for invalid values
         if (x <= 0)
         {
-            InvalidArgument("Fixed64.RSqrtFast", "x", x);
+            FixedUtil.InvalidArgument("Fixed64.RSqrtFast", "x", x);
             return 0;
         }
 
@@ -635,7 +631,7 @@ public class Fixed64
         // Return 0 for invalid values
         if (x <= 0)
         {
-            InvalidArgument("Fixed64.RSqrtFastest", "x", x);
+            FixedUtil.InvalidArgument("Fixed64.RSqrtFastest", "x", x);
             return 0;
         }
 
@@ -665,7 +661,7 @@ public class Fixed64
     {
         if (x == MinValue || x == 0)
         {
-            InvalidArgument("Fixed64.Rcp", "x", x);
+            FixedUtil.InvalidArgument("Fixed64.Rcp", "x", x);
             return 0;
         }
 
@@ -694,7 +690,7 @@ public class Fixed64
     {
         if (x == MinValue || x == 0)
         {
-            InvalidArgument("Fixed64.Rcp", "x", x);
+            FixedUtil.InvalidArgument("Fixed64.RcpFast", "x", x);
             return 0;
         }
 
@@ -723,7 +719,7 @@ public class Fixed64
     {
         if (x == MinValue || x == 0)
         {
-            InvalidArgument("Fixed64.Rcp", "x", x);
+            FixedUtil.InvalidArgument("Fixed64.RcpFastest", "x", x);
             return 0;
         }
 
@@ -822,7 +818,10 @@ public class Fixed64
     {
         // Return 0 for invalid values
         if (x <= 0)
+        {
+            FixedUtil.InvalidArgument("Fixed64.Log", "x", x);
             return 0;
+        }
 
         // Normalize value to range [1.0, 2.0( as s2.30 and extract exponent.
         final int ONE = (1 << 30);
@@ -839,7 +838,10 @@ public class Fixed64
     {
         // Return 0 for invalid values
         if (x <= 0)
+        {
+            FixedUtil.InvalidArgument("Fixed64.LogFast", "x", x);
             return 0;
+        }
 
         // Normalize value to range [1.0, 2.0( as s2.30 and extract exponent.
         final int ONE = (1 << 30);
@@ -856,7 +858,10 @@ public class Fixed64
     {
         // Return 0 for invalid values
         if (x <= 0)
+        {
+            FixedUtil.InvalidArgument("Fixed64.LogFastest", "x", x);
             return 0;
+        }
 
         // Normalize value to range [1.0, 2.0( as s2.30 and extract exponent.
         final int ONE = (1 << 30);
@@ -873,7 +878,10 @@ public class Fixed64
     {
         // Return 0 for invalid values
         if (x <= 0)
+        {
+            FixedUtil.InvalidArgument("Fixed64.Log2", "x", x);
             return 0;
+        }
 
         // Normalize value to range [1.0, 2.0( as s2.30 and extract exponent.
         int offset = 31 - Nlz(x);
@@ -892,7 +900,10 @@ public class Fixed64
     {
         // Return 0 for invalid values
         if (x <= 0)
+        {
+            FixedUtil.InvalidArgument("Fixed64.Log2Fast", "x", x);
             return 0;
+        }
 
         // Normalize value to range [1.0, 2.0( as s2.30 and extract exponent.
         int offset = 31 - Nlz(x);
@@ -911,7 +922,10 @@ public class Fixed64
     {
         // Return 0 for invalid values
         if (x <= 0)
+        {
+            FixedUtil.InvalidArgument("Fixed64.Log2Fastest", "x", x);
             return 0;
+        }
 
         // Normalize value to range [1.0, 2.0( as s2.30 and extract exponent.
         int offset = 31 - Nlz(x);
@@ -933,7 +947,11 @@ public class Fixed64
     {
         // Return 0 for invalid values
         if (x <= 0)
+        {
+            if (x < 0)
+                FixedUtil.InvalidArgument("Fixed64.Pow", "x", x);
             return 0;
+        }
 
         return Exp(Mul(exponent, Log(x)));
     }
@@ -945,7 +963,11 @@ public class Fixed64
     {
         // Return 0 for invalid values
         if (x <= 0)
+        {
+            if (x < 0)
+                FixedUtil.InvalidArgument("Fixed64.PowFast", "x", x);
             return 0;
+        }
 
         return ExpFast(Mul(exponent, LogFast(x)));
     }
@@ -957,7 +979,11 @@ public class Fixed64
     {
         // Return 0 for invalid values
         if (x <= 0)
+        {
+            if (x < 0)
+                FixedUtil.InvalidArgument("Fixed64.PowFastest", "x", x);
             return 0;
+        }
 
         return ExpFastest(Mul(exponent, LogFastest(x)));
     }
@@ -1260,7 +1286,10 @@ public class Fixed64
     {
         // Return 0 for invalid values
         if (x < -One || x > One)
+        {
+            FixedUtil.InvalidArgument("Fixed64.Asin", "x", x);
             return 0;
+        }
 
         return Atan2(x, Sqrt(Mul(One + x, One - x)));
     }
@@ -1269,7 +1298,10 @@ public class Fixed64
     {
         // Return 0 for invalid values
         if (x < -One || x > One)
+        {
+            FixedUtil.InvalidArgument("Fixed64.AsinFast", "x", x);
             return 0;
+        }
 
         return Atan2Fast(x, SqrtFast(Mul(One + x, One - x)));
     }
@@ -1278,7 +1310,10 @@ public class Fixed64
     {
         // Return 0 for invalid values
         if (x < -One || x > One)
+        {
+            FixedUtil.InvalidArgument("Fixed64.AsinFastest", "x", x);
             return 0;
+        }
 
         return Atan2Fastest(x, SqrtFastest(Mul(One + x, One - x)));
     }
@@ -1287,7 +1322,10 @@ public class Fixed64
     {
         // Return 0 for invalid values
         if (x < -One || x > One)
+        {
+            FixedUtil.InvalidArgument("Fixed64.Acos", "x", x);
             return 0;
+        }
 
         return Atan2(Sqrt(Mul(One + x, One - x)), x);
     }
@@ -1296,7 +1334,10 @@ public class Fixed64
     {
         // Return 0 for invalid values
         if (x < -One || x > One)
+        {
+            FixedUtil.InvalidArgument("Fixed64.AcosFast", "x", x);
             return 0;
+        }
 
         return Atan2Fast(SqrtFast(Mul(One + x, One - x)), x);
     }
@@ -1305,7 +1346,10 @@ public class Fixed64
     {
         // Return 0 for invalid values
         if (x < -One || x > One)
+        {
+            FixedUtil.InvalidArgument("Fixed64.AcosFastest", "x", x);
             return 0;
+        }
 
         return Atan2Fastest(SqrtFastest(Mul(One + x, One - x)), x);
     }
