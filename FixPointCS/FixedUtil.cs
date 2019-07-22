@@ -73,6 +73,18 @@ namespace FixPointCS
 #if !TRANSPILE
         // Backwards compatible way to use MethodImplOptions.AggressiveInlining
         public const MethodImplOptions AggressiveInlining = (MethodImplOptions)256;
+
+        /// <summary>
+        /// Action which is invoked when an invalid s16.16 fixed point value is given to a function.
+        /// Intended to be replaced if custom handling for invalid inputs is desired.
+        /// </summary>
+        public static Action<string, string, int> InvalidArgumentHandler32 = (string funcName, string argName, int argValue) => throw new ArgumentException($"Invalid argument {funcName}(): {argValue}", argName);
+
+        /// <summary>
+        /// Action which is invoked when an invalid s32.32 fixed point value is given to a function.
+        /// Intended to be replaced if custom handling for invalid inputs is desired.
+        /// </summary>
+        public static Action<string, string, long> InvalidArgumentHandler64 = (string funcName, string argName, long argValue) => throw new ArgumentException($"Invalid argument {funcName}(): {argValue}", argName);
 #endif
 
         [MethodImpl(AggressiveInlining)]

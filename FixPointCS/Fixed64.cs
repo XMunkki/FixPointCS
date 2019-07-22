@@ -94,6 +94,25 @@ namespace FixPointCS
         private const long RCP_LOG2_E   = 2977044471L;  // 1.0 / log2(e) ~= 0.6931471805599453
         private const int  RCP_HALF_PI  = 683565276; // 1.0 / (4.0 * 0.5 * Math.PI);  // the 4.0 factor converts directly to s2.30
 
+#if CPP
+        public static void InvalidArgument(const char* funcName, const char* argName, long argValue)
+        {
+            char reason[128];
+            sprintf(reason, "Invalid argument %s for %s(): %" PRId64, argName, funcName, argValue);
+            throw std::invalid_argument(reason);
+        }
+#elif JAVA
+        public static void InvalidArgument(string funcName, string argName, long argValue)
+        {
+            throw new IllegalArgumentException(String.Format("Argument %s for %s() is invalid: %d", argName, funcName, argValue);
+        }
+#else
+        public static void InvalidArgument(string funcName, string argName, long argValue)
+        {
+            FixedUtil.InvalidArgumentHandler64.Invoke(funcName, argName, argValue);
+        }
+#endif
+
         /// <summary>
         /// Converts an integer to a fixed-point value.
         /// </summary>
@@ -494,7 +513,10 @@ namespace FixPointCS
         public static long Div(long a, long b)
         {
             if (b == MinValue)
+            {
+                InvalidArgument("Fixed64.Div", "b", b);
                 return 0;
+            }
 
             // Handle negative values.
             int sign = (b < 0) ? -1 : 1;
@@ -520,7 +542,10 @@ namespace FixPointCS
         public static long DivFast(long a, long b)
         {
             if (b == MinValue)
+            {
+                InvalidArgument("Fixed64.DivFast", "b", b);
                 return 0;
+            }
 
             // Handle negative values.
             int sign = (b < 0) ? -1 : 1;
@@ -546,7 +571,10 @@ namespace FixPointCS
         public static long DivFastest(long a, long b)
         {
             if (b == MinValue)
+            {
+                InvalidArgument("Fixed64.DivFastest", "b", b);
                 return 0;
+            }
 
             // Handle negative values.
             int sign = (b < 0) ? -1 : 1;
@@ -583,7 +611,10 @@ namespace FixPointCS
         {
             // Adapted from https://github.com/chmike/fpsqrt
             if (a < 0)
+            {
+                InvalidArgument("Fixed64.SqrtPrecise", "a", a);
                 return 0;
+            }
 
 #if JAVA
             long r = a;
@@ -626,7 +657,11 @@ namespace FixPointCS
         {
             // Return 0 for all non-positive values.
             if (x <= 0)
+            {
+                if (x < 0)
+                    InvalidArgument("Fixed64.Sqrt", "x", x);
                 return 0;
+            }
 
             // Constants (s2.30).
             const int ONE = (1 << 30);
@@ -651,7 +686,11 @@ namespace FixPointCS
         {
             // Return 0 for all non-positive values.
             if (x <= 0)
+            {
+                if (x < 0)
+                    InvalidArgument("Fixed64.SqrtFast", "x", x);
                 return 0;
+            }
 
             // Constants (s2.30).
             const int ONE = (1 << 30);
@@ -676,7 +715,11 @@ namespace FixPointCS
         {
             // Return 0 for all non-positive values.
             if (x <= 0)
+            {
+                if (x < 0)
+                    InvalidArgument("Fixed64.SqrtFastest", "x", x);
                 return 0;
+            }
 
             // Constants (s2.30).
             const int ONE = (1 << 30);
@@ -704,7 +747,10 @@ namespace FixPointCS
         {
             // Return 0 for invalid values
             if (x <= 0)
+            {
+                InvalidArgument("Fixed64.RSqrt", "x", x);
                 return 0;
+            }
 
             // Constants (s2.30).
             const int ONE = (1 << 30);
@@ -732,7 +778,10 @@ namespace FixPointCS
         {
             // Return 0 for invalid values
             if (x <= 0)
+            {
+                InvalidArgument("Fixed64.RSqrtFast", "x", x);
                 return 0;
+            }
 
             // Constants (s2.30).
             const int ONE = (1 << 30);
@@ -760,7 +809,10 @@ namespace FixPointCS
         {
             // Return 0 for invalid values
             if (x <= 0)
+            {
+                InvalidArgument("Fixed64.RSqrtFastest", "x", x);
                 return 0;
+            }
 
             // Constants (s2.30).
             const int ONE = (1 << 30);
@@ -787,7 +839,10 @@ namespace FixPointCS
         public static long Rcp(long x)
         {
             if (x == MinValue || x == 0)
+            {
+                InvalidArgument("Fixed64.Rcp", "x", x);
                 return 0;
+            }
 
             // Handle negative values.
             int sign = (x < 0) ? -1 : 1;
@@ -813,7 +868,10 @@ namespace FixPointCS
         public static long RcpFast(long x)
         {
             if (x == MinValue || x == 0)
+            {
+                InvalidArgument("Fixed64.Rcp", "x", x);
                 return 0;
+            }
 
             // Handle negative values.
             int sign = (x < 0) ? -1 : 1;
@@ -839,7 +897,10 @@ namespace FixPointCS
         public static long RcpFastest(long x)
         {
             if (x == MinValue || x == 0)
+            {
+                InvalidArgument("Fixed64.Rcp", "x", x);
                 return 0;
+            }
 
             // Handle negative values.
             int sign = (x < 0) ? -1 : 1;
