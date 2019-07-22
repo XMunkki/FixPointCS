@@ -64,6 +64,11 @@ public class Fixed64
     private static final long RCP_LOG2_E   = 2977044471L;  // 1.0 / log2(e) ~= 0.6931471805599453
     private static final int  RCP_HALF_PI  = 683565276; // 1.0 / (4.0 * 0.5 * Math.PI);  // the 4.0 factor converts directly to s2.30
 
+    public static void InvalidArgument(string funcName, string argName, long argValue)
+    {
+        throw new IllegalArgumentException(String.Format("Argument %s for %s() is invalid: %d", argName, funcName, argValue);
+    }
+
     /// <summary>
     /// Converts an integer to a fixed-point value.
     /// </summary>
@@ -352,7 +357,10 @@ public class Fixed64
     public static long Div(long a, long b)
     {
         if (b == MinValue)
+        {
+            InvalidArgument("Fixed64.Div", "b", b);
             return 0;
+        }
 
         // Handle negative values.
         int sign = (b < 0) ? -1 : 1;
@@ -378,7 +386,10 @@ public class Fixed64
     public static long DivFast(long a, long b)
     {
         if (b == MinValue)
+        {
+            InvalidArgument("Fixed64.DivFast", "b", b);
             return 0;
+        }
 
         // Handle negative values.
         int sign = (b < 0) ? -1 : 1;
@@ -404,7 +415,10 @@ public class Fixed64
     public static long DivFastest(long a, long b)
     {
         if (b == MinValue)
+        {
+            InvalidArgument("Fixed64.DivFastest", "b", b);
             return 0;
+        }
 
         // Handle negative values.
         int sign = (b < 0) ? -1 : 1;
@@ -441,7 +455,10 @@ public class Fixed64
     {
         // Adapted from https://github.com/chmike/fpsqrt
         if (a < 0)
+        {
+            InvalidArgument("Fixed64.SqrtPrecise", "a", a);
             return 0;
+        }
 
         long r = a;
         long b = 0x4000000000000000L;
@@ -465,7 +482,11 @@ public class Fixed64
     {
         // Return 0 for all non-positive values.
         if (x <= 0)
+        {
+            if (x < 0)
+                InvalidArgument("Fixed64.Sqrt", "x", x);
             return 0;
+        }
 
         // Constants (s2.30).
         final int ONE = (1 << 30);
@@ -490,7 +511,11 @@ public class Fixed64
     {
         // Return 0 for all non-positive values.
         if (x <= 0)
+        {
+            if (x < 0)
+                InvalidArgument("Fixed64.SqrtFast", "x", x);
             return 0;
+        }
 
         // Constants (s2.30).
         final int ONE = (1 << 30);
@@ -515,7 +540,11 @@ public class Fixed64
     {
         // Return 0 for all non-positive values.
         if (x <= 0)
+        {
+            if (x < 0)
+                InvalidArgument("Fixed64.SqrtFastest", "x", x);
             return 0;
+        }
 
         // Constants (s2.30).
         final int ONE = (1 << 30);
@@ -543,7 +572,10 @@ public class Fixed64
     {
         // Return 0 for invalid values
         if (x <= 0)
+        {
+            InvalidArgument("Fixed64.RSqrt", "x", x);
             return 0;
+        }
 
         // Constants (s2.30).
         final int ONE = (1 << 30);
@@ -571,7 +603,10 @@ public class Fixed64
     {
         // Return 0 for invalid values
         if (x <= 0)
+        {
+            InvalidArgument("Fixed64.RSqrtFast", "x", x);
             return 0;
+        }
 
         // Constants (s2.30).
         final int ONE = (1 << 30);
@@ -599,7 +634,10 @@ public class Fixed64
     {
         // Return 0 for invalid values
         if (x <= 0)
+        {
+            InvalidArgument("Fixed64.RSqrtFastest", "x", x);
             return 0;
+        }
 
         // Constants (s2.30).
         final int ONE = (1 << 30);
@@ -626,7 +664,10 @@ public class Fixed64
     public static long Rcp(long x)
     {
         if (x == MinValue || x == 0)
+        {
+            InvalidArgument("Fixed64.Rcp", "x", x);
             return 0;
+        }
 
         // Handle negative values.
         int sign = (x < 0) ? -1 : 1;
@@ -652,7 +693,10 @@ public class Fixed64
     public static long RcpFast(long x)
     {
         if (x == MinValue || x == 0)
+        {
+            InvalidArgument("Fixed64.Rcp", "x", x);
             return 0;
+        }
 
         // Handle negative values.
         int sign = (x < 0) ? -1 : 1;
@@ -678,7 +722,10 @@ public class Fixed64
     public static long RcpFastest(long x)
     {
         if (x == MinValue || x == 0)
+        {
+            InvalidArgument("Fixed64.Rcp", "x", x);
             return 0;
+        }
 
         // Handle negative values.
         int sign = (x < 0) ? -1 : 1;

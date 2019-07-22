@@ -81,6 +81,13 @@ namespace Fixed64
     static const FP_LONG RCP_LOG2_E   = INT64_C(2977044471);  // 1.0 / log2(e) ~= 0.6931471805599453
     static const FP_INT  RCP_HALF_PI  = 683565276; // 1.0 / (4.0 * 0.5 * Math.PI);  // the 4.0 factor converts directly to s2.30
 
+    static void InvalidArgument(static const char* funcName, static const char* argName, FP_LONG argValue)
+    {
+        char reason[128];
+        sprintf(reason, "Invalid argument %s for %s(): %" PRId64, argName, funcName, argValue);
+        throw std::invalid_argument(reason);
+    }
+
     /// <summary>
     /// Converts an integer to a fixed-point value.
     /// </summary>
@@ -373,7 +380,10 @@ namespace Fixed64
     static FP_LONG Div(FP_LONG a, FP_LONG b)
     {
         if (b == MinValue)
+        {
+            InvalidArgument("Fixed64::Div", "b", b);
             return 0;
+        }
 
         // Handle negative values.
         FP_INT sign = (b < 0) ? -1 : 1;
@@ -399,7 +409,10 @@ namespace Fixed64
     static FP_LONG DivFast(FP_LONG a, FP_LONG b)
     {
         if (b == MinValue)
+        {
+            InvalidArgument("Fixed64::DivFast", "b", b);
             return 0;
+        }
 
         // Handle negative values.
         FP_INT sign = (b < 0) ? -1 : 1;
@@ -425,7 +438,10 @@ namespace Fixed64
     static FP_LONG DivFastest(FP_LONG a, FP_LONG b)
     {
         if (b == MinValue)
+        {
+            InvalidArgument("Fixed64::DivFastest", "b", b);
             return 0;
+        }
 
         // Handle negative values.
         FP_INT sign = (b < 0) ? -1 : 1;
@@ -462,7 +478,10 @@ namespace Fixed64
     {
         // Adapted from https://github.com/chmike/fpsqrt
         if (a < 0)
+        {
+            InvalidArgument("Fixed64::SqrtPrecise", "a", a);
             return 0;
+        }
 
         FP_ULONG r = (FP_ULONG)a;
         FP_ULONG b = INT64_C(0x4000000000000000);
@@ -486,7 +505,11 @@ namespace Fixed64
     {
         // Return 0 for all non-positive values.
         if (x <= 0)
+        {
+            if (x < 0)
+                InvalidArgument("Fixed64::Sqrt", "x", x);
             return 0;
+        }
 
         // Constants (s2.30).
         static const FP_INT ONE = (1 << 30);
@@ -511,7 +534,11 @@ namespace Fixed64
     {
         // Return 0 for all non-positive values.
         if (x <= 0)
+        {
+            if (x < 0)
+                InvalidArgument("Fixed64::SqrtFast", "x", x);
             return 0;
+        }
 
         // Constants (s2.30).
         static const FP_INT ONE = (1 << 30);
@@ -536,7 +563,11 @@ namespace Fixed64
     {
         // Return 0 for all non-positive values.
         if (x <= 0)
+        {
+            if (x < 0)
+                InvalidArgument("Fixed64::SqrtFastest", "x", x);
             return 0;
+        }
 
         // Constants (s2.30).
         static const FP_INT ONE = (1 << 30);
@@ -564,7 +595,10 @@ namespace Fixed64
     {
         // Return 0 for invalid values
         if (x <= 0)
+        {
+            InvalidArgument("Fixed64::RSqrt", "x", x);
             return 0;
+        }
 
         // Constants (s2.30).
         static const FP_INT ONE = (1 << 30);
@@ -592,7 +626,10 @@ namespace Fixed64
     {
         // Return 0 for invalid values
         if (x <= 0)
+        {
+            InvalidArgument("Fixed64::RSqrtFast", "x", x);
             return 0;
+        }
 
         // Constants (s2.30).
         static const FP_INT ONE = (1 << 30);
@@ -620,7 +657,10 @@ namespace Fixed64
     {
         // Return 0 for invalid values
         if (x <= 0)
+        {
+            InvalidArgument("Fixed64::RSqrtFastest", "x", x);
             return 0;
+        }
 
         // Constants (s2.30).
         static const FP_INT ONE = (1 << 30);
@@ -647,7 +687,10 @@ namespace Fixed64
     static FP_LONG Rcp(FP_LONG x)
     {
         if (x == MinValue || x == 0)
+        {
+            InvalidArgument("Fixed64::Rcp", "x", x);
             return 0;
+        }
 
         // Handle negative values.
         FP_INT sign = (x < 0) ? -1 : 1;
@@ -673,7 +716,10 @@ namespace Fixed64
     static FP_LONG RcpFast(FP_LONG x)
     {
         if (x == MinValue || x == 0)
+        {
+            InvalidArgument("Fixed64::Rcp", "x", x);
             return 0;
+        }
 
         // Handle negative values.
         FP_INT sign = (x < 0) ? -1 : 1;
@@ -699,7 +745,10 @@ namespace Fixed64
     static FP_LONG RcpFastest(FP_LONG x)
     {
         if (x == MinValue || x == 0)
+        {
+            InvalidArgument("Fixed64::Rcp", "x", x);
             return 0;
+        }
 
         // Handle negative values.
         FP_INT sign = (x < 0) ? -1 : 1;
