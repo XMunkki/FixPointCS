@@ -94,20 +94,6 @@ namespace FixPointCS
         private const long RCP_LOG2_E   = 2977044471L;  // 1.0 / log2(e) ~= 0.6931471805599453
         private const int  RCP_HALF_PI  = 683565276; // 1.0 / (4.0 * 0.5 * Math.PI);  // the 4.0 factor converts directly to s2.30
 
-#if CPP
-        // InvalidArgument function defined in the transpiler generated header
-#elif JAVA
-        public static void InvalidArgument(string funcName, string argName, long argValue)
-        {
-            throw new IllegalArgumentException(String.Format("Argument %s for %s() is invalid: %d", argName, funcName, argValue);
-        }
-#else
-        public static void InvalidArgument(string funcName, string argName, long argValue)
-        {
-            FixedUtil.InvalidArgumentHandler64.Invoke(funcName, argName, argValue);
-        }
-#endif
-
         /// <summary>
         /// Converts an integer to a fixed-point value.
         /// </summary>
@@ -509,7 +495,7 @@ namespace FixPointCS
         {
             if (b == MinValue || b == 0)
             {
-                InvalidArgument("Fixed64.Div", "b", b);
+                FixedUtil.InvalidArgument("Fixed64.Div", "b", b);
                 return 0;
             }
 
@@ -538,7 +524,7 @@ namespace FixPointCS
         {
             if (b == MinValue || b == 0)
             {
-                InvalidArgument("Fixed64.DivFast", "b", b);
+                FixedUtil.InvalidArgument("Fixed64.DivFast", "b", b);
                 return 0;
             }
 
@@ -567,7 +553,7 @@ namespace FixPointCS
         {
             if (b == MinValue || b == 0)
             {
-                InvalidArgument("Fixed64.DivFastest", "b", b);
+                FixedUtil.InvalidArgument("Fixed64.DivFastest", "b", b);
                 return 0;
             }
 
@@ -608,7 +594,7 @@ namespace FixPointCS
             if (a <= 0)
             {
                 if (a < 0)
-                    InvalidArgument("Fixed64.SqrtPrecise", "a", a);
+                    FixedUtil.InvalidArgument("Fixed64.SqrtPrecise", "a", a);
                 return 0;
             }
 
@@ -655,7 +641,7 @@ namespace FixPointCS
             if (x <= 0)
             {
                 if (x < 0)
-                    InvalidArgument("Fixed64.Sqrt", "x", x);
+                    FixedUtil.InvalidArgument("Fixed64.Sqrt", "x", x);
                 return 0;
             }
 
@@ -684,7 +670,7 @@ namespace FixPointCS
             if (x <= 0)
             {
                 if (x < 0)
-                    InvalidArgument("Fixed64.SqrtFast", "x", x);
+                    FixedUtil.InvalidArgument("Fixed64.SqrtFast", "x", x);
                 return 0;
             }
 
@@ -713,7 +699,7 @@ namespace FixPointCS
             if (x <= 0)
             {
                 if (x < 0)
-                    InvalidArgument("Fixed64.SqrtFastest", "x", x);
+                    FixedUtil.InvalidArgument("Fixed64.SqrtFastest", "x", x);
                 return 0;
             }
 
@@ -744,7 +730,7 @@ namespace FixPointCS
             // Return 0 for invalid values
             if (x <= 0)
             {
-                InvalidArgument("Fixed64.RSqrt", "x", x);
+                FixedUtil.InvalidArgument("Fixed64.RSqrt", "x", x);
                 return 0;
             }
 
@@ -775,7 +761,7 @@ namespace FixPointCS
             // Return 0 for invalid values
             if (x <= 0)
             {
-                InvalidArgument("Fixed64.RSqrtFast", "x", x);
+                FixedUtil.InvalidArgument("Fixed64.RSqrtFast", "x", x);
                 return 0;
             }
 
@@ -806,7 +792,7 @@ namespace FixPointCS
             // Return 0 for invalid values
             if (x <= 0)
             {
-                InvalidArgument("Fixed64.RSqrtFastest", "x", x);
+                FixedUtil.InvalidArgument("Fixed64.RSqrtFastest", "x", x);
                 return 0;
             }
 
@@ -836,7 +822,7 @@ namespace FixPointCS
         {
             if (x == MinValue || x == 0)
             {
-                InvalidArgument("Fixed64.Rcp", "x", x);
+                FixedUtil.InvalidArgument("Fixed64.Rcp", "x", x);
                 return 0;
             }
 
@@ -865,7 +851,7 @@ namespace FixPointCS
         {
             if (x == MinValue || x == 0)
             {
-                InvalidArgument("Fixed64.RcpFast", "x", x);
+                FixedUtil.InvalidArgument("Fixed64.RcpFast", "x", x);
                 return 0;
             }
 
@@ -894,7 +880,7 @@ namespace FixPointCS
         {
             if (x == MinValue || x == 0)
             {
-                InvalidArgument("Fixed64.RcpFastest", "x", x);
+                FixedUtil.InvalidArgument("Fixed64.RcpFastest", "x", x);
                 return 0;
             }
 
@@ -994,7 +980,7 @@ namespace FixPointCS
             // Return 0 for invalid values
             if (x <= 0)
             {
-                InvalidArgument("Fixed64.Log", "x", x);
+                FixedUtil.InvalidArgument("Fixed64.Log", "x", x);
                 return 0;
             }
 
@@ -1014,7 +1000,7 @@ namespace FixPointCS
             // Return 0 for invalid values
             if (x <= 0)
             {
-                InvalidArgument("Fixed64.LogFast", "x", x);
+                FixedUtil.InvalidArgument("Fixed64.LogFast", "x", x);
                 return 0;
             }
 
@@ -1034,7 +1020,7 @@ namespace FixPointCS
             // Return 0 for invalid values
             if (x <= 0)
             {
-                InvalidArgument("Fixed64.LogFastest", "x", x);
+                FixedUtil.InvalidArgument("Fixed64.LogFastest", "x", x);
                 return 0;
             }
 
@@ -1054,7 +1040,7 @@ namespace FixPointCS
             // Return 0 for invalid values
             if (x <= 0)
             {
-                InvalidArgument("Fixed64.Log2", "x", x);
+                FixedUtil.InvalidArgument("Fixed64.Log2", "x", x);
                 return 0;
             }
 
@@ -1076,7 +1062,7 @@ namespace FixPointCS
             // Return 0 for invalid values
             if (x <= 0)
             {
-                InvalidArgument("Fixed64.Log2Fast", "x", x);
+                FixedUtil.InvalidArgument("Fixed64.Log2Fast", "x", x);
                 return 0;
             }
 
@@ -1098,7 +1084,7 @@ namespace FixPointCS
             // Return 0 for invalid values
             if (x <= 0)
             {
-                InvalidArgument("Fixed64.Log2Fastest", "x", x);
+                FixedUtil.InvalidArgument("Fixed64.Log2Fastest", "x", x);
                 return 0;
             }
 
@@ -1124,7 +1110,7 @@ namespace FixPointCS
             if (x <= 0)
             {
                 if (x < 0)
-                    InvalidArgument("Fixed64.Pow", "x", x);
+                    FixedUtil.InvalidArgument("Fixed64.Pow", "x", x);
                 return 0;
             }
 
@@ -1140,7 +1126,7 @@ namespace FixPointCS
             if (x <= 0)
             {
                 if (x < 0)
-                    InvalidArgument("Fixed64.PowFast", "x", x);
+                    FixedUtil.InvalidArgument("Fixed64.PowFast", "x", x);
                 return 0;
             }
 
@@ -1156,7 +1142,7 @@ namespace FixPointCS
             if (x <= 0)
             {
                 if (x < 0)
-                    InvalidArgument("Fixed64.PowFastest", "x", x);
+                    FixedUtil.InvalidArgument("Fixed64.PowFastest", "x", x);
                 return 0;
             }
 
@@ -1468,7 +1454,7 @@ namespace FixPointCS
             // Return 0 for invalid values
             if (x < -One || x > One)
             {
-                InvalidArgument("Fixed64.Asin", "x", x);
+                FixedUtil.InvalidArgument("Fixed64.Asin", "x", x);
                 return 0;
             }
 
@@ -1480,7 +1466,7 @@ namespace FixPointCS
             // Return 0 for invalid values
             if (x < -One || x > One)
             {
-                InvalidArgument("Fixed64.AsinFast", "x", x);
+                FixedUtil.InvalidArgument("Fixed64.AsinFast", "x", x);
                 return 0;
             }
 
@@ -1492,7 +1478,7 @@ namespace FixPointCS
             // Return 0 for invalid values
             if (x < -One || x > One)
             {
-                InvalidArgument("Fixed64.AsinFastest", "x", x);
+                FixedUtil.InvalidArgument("Fixed64.AsinFastest", "x", x);
                 return 0;
             }
 
@@ -1504,7 +1490,7 @@ namespace FixPointCS
             // Return 0 for invalid values
             if (x < -One || x > One)
             {
-                InvalidArgument("Fixed64.Acos", "x", x);
+                FixedUtil.InvalidArgument("Fixed64.Acos", "x", x);
                 return 0;
             }
 
@@ -1516,7 +1502,7 @@ namespace FixPointCS
             // Return 0 for invalid values
             if (x < -One || x > One)
             {
-                InvalidArgument("Fixed64.AcosFast", "x", x);
+                FixedUtil.InvalidArgument("Fixed64.AcosFast", "x", x);
                 return 0;
             }
 
@@ -1528,7 +1514,7 @@ namespace FixPointCS
             // Return 0 for invalid values
             if (x < -One || x > One)
             {
-                InvalidArgument("Fixed64.AcosFastest", "x", x);
+                FixedUtil.InvalidArgument("Fixed64.AcosFastest", "x", x);
                 return 0;
             }
 

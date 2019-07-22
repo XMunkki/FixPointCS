@@ -70,7 +70,19 @@ namespace FixPointCS
     {
 #endif
 
-#if !TRANSPILE
+#if CPP
+        // InvalidArgument function defined in the transpiler generated header
+#elif JAVA
+        public static void InvalidArgument(string funcName, string argName, int argValue)
+        {
+            throw new IllegalArgumentException(String.Format("Argument %s for %s() is invalid: %d", argName, funcName, argValue);
+        }
+
+        public static void InvalidArgument(string funcName, string argName, long argValue)
+        {
+            throw new IllegalArgumentException(String.Format("Argument %s for %s() is invalid: %d", argName, funcName, argValue);
+        }
+#else
         // Backwards compatible way to use MethodImplOptions.AggressiveInlining
         public const MethodImplOptions AggressiveInlining = (MethodImplOptions)256;
 
@@ -85,6 +97,16 @@ namespace FixPointCS
         /// Intended to be replaced if custom handling for invalid inputs is desired.
         /// </summary>
         public static Action<string, string, long> InvalidArgumentHandler64 = (string funcName, string argName, long argValue) => throw new ArgumentException($"Invalid argument {funcName}(): {argValue}", argName);
+
+        public static void InvalidArgument(string funcName, string argName, int argValue)
+        {
+            InvalidArgumentHandler32.Invoke(funcName, argName, argValue);
+        }
+
+        public static void InvalidArgument(string funcName, string argName, long argValue)
+        {
+            InvalidArgumentHandler64.Invoke(funcName, argName, argValue);
+        }
 #endif
 
         [MethodImpl(AggressiveInlining)]
