@@ -95,12 +95,7 @@ namespace FixPointCS
         private const int  RCP_HALF_PI  = 683565276; // 1.0 / (4.0 * 0.5 * Math.PI);  // the 4.0 factor converts directly to s2.30
 
 #if CPP
-        public static void InvalidArgument(const char* funcName, const char* argName, long argValue)
-        {
-            char reason[128];
-            sprintf(reason, "Invalid argument %s for %s(): %" PRId64, argName, funcName, argValue);
-            throw std::invalid_argument(reason);
-        }
+        // InvalidArgument function defined in the transpiler generated header
 #elif JAVA
         public static void InvalidArgument(string funcName, string argName, long argValue)
         {

@@ -154,6 +154,18 @@ namespace Transpiler
 #   define FP_ASSERT(x) assert(x)
 #endif
 
+// If FP_NO_INVALID_ARGS is defined, then invalid arguments will not be reported (some default value will be returned).
+//#define FP_NO_INVALID_ARGS
+// If FP_CUSTOM_INVALID_ARGS is defined, then the used is expected to implement the following functions in
+// the Fixed{desc} namespace:
+//   
+//#define FP_CUSTOM_INVALID_ARGS
+
+// Include some optional headers (depending on chosen options)
+#if !defined(FP_NO_INVALID_ARGS) && !defined(FP_CUSTOM_INVALID_ARGS)
+#   include <inttypes.h>
+#endif
+
 namespace Fixed{desc}
 {{
     typedef int32_t FP_INT;
@@ -165,6 +177,17 @@ namespace Fixed{desc}
     static_assert(sizeof(FP_UINT) == 4, ""Wrong bytesize for FP_UINT"");
     static_assert(sizeof(FP_LONG) == 8, ""Wrong bytesize for FP_LONG"");
     static_assert(sizeof(FP_ULONG) == 8, ""Wrong bytesize for FP_ULONG"");
+
+#ifdef FP_NO_INVALID_ARGS
+    static inline void InvalidArgument(const char* funcName, const char* argName, long argValue) {{ }}
+#else
+    static void InvalidArgument(const char* funcName, const char* argName, long argValue)
+    {{
+        char reason[128];
+        sprintf(reason, ""Invalid argument %s for %s(): %"" PRId64, argName, funcName, argValue);
+        throw std::invalid_argument(reason);
+    }}
+#endif
 ";
         }
 
