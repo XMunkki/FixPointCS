@@ -93,6 +93,13 @@ namespace FixPointCS
         private static Action<string, string, long> InvalidArgumentHandler64 = (funcName, argName, argValue) => { };
         private static Action<string, string, long, long> InvalidArgumentHandler64_64 = (funcName, argName, argValue1, argValue2) => { };
 
+        /// <summary>
+        /// Set invalid argument handlers individually to custom implementations.
+        /// </summary>
+        /// <param name="handler32">Handler for single s16.16 argument</param>
+        /// <param name="handler32_32">Handler for dual s16.16 arguments</param>
+        /// <param name="handler64">Handler for single s32.32 argument</param>
+        /// <param name="handler64_64">Handler for dual s32.32 arguments</param>
         public static void SetInvalidArgumentHandler(
             Action<string, string, int> handler32,
             Action<string, string, int, int> handler32_32,
@@ -105,13 +112,16 @@ namespace FixPointCS
             InvalidArgumentHandler64_64 = handler64_64;
         }
 
+        /// <summary>
+        /// Set invalid argument handlers to implementations which throw an <see cref="ArgumentException"/>.
+        /// </summary>
         public static void SetThrowOnInvalidArgument()
         {
             SetInvalidArgumentHandler(
                 (funcName, argName, argValue) => throw new ArgumentException($"Invalid argument {funcName}(): {argValue}", argName),
-                (funcName, argName, argValue1, argValue2) => throw new ArgumentException($"Invalid argument {funcName}(): {argValue1}, {argValue2}", argName),
+                (funcName, argName, argValue1, argValue2) => throw new ArgumentException($"Invalid arguments {funcName}(): {argValue1}, {argValue2}", argName),
                 (funcName, argName, argValue) => throw new ArgumentException($"Invalid argument {funcName}(): {argValue}", argName),
-                (funcName, argName, argValue1, argValue2) => throw new ArgumentException($"Invalid argument {funcName}(): {argValue1}, {argValue2}", argName));
+                (funcName, argName, argValue1, argValue2) => throw new ArgumentException($"Invalid arguments {funcName}(): {argValue1}, {argValue2}", argName));
         }
 
         public static void InvalidArgument(string funcName, string argName, int argValue)
@@ -119,9 +129,19 @@ namespace FixPointCS
             InvalidArgumentHandler32.Invoke(funcName, argName, argValue);
         }
 
+        public static void InvalidArguments(string funcName, string argNames, int argValue1, int argValue2)
+        {
+            InvalidArgumentHandler32_32.Invoke(funcName, argNames, argValue1, argValue2);
+        }
+
         public static void InvalidArgument(string funcName, string argName, long argValue)
         {
             InvalidArgumentHandler64.Invoke(funcName, argName, argValue);
+        }
+
+        public static void InvalidArguments(string funcName, string argNames, long argValue1, long argValue2)
+        {
+            InvalidArgumentHandler64_64.Invoke(funcName, argNames, argValue1, argValue2);
         }
 #endif
 
