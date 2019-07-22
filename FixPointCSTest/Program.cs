@@ -1109,6 +1109,20 @@ namespace FixPointCSTest
             ),
 
             new UnaryOpFamily(
+                (double i0) => { return Math.Sign(i0); },
+                AbsoluteUnaryErrorEvaluator(),
+                Operation.Multi(
+                    Operation.F64_Int("Fixed64.Sign", (int n, F64[] i0, int[] o) => { for (int i=0; i<n; i++) { o[i] = F64.Sign(i0[i]); } }),
+                    Operation.F32_Int("Fixed32.Sign", (int n, F32[] i0, int[] o) => { for (int i=0; i<n; i++) { o[i] = F32.Sign(i0[i]); } })
+                ),
+                bounds => new[] {
+                    InputGenerator.Unary(Input.Uniform(-1.0, 1.0)),
+                    InputGenerator.Unary(Input.Uniform(-1e5, 1e5)),
+                    InputGenerator.Unary(Input.Uniform(bounds.InputNegMax, bounds.InputPosMax))
+                }
+            ),
+
+            new UnaryOpFamily(
                 (double i0) => { return 1.0 / i0; },
                 RelativeUnaryErrorEvaluator(),
                 new[] {
@@ -1407,7 +1421,7 @@ namespace FixPointCSTest
         {
             Console.WriteLine("Generating Java unit tests..");
 
-            using (StreamWriter file = new StreamWriter("../../../Java/UnitTest.java"))
+            using (StreamWriter file = new StreamWriter("../../../../Java/UnitTest.java"))
             {
                 file.WriteLine("package fixpointcs.test;");
                 file.WriteLine("");
@@ -1451,7 +1465,7 @@ namespace FixPointCSTest
         {
             Console.WriteLine("Generating C++ unit tests..");
 
-            using (StreamWriter file = new StreamWriter("../../../Cpp/UnitTest.cpp"))
+            using (StreamWriter file = new StreamWriter("../../../../Cpp/UnitTest.cpp"))
             {
                 file.WriteLine("#include \"UnitTest.h\"");
                 file.WriteLine("#include \"Fixed32.h\"");
