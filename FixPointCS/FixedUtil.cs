@@ -73,30 +73,46 @@ namespace FixPointCS
 #if CPP
         // InvalidArgument function defined in the transpiler generated header
 #elif JAVA
-        public static void InvalidArgument(string funcName, string argName, int argValue)
+        // \todo implement custom handlers in Java
+
+        public static void InvalidArgument(String funcName, String argName, int argValue)
         {
-            throw new IllegalArgumentException(String.Format("Argument %s for %s() is invalid: %d", argName, funcName, argValue);
+            //throw new IllegalArgumentException(String.format("Argument %s for %s() is invalid: %d", argName, funcName, argValue));
         }
 
-        public static void InvalidArgument(string funcName, string argName, long argValue)
+        public static void InvalidArgument(String funcName, String argName, long argValue)
         {
-            throw new IllegalArgumentException(String.Format("Argument %s for %s() is invalid: %d", argName, funcName, argValue);
+            //throw new IllegalArgumentException(String.format("Argument %s for %s() is invalid: %d", argName, funcName, argValue));
         }
 #else
         // Backwards compatible way to use MethodImplOptions.AggressiveInlining
         public const MethodImplOptions AggressiveInlining = (MethodImplOptions)256;
 
-        /// <summary>
-        /// Action which is invoked when an invalid s16.16 fixed point value is given to a function.
-        /// Intended to be replaced if custom handling for invalid inputs is desired.
-        /// </summary>
-        public static Action<string, string, int> InvalidArgumentHandler32 = (string funcName, string argName, int argValue) => throw new ArgumentException($"Invalid argument {funcName}(): {argValue}", argName);
+        private static Action<string, string, int> InvalidArgumentHandler32 = (funcName, argName, argValue) => { };
+        private static Action<string, string, int, int> InvalidArgumentHandler32_32 = (funcName, argName, argValue1, argValue2) => { };
+        private static Action<string, string, long> InvalidArgumentHandler64 = (funcName, argName, argValue) => { };
+        private static Action<string, string, long, long> InvalidArgumentHandler64_64 = (funcName, argName, argValue1, argValue2) => { };
 
-        /// <summary>
-        /// Action which is invoked when an invalid s32.32 fixed point value is given to a function.
-        /// Intended to be replaced if custom handling for invalid inputs is desired.
-        /// </summary>
-        public static Action<string, string, long> InvalidArgumentHandler64 = (string funcName, string argName, long argValue) => throw new ArgumentException($"Invalid argument {funcName}(): {argValue}", argName);
+        public static void SetInvalidArgumentHandler(
+            Action<string, string, int> handler32,
+            Action<string, string, int, int> handler32_32,
+            Action<string, string, long> handler64,
+            Action<string, string, long, long> handler64_64)
+        {
+            InvalidArgumentHandler32 = handler32;
+            InvalidArgumentHandler32_32 = handler32_32;
+            InvalidArgumentHandler64 = handler64;
+            InvalidArgumentHandler64_64 = handler64_64;
+        }
+
+        public static void SetThrowOnInvalidArgument()
+        {
+            SetInvalidArgumentHandler(
+                (funcName, argName, argValue) => throw new ArgumentException($"Invalid argument {funcName}(): {argValue}", argName),
+                (funcName, argName, argValue1, argValue2) => throw new ArgumentException($"Invalid argument {funcName}(): {argValue1}, {argValue2}", argName),
+                (funcName, argName, argValue) => throw new ArgumentException($"Invalid argument {funcName}(): {argValue}", argName),
+                (funcName, argName, argValue1, argValue2) => throw new ArgumentException($"Invalid argument {funcName}(): {argValue1}, {argValue2}", argName));
+        }
 
         public static void InvalidArgument(string funcName, string argName, int argValue)
         {
