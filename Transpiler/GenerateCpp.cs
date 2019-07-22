@@ -135,7 +135,8 @@ namespace Transpiler
             if (mode == Mode.Fp32)
                 includes += "#include \"Fixed64.h\"\n";
 
-            return $@"//
+            // Main header
+            string header = $@"//
 // GENERATED FILE!!!
 //
 // Generated from Fixed{desc}.cs, part of the FixPointCS project (MIT license).
@@ -154,16 +155,17 @@ namespace Transpiler
 #   define FP_ASSERT(x) assert(x)
 #endif
 
-// If FP_NO_INVALID_ARGS is defined, then invalid arguments will not be reported (some default value will be returned).
-//#define FP_NO_INVALID_ARGS
 // If FP_CUSTOM_INVALID_ARGS is defined, then the used is expected to implement the following functions in
-// the Fixed{desc} namespace:
-//   
+// the FixedUtil namespace:
+//    extern static void InvalidArgument(const char* funcName, const char* argName, FP_INT argValue);
+//    extern static void InvalidArgument(const char* funcName, const char* argName, FP_LONG argValue);
+// These functions should handle the cases for invalid arguments in any desired way (assert, exception, log, ignore etc).
 //#define FP_CUSTOM_INVALID_ARGS
 
 // Include some optional headers (depending on chosen options)
 #if !defined(FP_NO_INVALID_ARGS) && !defined(FP_CUSTOM_INVALID_ARGS)
 #   include <inttypes.h>
+#   include <stdexcept>
 #endif
 
 namespace Fixed{desc}
@@ -177,18 +179,26 @@ namespace Fixed{desc}
     static_assert(sizeof(FP_UINT) == 4, ""Wrong bytesize for FP_UINT"");
     static_assert(sizeof(FP_LONG) == 8, ""Wrong bytesize for FP_LONG"");
     static_assert(sizeof(FP_ULONG) == 8, ""Wrong bytesize for FP_ULONG"");
-
-#ifdef FP_NO_INVALID_ARGS
-    static inline void InvalidArgument(const char* funcName, const char* argName, long argValue) {{ }}
+";
+            // Additional Util headers
+            if (mode == Mode.Util)
+            {
+                header += $@"
+#ifdef FP_CUSTOM_INVALID_ARGS
+    extern static void InvalidArgument(const char* funcName, const char* argName, FP_INT argValue);
+	extern static void InvalidArgument(const char* funcName, const char* argName, FP_INT argValue1, FP_INT argValue2);
+	extern static void InvalidArgument(const char* funcName, const char* argName, FP_LONG argValue);
+	extern static void InvalidArgument(const char* funcName, const char* argName, FP_LONG argValue1, FP_LONG argValue2);
 #else
-    static void InvalidArgument(const char* funcName, const char* argName, long argValue)
-    {{
-        char reason[128];
-        sprintf(reason, ""Invalid argument %s for %s(): %"" PRId64, argName, funcName, argValue);
-        throw std::invalid_argument(reason);
-    }}
+	static inline void InvalidArgument(const char* funcName, const char* argName, FP_INT argValue) { }
+	static inline void InvalidArgument(const char* funcName, const char* argName, FP_INT argValue1, FP_INT argValue2) { }
+	static inline void InvalidArgument(const char* funcName, const char* argName, FP_LONG argValue) { }
+	static inline void InvalidArgument(const char* funcName, const char* argName, FP_LONG argValue1, FP_LONG argValue2) { }
 #endif
 ";
+            }
+
+            return header;
         }
 
         private static string MakeSuffix(Mode mode)
