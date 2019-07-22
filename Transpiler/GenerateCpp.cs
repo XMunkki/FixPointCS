@@ -190,10 +190,10 @@ namespace Fixed{desc}
 	extern static void InvalidArgument(const char* funcName, const char* argName, FP_LONG argValue);
 	extern static void InvalidArgument(const char* funcName, const char* argName, FP_LONG argValue1, FP_LONG argValue2);
 #else
-	static inline void InvalidArgument(const char* funcName, const char* argName, FP_INT argValue) { }
-	static inline void InvalidArgument(const char* funcName, const char* argName, FP_INT argValue1, FP_INT argValue2) { }
-	static inline void InvalidArgument(const char* funcName, const char* argName, FP_LONG argValue) { }
-	static inline void InvalidArgument(const char* funcName, const char* argName, FP_LONG argValue1, FP_LONG argValue2) { }
+	static inline void InvalidArgument(const char* funcName, const char* argName, FP_INT argValue) {{ }}
+	static inline void InvalidArgument(const char* funcName, const char* argName, FP_INT argValue1, FP_INT argValue2) {{ }}
+	static inline void InvalidArgument(const char* funcName, const char* argName, FP_LONG argValue) {{ }}
+	static inline void InvalidArgument(const char* funcName, const char* argName, FP_LONG argValue1, FP_LONG argValue2) {{ }}
 #endif
 ";
             }
