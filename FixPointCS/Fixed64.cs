@@ -272,7 +272,11 @@ namespace FixPointCS
         public static int Sign(long x)
         {
             // https://stackoverflow.com/questions/14579920/fast-sign-of-integer-in-c/14612418#14612418
+#if JAVA
+            return (int)((x >> 63) | (-x >>> 63));
+#else
             return (int)((x >> 63) | (long)(((ulong)-x) >> 63));
+#endif
         }
 
         /// <summary>
