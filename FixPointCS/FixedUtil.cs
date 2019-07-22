@@ -80,9 +80,19 @@ namespace FixPointCS
             //throw new IllegalArgumentException(String.format("Argument %s for %s() is invalid: %d", argName, funcName, argValue));
         }
 
+        public static void InvalidArgument(String funcName, String argName, int argValue1, int argValue2)
+        {
+            //throw new IllegalArgumentException(String.format("Argument %s for %s() is invalid: %d, %d", argName, funcName, argValue1, argValue2));
+        }
+
         public static void InvalidArgument(String funcName, String argName, long argValue)
         {
             //throw new IllegalArgumentException(String.format("Argument %s for %s() is invalid: %d", argName, funcName, argValue));
+        }
+
+        public static void InvalidArgument(String funcName, String argName, long argValue1, long argValue2)
+        {
+            //throw new IllegalArgumentException(String.format("Argument %s for %s() is invalid: %d, %d", argName, funcName, argValue1, argValue2));
         }
 #else
         // Backwards compatible way to use MethodImplOptions.AggressiveInlining
@@ -129,7 +139,7 @@ namespace FixPointCS
             InvalidArgumentHandler32.Invoke(funcName, argName, argValue);
         }
 
-        public static void InvalidArguments(string funcName, string argNames, int argValue1, int argValue2)
+        public static void InvalidArgument(string funcName, string argNames, int argValue1, int argValue2)
         {
             InvalidArgumentHandler32_32.Invoke(funcName, argNames, argValue1, argValue2);
         }
@@ -139,7 +149,7 @@ namespace FixPointCS
             InvalidArgumentHandler64.Invoke(funcName, argName, argValue);
         }
 
-        public static void InvalidArguments(string funcName, string argNames, long argValue1, long argValue2)
+        public static void InvalidArgument(string funcName, string argNames, long argValue1, long argValue2)
         {
             InvalidArgumentHandler64_64.Invoke(funcName, argNames, argValue1, argValue2);
         }

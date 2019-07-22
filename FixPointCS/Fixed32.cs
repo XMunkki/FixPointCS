@@ -1166,7 +1166,7 @@ namespace FixPointCS
                 if (y > 0) return PiHalf;
                 if (y < 0) return -PiHalf;
 
-                FixedUtil.InvalidArguments("Fixed32.Atan2", "y, x", y, x);
+                FixedUtil.InvalidArgument("Fixed32.Atan2", "y, x", y, x);
                 return 0;
             }
 
@@ -1220,7 +1220,7 @@ namespace FixPointCS
                 if (y > 0) return PiHalf;
                 if (y < 0) return -PiHalf;
 
-                FixedUtil.InvalidArguments("Fixed32.Atan2Fast", "y, x", y, x);
+                FixedUtil.InvalidArgument("Fixed32.Atan2Fast", "y, x", y, x);
                 return 0;
             }
 
@@ -1274,7 +1274,7 @@ namespace FixPointCS
                 if (y > 0) return PiHalf;
                 if (y < 0) return -PiHalf;
 
-                FixedUtil.InvalidArguments("Fixed32.Atan2Fastest", "y, x", y, x);
+                FixedUtil.InvalidArgument("Fixed32.Atan2Fastest", "y, x", y, x);
                 return 0;
             }
 

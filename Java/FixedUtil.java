@@ -47,9 +47,19 @@ public class FixedUtil
         //throw new IllegalArgumentException(String.format("Argument %s for %s() is invalid: %d", argName, funcName, argValue));
     }
 
+    public static void InvalidArgument(String funcName, String argName, int argValue1, int argValue2)
+    {
+        //throw new IllegalArgumentException(String.format("Argument %s for %s() is invalid: %d, %d", argName, funcName, argValue1, argValue2));
+    }
+
     public static void InvalidArgument(String funcName, String argName, long argValue)
     {
         //throw new IllegalArgumentException(String.format("Argument %s for %s() is invalid: %d", argName, funcName, argValue));
+    }
+
+    public static void InvalidArgument(String funcName, String argName, long argValue1, long argValue2)
+    {
+        //throw new IllegalArgumentException(String.format("Argument %s for %s() is invalid: %d, %d", argName, funcName, argValue1, argValue2));
     }
 
     public static int Qmul29(int a, int b)
