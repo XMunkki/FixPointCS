@@ -42,6 +42,15 @@
 #   define FP_ASSERT(x) assert(x)
 #endif
 
+// If FP_CUSTOM_INVALID_ARGS is defined, then the used is expected to implement the following functions in
+// the FixedUtil namespace:
+//  static void InvalidArgument(const char* funcName, const char* argName, FP_INT argValue);
+//  static void InvalidArgument(const char* funcName, const char* argName, FP_INT argValue1, FP_INT argValue2);
+//	static void InvalidArgument(const char* funcName, const char* argName, FP_LONG argValue);
+//	static void InvalidArgument(const char* funcName, const char* argName, FP_LONG argValue1, FP_LONG argValue2);
+// These functions should handle the cases for invalid arguments in any desired way (assert, exception, log, ignore etc).
+//#define FP_CUSTOM_INVALID_ARGS
+
 namespace Fixed64
 {
     typedef int32_t FP_INT;
@@ -80,13 +89,6 @@ namespace Fixed64
     static const FP_LONG RCP_LN2      = INT64_C(0x171547652); // 1.0 / log(2.0) ~= 1.4426950408889634
     static const FP_LONG RCP_LOG2_E   = INT64_C(2977044471);  // 1.0 / log2(e) ~= 0.6931471805599453
     static const FP_INT  RCP_HALF_PI  = 683565276; // 1.0 / (4.0 * 0.5 * Math.PI);  // the 4.0 factor converts directly to s2.30
-
-    static void InvalidArgument(static const char* funcName, static const char* argName, FP_LONG argValue)
-    {
-        char reason[128];
-        sprintf(reason, "Invalid argument %s for %s(): %" PRId64, argName, funcName, argValue);
-        throw std::invalid_argument(reason);
-    }
 
     /// <summary>
     /// Converts an integer to a fixed-point value.
@@ -379,9 +381,9 @@ namespace Fixed64
     /// </summary>
     static FP_LONG Div(FP_LONG a, FP_LONG b)
     {
-        if (b == MinValue)
+        if (b == MinValue || b == 0)
         {
-            InvalidArgument("Fixed64::Div", "b", b);
+            FixedUtil::InvalidArgument("Fixed64::Div", "b", b);
             return 0;
         }
 
@@ -408,9 +410,9 @@ namespace Fixed64
     /// </summary>
     static FP_LONG DivFast(FP_LONG a, FP_LONG b)
     {
-        if (b == MinValue)
+        if (b == MinValue || b == 0)
         {
-            InvalidArgument("Fixed64::DivFast", "b", b);
+            FixedUtil::InvalidArgument("Fixed64::DivFast", "b", b);
             return 0;
         }
 
@@ -437,9 +439,9 @@ namespace Fixed64
     /// </summary>
     static FP_LONG DivFastest(FP_LONG a, FP_LONG b)
     {
-        if (b == MinValue)
+        if (b == MinValue || b == 0)
         {
-            InvalidArgument("Fixed64::DivFastest", "b", b);
+            FixedUtil::InvalidArgument("Fixed64::DivFastest", "b", b);
             return 0;
         }
 
@@ -477,9 +479,10 @@ namespace Fixed64
     static FP_LONG SqrtPrecise(FP_LONG a)
     {
         // Adapted from https://github.com/chmike/fpsqrt
-        if (a < 0)
+        if (a <= 0)
         {
-            InvalidArgument("Fixed64::SqrtPrecise", "a", a);
+            if (a < 0)
+                FixedUtil::InvalidArgument("Fixed64::SqrtPrecise", "a", a);
             return 0;
         }
 
@@ -507,7 +510,7 @@ namespace Fixed64
         if (x <= 0)
         {
             if (x < 0)
-                InvalidArgument("Fixed64::Sqrt", "x", x);
+                FixedUtil::InvalidArgument("Fixed64::Sqrt", "x", x);
             return 0;
         }
 
@@ -536,7 +539,7 @@ namespace Fixed64
         if (x <= 0)
         {
             if (x < 0)
-                InvalidArgument("Fixed64::SqrtFast", "x", x);
+                FixedUtil::InvalidArgument("Fixed64::SqrtFast", "x", x);
             return 0;
         }
 
@@ -565,7 +568,7 @@ namespace Fixed64
         if (x <= 0)
         {
             if (x < 0)
-                InvalidArgument("Fixed64::SqrtFastest", "x", x);
+                FixedUtil::InvalidArgument("Fixed64::SqrtFastest", "x", x);
             return 0;
         }
 
@@ -596,7 +599,7 @@ namespace Fixed64
         // Return 0 for invalid values
         if (x <= 0)
         {
-            InvalidArgument("Fixed64::RSqrt", "x", x);
+            FixedUtil::InvalidArgument("Fixed64::RSqrt", "x", x);
             return 0;
         }
 
@@ -627,7 +630,7 @@ namespace Fixed64
         // Return 0 for invalid values
         if (x <= 0)
         {
-            InvalidArgument("Fixed64::RSqrtFast", "x", x);
+            FixedUtil::InvalidArgument("Fixed64::RSqrtFast", "x", x);
             return 0;
         }
 
@@ -658,7 +661,7 @@ namespace Fixed64
         // Return 0 for invalid values
         if (x <= 0)
         {
-            InvalidArgument("Fixed64::RSqrtFastest", "x", x);
+            FixedUtil::InvalidArgument("Fixed64::RSqrtFastest", "x", x);
             return 0;
         }
 
@@ -688,7 +691,7 @@ namespace Fixed64
     {
         if (x == MinValue || x == 0)
         {
-            InvalidArgument("Fixed64::Rcp", "x", x);
+            FixedUtil::InvalidArgument("Fixed64::Rcp", "x", x);
             return 0;
         }
 
@@ -717,7 +720,7 @@ namespace Fixed64
     {
         if (x == MinValue || x == 0)
         {
-            InvalidArgument("Fixed64::Rcp", "x", x);
+            FixedUtil::InvalidArgument("Fixed64::RcpFast", "x", x);
             return 0;
         }
 
@@ -746,7 +749,7 @@ namespace Fixed64
     {
         if (x == MinValue || x == 0)
         {
-            InvalidArgument("Fixed64::Rcp", "x", x);
+            FixedUtil::InvalidArgument("Fixed64::RcpFastest", "x", x);
             return 0;
         }
 
@@ -845,7 +848,10 @@ namespace Fixed64
     {
         // Return 0 for invalid values
         if (x <= 0)
+        {
+            FixedUtil::InvalidArgument("Fixed64::Log", "x", x);
             return 0;
+        }
 
         // Normalize value to range [1.0, 2.0( as s2.30 and extract exponent.
         static const FP_INT ONE = (1 << 30);
@@ -862,7 +868,10 @@ namespace Fixed64
     {
         // Return 0 for invalid values
         if (x <= 0)
+        {
+            FixedUtil::InvalidArgument("Fixed64::LogFast", "x", x);
             return 0;
+        }
 
         // Normalize value to range [1.0, 2.0( as s2.30 and extract exponent.
         static const FP_INT ONE = (1 << 30);
@@ -879,7 +888,10 @@ namespace Fixed64
     {
         // Return 0 for invalid values
         if (x <= 0)
+        {
+            FixedUtil::InvalidArgument("Fixed64::LogFastest", "x", x);
             return 0;
+        }
 
         // Normalize value to range [1.0, 2.0( as s2.30 and extract exponent.
         static const FP_INT ONE = (1 << 30);
@@ -896,7 +908,10 @@ namespace Fixed64
     {
         // Return 0 for invalid values
         if (x <= 0)
+        {
+            FixedUtil::InvalidArgument("Fixed64::Log2", "x", x);
             return 0;
+        }
 
         // Normalize value to range [1.0, 2.0( as s2.30 and extract exponent.
         FP_INT offset = 31 - Nlz((FP_ULONG)x);
@@ -915,7 +930,10 @@ namespace Fixed64
     {
         // Return 0 for invalid values
         if (x <= 0)
+        {
+            FixedUtil::InvalidArgument("Fixed64::Log2Fast", "x", x);
             return 0;
+        }
 
         // Normalize value to range [1.0, 2.0( as s2.30 and extract exponent.
         FP_INT offset = 31 - Nlz((FP_ULONG)x);
@@ -934,7 +952,10 @@ namespace Fixed64
     {
         // Return 0 for invalid values
         if (x <= 0)
+        {
+            FixedUtil::InvalidArgument("Fixed64::Log2Fastest", "x", x);
             return 0;
+        }
 
         // Normalize value to range [1.0, 2.0( as s2.30 and extract exponent.
         FP_INT offset = 31 - Nlz((FP_ULONG)x);
@@ -956,7 +977,11 @@ namespace Fixed64
     {
         // Return 0 for invalid values
         if (x <= 0)
+        {
+            if (x < 0)
+                FixedUtil::InvalidArgument("Fixed64::Pow", "x", x);
             return 0;
+        }
 
         return Exp(Mul(exponent, Log(x)));
     }
@@ -968,7 +993,11 @@ namespace Fixed64
     {
         // Return 0 for invalid values
         if (x <= 0)
+        {
+            if (x < 0)
+                FixedUtil::InvalidArgument("Fixed64::PowFast", "x", x);
             return 0;
+        }
 
         return ExpFast(Mul(exponent, LogFast(x)));
     }
@@ -980,7 +1009,11 @@ namespace Fixed64
     {
         // Return 0 for invalid values
         if (x <= 0)
+        {
+            if (x < 0)
+                FixedUtil::InvalidArgument("Fixed64::PowFastest", "x", x);
             return 0;
+        }
 
         return ExpFastest(Mul(exponent, LogFastest(x)));
     }
@@ -1283,7 +1316,10 @@ namespace Fixed64
     {
         // Return 0 for invalid values
         if (x < -One || x > One)
+        {
+            FixedUtil::InvalidArgument("Fixed64::Asin", "x", x);
             return 0;
+        }
 
         return Atan2(x, Sqrt(Mul(One + x, One - x)));
     }
@@ -1292,7 +1328,10 @@ namespace Fixed64
     {
         // Return 0 for invalid values
         if (x < -One || x > One)
+        {
+            FixedUtil::InvalidArgument("Fixed64::AsinFast", "x", x);
             return 0;
+        }
 
         return Atan2Fast(x, SqrtFast(Mul(One + x, One - x)));
     }
@@ -1301,7 +1340,10 @@ namespace Fixed64
     {
         // Return 0 for invalid values
         if (x < -One || x > One)
+        {
+            FixedUtil::InvalidArgument("Fixed64::AsinFastest", "x", x);
             return 0;
+        }
 
         return Atan2Fastest(x, SqrtFastest(Mul(One + x, One - x)));
     }
@@ -1310,7 +1352,10 @@ namespace Fixed64
     {
         // Return 0 for invalid values
         if (x < -One || x > One)
+        {
+            FixedUtil::InvalidArgument("Fixed64::Acos", "x", x);
             return 0;
+        }
 
         return Atan2(Sqrt(Mul(One + x, One - x)), x);
     }
@@ -1319,7 +1364,10 @@ namespace Fixed64
     {
         // Return 0 for invalid values
         if (x < -One || x > One)
+        {
+            FixedUtil::InvalidArgument("Fixed64::AcosFast", "x", x);
             return 0;
+        }
 
         return Atan2Fast(SqrtFast(Mul(One + x, One - x)), x);
     }
@@ -1328,7 +1376,10 @@ namespace Fixed64
     {
         // Return 0 for invalid values
         if (x < -One || x > One)
+        {
+            FixedUtil::InvalidArgument("Fixed64::AcosFastest", "x", x);
             return 0;
+        }
 
         return Atan2Fastest(SqrtFastest(Mul(One + x, One - x)), x);
     }

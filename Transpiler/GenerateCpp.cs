@@ -157,16 +157,12 @@ namespace Transpiler
 
 // If FP_CUSTOM_INVALID_ARGS is defined, then the used is expected to implement the following functions in
 // the FixedUtil namespace:
-//    extern static void InvalidArgument(const char* funcName, const char* argName, FP_INT argValue);
-//    extern static void InvalidArgument(const char* funcName, const char* argName, FP_LONG argValue);
+//  static void InvalidArgument(const char* funcName, const char* argName, FP_INT argValue);
+//  static void InvalidArgument(const char* funcName, const char* argName, FP_INT argValue1, FP_INT argValue2);
+//	static void InvalidArgument(const char* funcName, const char* argName, FP_LONG argValue);
+//	static void InvalidArgument(const char* funcName, const char* argName, FP_LONG argValue1, FP_LONG argValue2);
 // These functions should handle the cases for invalid arguments in any desired way (assert, exception, log, ignore etc).
 //#define FP_CUSTOM_INVALID_ARGS
-
-// Include some optional headers (depending on chosen options)
-#if !defined(FP_NO_INVALID_ARGS) && !defined(FP_CUSTOM_INVALID_ARGS)
-#   include <inttypes.h>
-#   include <stdexcept>
-#endif
 
 namespace Fixed{desc}
 {{
@@ -186,14 +182,14 @@ namespace Fixed{desc}
                 header += $@"
 #ifdef FP_CUSTOM_INVALID_ARGS
     extern static void InvalidArgument(const char* funcName, const char* argName, FP_INT argValue);
-	extern static void InvalidArgument(const char* funcName, const char* argName, FP_INT argValue1, FP_INT argValue2);
-	extern static void InvalidArgument(const char* funcName, const char* argName, FP_LONG argValue);
-	extern static void InvalidArgument(const char* funcName, const char* argName, FP_LONG argValue1, FP_LONG argValue2);
+    extern static void InvalidArgument(const char* funcName, const char* argName, FP_INT argValue1, FP_INT argValue2);
+    extern static void InvalidArgument(const char* funcName, const char* argName, FP_LONG argValue);
+    extern static void InvalidArgument(const char* funcName, const char* argName, FP_LONG argValue1, FP_LONG argValue2);
 #else
-	static inline void InvalidArgument(const char* funcName, const char* argName, FP_INT argValue) {{ }}
-	static inline void InvalidArgument(const char* funcName, const char* argName, FP_INT argValue1, FP_INT argValue2) {{ }}
-	static inline void InvalidArgument(const char* funcName, const char* argName, FP_LONG argValue) {{ }}
-	static inline void InvalidArgument(const char* funcName, const char* argName, FP_LONG argValue1, FP_LONG argValue2) {{ }}
+    static inline void InvalidArgument(const char* funcName, const char* argName, FP_INT argValue) {{ }}
+    static inline void InvalidArgument(const char* funcName, const char* argName, FP_INT argValue1, FP_INT argValue2) {{ }}
+    static inline void InvalidArgument(const char* funcName, const char* argName, FP_LONG argValue) {{ }}
+    static inline void InvalidArgument(const char* funcName, const char* argName, FP_LONG argValue1, FP_LONG argValue2) {{ }}
 #endif
 ";
             }

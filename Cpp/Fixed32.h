@@ -43,6 +43,15 @@
 #   define FP_ASSERT(x) assert(x)
 #endif
 
+// If FP_CUSTOM_INVALID_ARGS is defined, then the used is expected to implement the following functions in
+// the FixedUtil namespace:
+//  static void InvalidArgument(const char* funcName, const char* argName, FP_INT argValue);
+//  static void InvalidArgument(const char* funcName, const char* argName, FP_INT argValue1, FP_INT argValue2);
+//	static void InvalidArgument(const char* funcName, const char* argName, FP_LONG argValue);
+//	static void InvalidArgument(const char* funcName, const char* argName, FP_LONG argValue1, FP_LONG argValue2);
+// These functions should handle the cases for invalid arguments in any desired way (assert, exception, log, ignore etc).
+//#define FP_CUSTOM_INVALID_ARGS
+
 namespace Fixed32
 {
     typedef int32_t FP_INT;
@@ -297,7 +306,10 @@ namespace Fixed32
     static FP_INT Div(FP_INT a, FP_INT b)
     {
         if (b == MinValue || b == 0)
+        {
+            FixedUtil::InvalidArgument("Fixed32.Div", "b", b);
             return 0;
+        }
 
         return (FP_INT)(((FP_LONG)a << 16) / b);
     }
@@ -308,7 +320,10 @@ namespace Fixed32
     static FP_INT DivFast(FP_INT a, FP_INT b)
     {
         if (b == MinValue || b == 0)
+        {
+            FixedUtil::InvalidArgument("Fixed32.DivFast", "b", b);
             return 0;
+        }
 
         // Handle negative values.
         FP_INT sign = (b < 0) ? -1 : 1;
@@ -334,7 +349,10 @@ namespace Fixed32
     static FP_INT DivFastest(FP_INT a, FP_INT b)
     {
         if (b == MinValue || b == 0)
+        {
+            FixedUtil::InvalidArgument("Fixed32.DivFastest", "b", b);
             return 0;
+        }
 
         // Handle negative values.
         FP_INT sign = (b < 0) ? -1 : 1;
@@ -370,8 +388,12 @@ namespace Fixed32
     static FP_INT SqrtPrecise(FP_INT a)
     {
         // Adapted from https://github.com/chmike/fpsqrt
-        if (a < 0)
+        if (a <= 0)
+        {
+            if (a < 0)
+                FixedUtil::InvalidArgument("Fixed32.SqrtPrecise", "a", a);
             return 0;
+        }
 
         FP_UINT r = (FP_UINT)a;
         FP_UINT b = 0x40000000;
@@ -395,7 +417,11 @@ namespace Fixed32
     {
         // Return 0 for all non-positive values.
         if (x <= 0)
+        {
+            if (x < 0)
+                FixedUtil::InvalidArgument("Fixed32.Sqrt", "x", x);
             return 0;
+        }
 
         // Constants (s2.30).
         static const FP_INT ONE = (1 << 30);
@@ -420,7 +446,11 @@ namespace Fixed32
     {
         // Return 0 for all non-positive values.
         if (x <= 0)
+        {
+            if (x < 0)
+                FixedUtil::InvalidArgument("Fixed32.SqrtFast", "x", x);
             return 0;
+        }
 
         // Constants (s2.30).
         static const FP_INT ONE = (1 << 30);
@@ -445,7 +475,11 @@ namespace Fixed32
     {
         // Return 0 for all non-positive values.
         if (x <= 0)
+        {
+            if (x < 0)
+                FixedUtil::InvalidArgument("Fixed32.SqrtFastest", "x", x);
             return 0;
+        }
 
         // Constants (s2.30).
         static const FP_INT ONE = (1 << 30);
@@ -473,7 +507,10 @@ namespace Fixed32
     {
         // Return 0 for invalid values
         if (x <= 0)
+        {
+            FixedUtil::InvalidArgument("Fixed32.RSqrt", "x", x);
             return 0;
+        }
 
         // Constants (s2.30).
         static const FP_INT ONE = (1 << 30);
@@ -501,7 +538,10 @@ namespace Fixed32
     {
         // Return 0 for invalid values
         if (x <= 0)
+        {
+            FixedUtil::InvalidArgument("Fixed32.RSqrtFast", "x", x);
             return 0;
+        }
 
         // Constants (s2.30).
         static const FP_INT ONE = (1 << 30);
@@ -529,7 +569,10 @@ namespace Fixed32
     {
         // Return 0 for invalid values
         if (x <= 0)
+        {
+            FixedUtil::InvalidArgument("Fixed32.RSqrtFastest", "x", x);
             return 0;
+        }
 
         // Constants (s2.30).
         static const FP_INT ONE = (1 << 30);
@@ -556,7 +599,10 @@ namespace Fixed32
     static FP_INT Rcp(FP_INT x)
     {
         if (x == MinValue || x == 0)
+        {
+            FixedUtil::InvalidArgument("Fixed32.Rcp", "x", x);
             return 0;
+        }
 
         // Handle negative values.
         FP_INT sign = (x < 0) ? -1 : 1;
@@ -581,7 +627,10 @@ namespace Fixed32
     static FP_INT RcpFast(FP_INT x)
     {
         if (x == MinValue || x == 0)
+        {
+            FixedUtil::InvalidArgument("Fixed32.RcpFast", "x", x);
             return 0;
+        }
 
         // Handle negative values.
         FP_INT sign = (x < 0) ? -1 : 1;
@@ -607,7 +656,10 @@ namespace Fixed32
     static FP_INT RcpFastest(FP_INT x)
     {
         if (x == MinValue || x == 0)
+        {
+            FixedUtil::InvalidArgument("Fixed32.RcpFastest", "x", x);
             return 0;
+        }
 
         // Handle negative values.
         FP_INT sign = (x < 0) ? -1 : 1;
@@ -703,7 +755,10 @@ namespace Fixed32
     {
         // Return 0 for invalid values
         if (x <= 0)
+        {
+            FixedUtil::InvalidArgument("Fixed32.Log", "x", x);
             return 0;
+        }
 
         // Normalize value to range [1.0, 2.0( as s2.30 and extract exponent.
         FP_INT offset = 15 - Nlz((FP_UINT)x);
@@ -722,7 +777,10 @@ namespace Fixed32
     {
         // Return 0 for invalid values
         if (x <= 0)
+        {
+            FixedUtil::InvalidArgument("Fixed32.LogFast", "x", x);
             return 0;
+        }
 
         // Normalize value to range [1.0, 2.0( as s2.30 and extract exponent.
         FP_INT offset = 15 - Nlz((FP_UINT)x);
@@ -741,7 +799,10 @@ namespace Fixed32
     {
         // Return 0 for invalid values
         if (x <= 0)
+        {
+            FixedUtil::InvalidArgument("Fixed32.LogFastest", "x", x);
             return 0;
+        }
 
         // Normalize value to range [1.0, 2.0( as s2.30 and extract exponent.
         FP_INT offset = 15 - Nlz((FP_UINT)x);
@@ -760,7 +821,10 @@ namespace Fixed32
     {
         // Return 0 for invalid values
         if (x <= 0)
+        {
+            FixedUtil::InvalidArgument("Fixed32.Log2", "x", x);
             return 0;
+        }
 
         // Normalize value to range [1.0, 2.0( as s2.30 and extract exponent.
         FP_INT offset = 15 - Nlz((FP_UINT)x);
@@ -779,7 +843,10 @@ namespace Fixed32
     {
         // Return 0 for invalid values
         if (x <= 0)
+        {
+            FixedUtil::InvalidArgument("Fixed32.Log2Fast", "x", x);
             return 0;
+        }
 
         // Normalize value to range [1.0, 2.0( as s2.30 and extract exponent.
         FP_INT offset = 15 - Nlz((FP_UINT)x);
@@ -798,7 +865,10 @@ namespace Fixed32
     {
         // Return 0 for invalid values
         if (x <= 0)
+        {
+            FixedUtil::InvalidArgument("Fixed32.Log2Fastest", "x", x);
             return 0;
+        }
 
         // Normalize value to range [1.0, 2.0( as s2.30 and extract exponent.
         FP_INT offset = 15 - Nlz((FP_UINT)x);
@@ -820,7 +890,11 @@ namespace Fixed32
     {
         // Return 0 for invalid values
         if (x <= 0)
+        {
+            if (x < 0)
+                FixedUtil::InvalidArgument("Fixed32.Pow", "x", x);
             return 0;
+        }
 
         return Exp(Mul(exponent, Log(x)));
     }
@@ -832,7 +906,11 @@ namespace Fixed32
     {
         // Return 0 for invalid values
         if (x <= 0)
+        {
+            if (x < 0)
+                FixedUtil::InvalidArgument("Fixed32.PowFast", "x", x);
             return 0;
+        }
 
         return ExpFast(Mul(exponent, LogFast(x)));
     }
@@ -844,7 +922,11 @@ namespace Fixed32
     {
         // Return 0 for invalid values
         if (x <= 0)
+        {
+            if (x < 0)
+                FixedUtil::InvalidArgument("Fixed32.PowFastest", "x", x);
             return 0;
+        }
 
         return ExpFastest(Mul(exponent, LogFastest(x)));
     }
@@ -1142,7 +1224,10 @@ namespace Fixed32
     {
         // Return 0 for invalid values
         if (x < -One || x > One)
+        {
+            FixedUtil::InvalidArgument("Fixed32.Asin", "x", x);
             return 0;
+        }
 
         // Compute Atan2(x, Sqrt((1+x) * (1-x))), using s32.32.
         FP_LONG xx = (FP_LONG)(One + x) * (FP_LONG)(One - x);
@@ -1154,7 +1239,10 @@ namespace Fixed32
     {
         // Return 0 for invalid values
         if (x < -One || x > One)
+        {
+            FixedUtil::InvalidArgument("Fixed32.AsinFast", "x", x);
             return 0;
+        }
 
         // Compute Atan2(x, Sqrt((1+x) * (1-x))), using s32.32.
         FP_LONG xx = (FP_LONG)(One + x) * (FP_LONG)(One - x);
@@ -1166,7 +1254,10 @@ namespace Fixed32
     {
         // Return 0 for invalid values
         if (x < -One || x > One)
+        {
+            FixedUtil::InvalidArgument("Fixed32.AsinFastest", "x", x);
             return 0;
+        }
 
         // Compute Atan2(x, Sqrt((1+x) * (1-x))), using s32.32.
         FP_LONG xx = (FP_LONG)(One + x) * (FP_LONG)(One - x);
@@ -1178,7 +1269,10 @@ namespace Fixed32
     {
         // Return 0 for invalid values
         if (x < -One || x > One)
+        {
+            FixedUtil::InvalidArgument("Fixed32.Acos", "x", x);
             return 0;
+        }
 
         // Compute Atan2(Sqrt((1+x) * (1-x)), x), using s32.32.
         FP_LONG xx = (FP_LONG)(One + x) * (FP_LONG)(One - x);
@@ -1190,7 +1284,10 @@ namespace Fixed32
     {
         // Return 0 for invalid values
         if (x < -One || x > One)
+        {
+            FixedUtil::InvalidArgument("Fixed32.AcosFast", "x", x);
             return 0;
+        }
 
         // Compute Atan2(Sqrt((1+x) * (1-x)), x), using s32.32.
         FP_LONG xx = (FP_LONG)(One + x) * (FP_LONG)(One - x);
@@ -1202,7 +1299,10 @@ namespace Fixed32
     {
         // Return 0 for invalid values
         if (x < -One || x > One)
+        {
+            FixedUtil::InvalidArgument("Fixed32.AcosFastest", "x", x);
             return 0;
+        }
 
         // Compute Atan2(Sqrt((1+x) * (1-x)), x), using s32.32.
         FP_LONG xx = (FP_LONG)(One + x) * (FP_LONG)(One - x);

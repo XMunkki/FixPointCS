@@ -40,6 +40,17 @@ import java.lang.Double;
 public class FixedUtil
 {
 
+    // \todo implement custom handlers in Java
+
+    public static void InvalidArgument(String funcName, String argName, int argValue)
+    {
+        //throw new IllegalArgumentException(String.format("Argument %s for %s() is invalid: %d", argName, funcName, argValue));
+    }
+
+    public static void InvalidArgument(String funcName, String argName, long argValue)
+    {
+        //throw new IllegalArgumentException(String.format("Argument %s for %s() is invalid: %d", argName, funcName, argValue));
+    }
 
     public static int Qmul29(int a, int b)
     {
