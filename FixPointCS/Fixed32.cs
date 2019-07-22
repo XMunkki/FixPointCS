@@ -94,6 +94,25 @@ namespace FixPointCS
         private const int RCP_LOG2_E    = (int)(2977044471L >> 16);     // 1.0 / log2(e) ~= 0.6931471805599453
         private const int RCP_TWO_PI    = 683565276;                    // 1.0 / (4.0 * 0.5 * pi);  -- the 4.0 factor converts directly to s2.30
 
+#if CPP
+        public static void InvalidArgument(const char* funcName, const char* argName, long argValue)
+        {
+            char reason[128];
+            sprintf(reason, "Invalid argument %s for %s(): %d", argName, funcName, argValue);
+            throw std::invalid_argument(reason);
+        }
+#elif JAVA
+        public static void InvalidArgument(string funcName, string argName, long argValue)
+        {
+            throw new IllegalArgumentException(String.Format("Argument %s for %s() is invalid: %d", argName, funcName, argValue);
+        }
+#else
+        public static void InvalidArgument(string funcName, string argName, int argValue)
+        {
+            FixedUtil.InvalidArgumentHandler32.Invoke(funcName, argName, argValue);
+        }
+#endif
+
         /// <summary>
         /// Converts an integer to a fixed-point value.
         /// </summary>
@@ -351,7 +370,10 @@ namespace FixPointCS
         public static int Div(int a, int b)
         {
             if (b == MinValue || b == 0)
+            {
+                InvalidArgument("Fixed32.Div", "b", b);
                 return 0;
+            }
 
             return (int)(((long)a << 16) / b);
         }
@@ -362,7 +384,10 @@ namespace FixPointCS
         public static int DivFast(int a, int b)
         {
             if (b == MinValue || b == 0)
+            {
+                InvalidArgument("Fixed32.DivFast", "b", b);
                 return 0;
+            }
 
             // Handle negative values.
             int sign = (b < 0) ? -1 : 1;
@@ -388,7 +413,10 @@ namespace FixPointCS
         public static int DivFastest(int a, int b)
         {
             if (b == MinValue || b == 0)
+            {
+                InvalidArgument("Fixed32.DivFastest", "b", b);
                 return 0;
+            }
 
             // Handle negative values.
             int sign = (b < 0) ? -1 : 1;
@@ -424,8 +452,12 @@ namespace FixPointCS
         public static int SqrtPrecise(int a)
         {
             // Adapted from https://github.com/chmike/fpsqrt
-            if (a < 0)
+            if (a <= 0)
+            {
+                if (a < 0)
+                    InvalidArgument("Fixed32.SqrtPrecise", "a", a);
                 return 0;
+            }
 
 #if JAVA
             int r = a;
@@ -468,7 +500,11 @@ namespace FixPointCS
         {
             // Return 0 for all non-positive values.
             if (x <= 0)
+            {
+                if (x < 0)
+                    InvalidArgument("Fixed32.Sqrt", "x", x);
                 return 0;
+            }
 
             // Constants (s2.30).
             const int ONE = (1 << 30);
@@ -493,7 +529,11 @@ namespace FixPointCS
         {
             // Return 0 for all non-positive values.
             if (x <= 0)
+            {
+                if (x < 0)
+                    InvalidArgument("Fixed32.SqrtFast", "x", x);
                 return 0;
+            }
 
             // Constants (s2.30).
             const int ONE = (1 << 30);
@@ -518,7 +558,11 @@ namespace FixPointCS
         {
             // Return 0 for all non-positive values.
             if (x <= 0)
+            {
+                if (x < 0)
+                    InvalidArgument("Fixed32.SqrtFastest", "x", x);
                 return 0;
+            }
 
             // Constants (s2.30).
             const int ONE = (1 << 30);
@@ -546,7 +590,10 @@ namespace FixPointCS
         {
             // Return 0 for invalid values
             if (x <= 0)
+            {
+                InvalidArgument("Fixed32.RSqrt", "x", x);
                 return 0;
+            }
 
             // Constants (s2.30).
             const int ONE = (1 << 30);
@@ -574,7 +621,10 @@ namespace FixPointCS
         {
             // Return 0 for invalid values
             if (x <= 0)
+            {
+                InvalidArgument("Fixed32.RSqrtFast", "x", x);
                 return 0;
+            }
 
             // Constants (s2.30).
             const int ONE = (1 << 30);
@@ -602,7 +652,10 @@ namespace FixPointCS
         {
             // Return 0 for invalid values
             if (x <= 0)
+            {
+                InvalidArgument("Fixed32.RSqrtFastest", "x", x);
                 return 0;
+            }
 
             // Constants (s2.30).
             const int ONE = (1 << 30);
@@ -629,7 +682,10 @@ namespace FixPointCS
         public static int Rcp(int x)
         {
             if (x == MinValue || x == 0)
+            {
+                InvalidArgument("Fixed32.Rcp", "x", x);
                 return 0;
+            }
 
             // Handle negative values.
             int sign = (x < 0) ? -1 : 1;
@@ -654,7 +710,10 @@ namespace FixPointCS
         public static int RcpFast(int x)
         {
             if (x == MinValue || x == 0)
+            {
+                InvalidArgument("Fixed32.RcpFast", "x", x);
                 return 0;
+            }
 
             // Handle negative values.
             int sign = (x < 0) ? -1 : 1;
@@ -680,7 +739,10 @@ namespace FixPointCS
         public static int RcpFastest(int x)
         {
             if (x == MinValue || x == 0)
+            {
+                InvalidArgument("Fixed32.RcpFastest", "x", x);
                 return 0;
+            }
 
             // Handle negative values.
             int sign = (x < 0) ? -1 : 1;
@@ -776,7 +838,10 @@ namespace FixPointCS
         {
             // Return 0 for invalid values
             if (x <= 0)
+            {
+                InvalidArgument("Fixed32.Log", "x", x);
                 return 0;
+            }
 
             // Normalize value to range [1.0, 2.0( as s2.30 and extract exponent.
             int offset = 15 - Nlz((uint)x);
@@ -795,7 +860,10 @@ namespace FixPointCS
         {
             // Return 0 for invalid values
             if (x <= 0)
+            {
+                InvalidArgument("Fixed32.LogFast", "x", x);
                 return 0;
+            }
 
             // Normalize value to range [1.0, 2.0( as s2.30 and extract exponent.
             int offset = 15 - Nlz((uint)x);
@@ -814,7 +882,10 @@ namespace FixPointCS
         {
             // Return 0 for invalid values
             if (x <= 0)
+            {
+                InvalidArgument("Fixed32.LogFastest", "x", x);
                 return 0;
+            }
 
             // Normalize value to range [1.0, 2.0( as s2.30 and extract exponent.
             int offset = 15 - Nlz((uint)x);
@@ -833,7 +904,10 @@ namespace FixPointCS
         {
             // Return 0 for invalid values
             if (x <= 0)
+            {
+                InvalidArgument("Fixed32.Log2", "x", x);
                 return 0;
+            }
 
             // Normalize value to range [1.0, 2.0( as s2.30 and extract exponent.
             int offset = 15 - Nlz((uint)x);
@@ -852,7 +926,10 @@ namespace FixPointCS
         {
             // Return 0 for invalid values
             if (x <= 0)
+            {
+                InvalidArgument("Fixed32.Log2Fast", "x", x);
                 return 0;
+            }
 
             // Normalize value to range [1.0, 2.0( as s2.30 and extract exponent.
             int offset = 15 - Nlz((uint)x);
@@ -871,7 +948,10 @@ namespace FixPointCS
         {
             // Return 0 for invalid values
             if (x <= 0)
+            {
+                InvalidArgument("Fixed32.Log2Fastest", "x", x);
                 return 0;
+            }
 
             // Normalize value to range [1.0, 2.0( as s2.30 and extract exponent.
             int offset = 15 - Nlz((uint)x);
@@ -893,7 +973,11 @@ namespace FixPointCS
         {
             // Return 0 for invalid values
             if (x <= 0)
+            {
+                if (x < 0)
+                    InvalidArgument("Fixed32.Pow", "x", x);
                 return 0;
+            }
 
             return Exp(Mul(exponent, Log(x)));
         }
@@ -905,7 +989,11 @@ namespace FixPointCS
         {
             // Return 0 for invalid values
             if (x <= 0)
+            {
+                if (x < 0)
+                    InvalidArgument("Fixed32.PowFast", "x", x);
                 return 0;
+            }
 
             return ExpFast(Mul(exponent, LogFast(x)));
         }
@@ -917,7 +1005,11 @@ namespace FixPointCS
         {
             // Return 0 for invalid values
             if (x <= 0)
+            {
+                if (x < 0)
+                    InvalidArgument("Fixed32.PowFastest", "x", x);
                 return 0;
+            }
 
             return ExpFastest(Mul(exponent, LogFastest(x)));
         }
@@ -1221,7 +1313,10 @@ namespace FixPointCS
         {
             // Return 0 for invalid values
             if (x < -One || x > One)
+            {
+                InvalidArgument("Fixed32.Asin", "x", x);
                 return 0;
+            }
 
             // Compute Atan2(x, Sqrt((1+x) * (1-x))), using s32.32.
             long xx = (long)(One + x) * (long)(One - x);
@@ -1233,7 +1328,10 @@ namespace FixPointCS
         {
             // Return 0 for invalid values
             if (x < -One || x > One)
+            {
+                InvalidArgument("Fixed32.AsinFast", "x", x);
                 return 0;
+            }
 
             // Compute Atan2(x, Sqrt((1+x) * (1-x))), using s32.32.
             long xx = (long)(One + x) * (long)(One - x);
@@ -1245,7 +1343,10 @@ namespace FixPointCS
         {
             // Return 0 for invalid values
             if (x < -One || x > One)
+            {
+                InvalidArgument("Fixed32.AsinFastest", "x", x);
                 return 0;
+            }
 
             // Compute Atan2(x, Sqrt((1+x) * (1-x))), using s32.32.
             long xx = (long)(One + x) * (long)(One - x);
@@ -1257,7 +1358,10 @@ namespace FixPointCS
         {
             // Return 0 for invalid values
             if (x < -One || x > One)
+            {
+                InvalidArgument("Fixed32.Acos", "x", x);
                 return 0;
+            }
 
             // Compute Atan2(Sqrt((1+x) * (1-x)), x), using s32.32.
             long xx = (long)(One + x) * (long)(One - x);
@@ -1269,7 +1373,10 @@ namespace FixPointCS
         {
             // Return 0 for invalid values
             if (x < -One || x > One)
+            {
+                InvalidArgument("Fixed32.AcosFast", "x", x);
                 return 0;
+            }
 
             // Compute Atan2(Sqrt((1+x) * (1-x)), x), using s32.32.
             long xx = (long)(One + x) * (long)(One - x);
@@ -1281,7 +1388,10 @@ namespace FixPointCS
         {
             // Return 0 for invalid values
             if (x < -One || x > One)
+            {
+                InvalidArgument("Fixed32.AcosFastest", "x", x);
                 return 0;
+            }
 
             // Compute Atan2(Sqrt((1+x) * (1-x)), x), using s32.32.
             long xx = (long)(One + x) * (long)(One - x);
