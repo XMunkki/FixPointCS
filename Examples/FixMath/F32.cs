@@ -228,7 +228,7 @@ namespace FixMath
 
         public override int GetHashCode()
         {
-            return (int)Raw | (int)(Raw >> 32);
+            return Raw;
         }
     }
 }
