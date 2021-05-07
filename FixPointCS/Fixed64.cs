@@ -363,7 +363,7 @@ namespace FixPointCS
         /// </summary>
         public static long DivPrecise(long arg_a, long arg_b)
         {
-            // From http://www.hackersdelight.org/hdcodetxt/divlu.c.txt
+            // From https://web.archive.org/web/20190109053731/http://www.hackersdelight.org/hdcodetxt/divlu.c.txt
 
 #if JAVA
             long sign_dif = arg_a ^ arg_b;
