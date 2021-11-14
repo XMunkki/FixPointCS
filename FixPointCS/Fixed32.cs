@@ -430,9 +430,13 @@ namespace FixPointCS
         /// </summary>
         public static int Mod(int a, int b)
         {
-            int di = a / b;
-            int ret = a - (di * b);
-            return ret;
+            if (b == 0)
+            {
+                FixedUtil.InvalidArgument("Fixed32.Mod", "b", b);
+                return 0;
+            }
+
+            return a % b;
         }
 
         /// <summary>
