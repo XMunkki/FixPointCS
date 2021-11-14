@@ -1400,6 +1400,51 @@ namespace FixPointCSTest
             ),
         };
 
+        static void CheckEqual(string op, F32 result, F32 expected)
+        {
+            if (result != expected)
+                Console.WriteLine("FAIL: {0} returned {1}, expecting {2}", op, result, expected);
+        }
+
+        static void CheckEqual(string op, F64 result, F64 expected)
+        {
+            if (result != expected)
+                Console.WriteLine("FAIL: {0} returned {1], expecting {2}", op, result, expected);
+        }
+
+        static void UnitTests()
+        {
+            CheckEqual("F32.Pow(0, 0)", F32.Pow(F32.Zero, F32.Zero), F32.One);
+            CheckEqual("F32.Pow(0, 1)", F32.Pow(F32.Zero, F32.One), F32.Zero);
+            CheckEqual("F32.Pow(1, 0)", F32.Pow(F32.One, F32.Zero), F32.One);
+            CheckEqual("F32.Pow(pi, 0)", F32.Pow(F32.Pi, F32.Zero), F32.One);
+
+            CheckEqual("F32.PowFast(0, 0)", F32.PowFast(F32.Zero, F32.Zero), F32.One);
+            CheckEqual("F32.PowFast(0, 1)", F32.PowFast(F32.Zero, F32.One), F32.Zero);
+            CheckEqual("F32.PowFast(1, 0)", F32.PowFast(F32.One, F32.Zero), F32.One);
+            CheckEqual("F32.PowFast(pi, 0)", F32.PowFast(F32.Pi, F32.Zero), F32.One);
+
+            CheckEqual("F32.PowFastest(0, 0)", F32.PowFastest(F32.Zero, F32.Zero), F32.One);
+            CheckEqual("F32.PowFastest(0, 1)", F32.PowFastest(F32.Zero, F32.One), F32.Zero);
+            CheckEqual("F32.PowFastest(1, 0)", F32.PowFastest(F32.One, F32.Zero), F32.One);
+            CheckEqual("F32.PowFastest(pi, 0)", F32.PowFastest(F32.Pi, F32.Zero), F32.One);
+
+            CheckEqual("F64.Pow(0, 0)", F64.Pow(F64.Zero, F64.Zero), F64.One);
+            CheckEqual("F64.Pow(0, 1)", F64.Pow(F64.Zero, F64.One), F64.Zero);
+            CheckEqual("F64.Pow(1, 0)", F64.Pow(F64.One, F64.Zero), F64.One);
+            CheckEqual("F64.Pow(pi, 0)", F64.Pow(F64.Pi, F64.Zero), F64.One);
+
+            CheckEqual("F64.PowFast(0, 0)", F64.PowFast(F64.Zero, F64.Zero), F64.One);
+            CheckEqual("F64.PowFast(0, 1)", F64.PowFast(F64.Zero, F64.One), F64.Zero);
+            CheckEqual("F64.PowFast(1, 0)", F64.PowFast(F64.One, F64.Zero), F64.One);
+            CheckEqual("F64.PowFast(pi, 0)", F64.PowFast(F64.Pi, F64.Zero), F64.One);
+
+            CheckEqual("F64.PowFastest(0, 0)", F64.PowFastest(F64.Zero, F64.Zero), F64.One);
+            CheckEqual("F64.PowFastest(0, 1)", F64.PowFastest(F64.Zero, F64.One), F64.Zero);
+            CheckEqual("F64.PowFastest(1, 0)", F64.PowFastest(F64.One, F64.Zero), F64.One);
+            CheckEqual("F64.PowFastest(pi, 0)", F64.PowFastest(F64.Pi, F64.Zero), F64.One);
+        }
+
         static void TestOperations(string testFilter)
         {
             Console.WriteLine("|              Operation |     Mops/s | Precision |        Max error |        Avg error | Worst input");
@@ -1534,6 +1579,9 @@ namespace FixPointCSTest
 
             // Generate unit tests for Java & C++
             GenerateUnitTests("");
+
+            // Basic unit tests
+            UnitTests();
 
             // Filter for choosing which tests to run. Empty runs all tests
             // Examples:

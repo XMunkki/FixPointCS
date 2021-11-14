@@ -1118,6 +1118,10 @@ namespace FixPointCS
         /// </summary>
         public static long Pow(long x, long exponent)
         {
+            // n^0 == 1
+            if (exponent == 0)
+                return One;
+
             // Return 0 for invalid values
             if (x <= 0)
             {
@@ -1134,6 +1138,10 @@ namespace FixPointCS
         /// </summary>
         public static long PowFast(long x, long exponent)
         {
+            // n^0 == 1
+            if (exponent == 0)
+                return One;
+
             // Return 0 for invalid values
             if (x <= 0)
             {
@@ -1150,6 +1158,10 @@ namespace FixPointCS
         /// </summary>
         public static long PowFastest(long x, long exponent)
         {
+            // n^0 == 1
+            if (exponent == 0)
+                return One;
+
             // Return 0 for invalid values
             if (x <= 0)
             {

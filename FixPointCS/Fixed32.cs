@@ -960,6 +960,10 @@ namespace FixPointCS
         /// </summary>
         public static int Pow(int x, int exponent)
         {
+            // n^0 == 1
+            if (exponent == 0)
+                return One;
+
             // Return 0 for invalid values
             if (x <= 0)
             {
@@ -976,6 +980,10 @@ namespace FixPointCS
         /// </summary>
         public static int PowFast(int x, int exponent)
         {
+            // n^0 == 1
+            if (exponent == 0)
+                return One;
+
             // Return 0 for invalid values
             if (x <= 0)
             {
@@ -992,6 +1000,10 @@ namespace FixPointCS
         /// </summary>
         public static int PowFastest(int x, int exponent)
         {
+            // n^0 == 1
+            if (exponent == 0)
+                return One;
+
             // Return 0 for invalid values
             if (x <= 0)
             {
