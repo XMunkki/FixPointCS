@@ -73,7 +73,7 @@ namespace Transpiler
             }
 
             // Save the file
-            File.WriteAllText(outPath, sb.ToString(), Encoding.ASCII);
+            File.WriteAllText(outPath, sb.ToString().Replace("\r", ""), Encoding.ASCII);
         }
 
         // Prefix for the generated file

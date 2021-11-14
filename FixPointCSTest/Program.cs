@@ -1423,6 +1423,7 @@ namespace FixPointCSTest
 
             using (StreamWriter file = new StreamWriter("../Java/UnitTest.java"))
             {
+                file.NewLine = "\n";
                 file.WriteLine("package fixpointcs.test;");
                 file.WriteLine("");
                 file.WriteLine("import fixpointcs.*;");
@@ -1467,6 +1468,7 @@ namespace FixPointCSTest
 
             using (StreamWriter file = new StreamWriter("../Cpp/UnitTest.cpp"))
             {
+                file.NewLine = "\n";
                 file.WriteLine("#include \"UnitTest.h\"");
                 file.WriteLine("#include \"Fixed32.h\"");
                 file.WriteLine("#include \"Fixed64.h\"");

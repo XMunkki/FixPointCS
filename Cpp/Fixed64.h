@@ -82,8 +82,8 @@ namespace Fixed64
     static const FP_LONG PiHalf = INT64_C(6746518852);
     static const FP_LONG E = INT64_C(11674931555);
 
-    static const FP_LONG MinValue = INT64_C(-9223372036854775808);
-    static const FP_LONG MaxValue = INT64_C(9223372036854775807);
+    static const FP_LONG MinValue = INT64_MIN;
+    static const FP_LONG MaxValue = INT64_MAX;
 
     // Private constants
     static const FP_LONG RCP_LN2      = INT64_C(0x171547652); // 1.0 / log(2.0) ~= 1.4426950408889634
