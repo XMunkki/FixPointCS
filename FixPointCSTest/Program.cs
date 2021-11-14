@@ -1421,7 +1421,7 @@ namespace FixPointCSTest
         {
             Console.WriteLine("Generating Java unit tests..");
 
-            using (StreamWriter file = new StreamWriter("../../../../Java/UnitTest.java"))
+            using (StreamWriter file = new StreamWriter("../Java/UnitTest.java"))
             {
                 file.WriteLine("package fixpointcs.test;");
                 file.WriteLine("");
@@ -1465,7 +1465,7 @@ namespace FixPointCSTest
         {
             Console.WriteLine("Generating C++ unit tests..");
 
-            using (StreamWriter file = new StreamWriter("../../../../Cpp/UnitTest.cpp"))
+            using (StreamWriter file = new StreamWriter("../Cpp/UnitTest.cpp"))
             {
                 file.WriteLine("#include \"UnitTest.h\"");
                 file.WriteLine("#include \"Fixed32.h\"");
@@ -1515,9 +1515,6 @@ namespace FixPointCSTest
 
         static void Main(string[] args)
         {
-            // Run on second core only, set process/thread priority to high.
-            // Produces more stable results from benchmarks.
-            Process.GetCurrentProcess().ProcessorAffinity = new IntPtr(2);
             Process.GetCurrentProcess().PriorityClass = ProcessPriorityClass.High;
             Thread.CurrentThread.Priority = ThreadPriority.Highest;
 

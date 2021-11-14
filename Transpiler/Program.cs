@@ -27,9 +27,9 @@ namespace Transpiler
 {
     class Program
     {
-        const string InputPath      = "../../../../FixPointCS";
-        const string CppOutputPath  = "../../../../Cpp";
-        const string JavaOutputPath = "../../../../Java";
+        const string InputPath      = "../FixPointCS";
+        const string CppOutputPath  = "../Cpp";
+        const string JavaOutputPath = "../Java";
 
         static void Main(string[] args)
         {
