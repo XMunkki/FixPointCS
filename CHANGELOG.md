@@ -9,6 +9,7 @@
 - Fix C++ transpiled code to use INT64_MIN and INT64_MAX.
 - Generate only LF in transpiler.
 - Removed extra logic from F32.GetHashCode(), still outputs the same value.
+- Use System.Numerics.BitOperations.LeadingZeroCount() with .NET 5 or higher. Boosts performance by about 10% for methods relying on it.
 
 ### Breaking (these can cause math function outputs to change and thus break determinism)
 

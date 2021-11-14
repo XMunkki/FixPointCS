@@ -278,6 +278,9 @@ namespace Fixed32
 
     static FP_INT Nlz(FP_UINT x)
     {
+    #if NET5_0_OR_GREATER
+        return System.Numerics.BitOperations.LeadingZeroCount(x);
+    #else
         FP_INT n = 0;
         if (x <= 0x0000FFFF) { n = n + 16; x = x << 16; }
         if (x <= 0x00FFFFFF) { n = n + 8; x = x << 8; }
@@ -286,6 +289,7 @@ namespace Fixed32
         if (x <= 0x7FFFFFFF) { n = n + 1; }
         if (x == 0) return 32;
         return n;
+    #endif
     }
 
     /// <summary>

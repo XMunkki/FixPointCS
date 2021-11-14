@@ -295,6 +295,9 @@ namespace Fixed64
 
     static FP_INT Nlz(FP_ULONG x)
     {
+    #if NET5_0_OR_GREATER
+        return System.Numerics.BitOperations.LeadingZeroCount(x);
+    #else
         FP_INT n = 0;
         if (x <= INT64_C(0x00000000FFFFFFFF)) { n = n + 32; x = x << 32; }
         if (x <= INT64_C(0x0000FFFFFFFFFFFF)) { n = n + 16; x = x << 16; }
@@ -304,6 +307,7 @@ namespace Fixed64
         if (x <= INT64_C(0x7FFFFFFFFFFFFFFF)) { n = n + 1; }
         if (x == 0) return 64;
         return n;
+    #endif
     }
 
     /// <summary>

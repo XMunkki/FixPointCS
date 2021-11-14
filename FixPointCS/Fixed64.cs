@@ -346,6 +346,9 @@ namespace FixPointCS
         [MethodImpl(FixedUtil.AggressiveInlining)]
         private static int Nlz(ulong x)
         {
+        #if NET5_0_OR_GREATER
+            return System.Numerics.BitOperations.LeadingZeroCount(x);
+        #else
             int n = 0;
             if (x <= 0x00000000FFFFFFFFL) { n = n + 32; x = x << 32; }
             if (x <= 0x0000FFFFFFFFFFFFL) { n = n + 16; x = x << 16; }
@@ -355,6 +358,7 @@ namespace FixPointCS
             if (x <= 0x7FFFFFFFFFFFFFFFL) { n = n + 1; }
             if (x == 0) return 64;
             return n;
+        #endif
         }
 #endif
 
