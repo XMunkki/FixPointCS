@@ -1,7 +1,7 @@
 
 # Changelog
 
-## Unreleased
+## 0.2 (2021-11-14)
 
 ### Changes
 
