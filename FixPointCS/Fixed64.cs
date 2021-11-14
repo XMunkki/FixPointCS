@@ -588,9 +588,13 @@ namespace FixPointCS
         /// </summary>
         public static long Mod(long a, long b)
         {
-            long di = a / b;
-            long ret = a - (di * b);
-            return ret;
+            if (b == 0)
+            {
+                FixedUtil.InvalidArgument("Fixed64.Mod", "b", b);
+                return 0;
+            }
+
+            return a % b;
         }
 
         /// <summary>

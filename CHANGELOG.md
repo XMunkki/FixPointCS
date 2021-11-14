@@ -14,6 +14,7 @@
 ### Breaking (these can cause math function outputs to change and thus break determinism)
 
 - Changed F64.GetHashCode() to use System.Int64.GetHashCode().
+- Fixed64.Mod() checks for div-by-zero. Simplify the code by using the modulo operator (%).
 
 ## 0.1 (2019-06-22)
 
