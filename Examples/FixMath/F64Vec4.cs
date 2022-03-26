@@ -1,7 +1,7 @@
 ﻿//
 // FixPointCS
 //
-// Copyright(c) 2018-2019 Jere Sanisalo, Petri Kero
+// Copyright(c) Jere Sanisalo, Petri Kero
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -21,9 +21,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 //
+using FixPointCS;
 using System;
 using System.Runtime.CompilerServices;
-using FixPointCS;
 
 namespace FixMath
 {
