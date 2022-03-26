@@ -1,6 +1,12 @@
 
 # Changelog
 
+## 0.3 (unrelesed)
+
+### Changes
+
+- Upgrade all C# projects to .NET 6.
+
 ## 0.2 (2021-11-14)
 
 ### Changes
