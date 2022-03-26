@@ -1,7 +1,7 @@
 
 # Changelog
 
-## 0.3 (unrelesed)
+## 0.3 (2022-03-26)
 
 ### Changes
 
