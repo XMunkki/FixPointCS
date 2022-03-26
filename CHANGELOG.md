@@ -6,6 +6,13 @@
 ### Changes
 
 - Upgrade all C# projects to .NET 6.
+- FixMath: Replace F32 and F64 constructors with explicit FromInt(), FromFloat(), FromDouble() to avoid accidental implicit casts.
+- FixMath: F32 and F64 now implement IComparable to make them usable in unit test assertion macros.
+- FixMath: Optimize Lerp() operations with a simpler formula.
+- FixMath: Introduce Clamp01() method for F32 and F64 which clamps the input to [0, 1] range.
+- FixMath: Introduce some extra inlining to speed up code using the library.
+- FixMath: F32 family of Length*() and Normalize*() methods now use 64-bit intermediate results to avoid overflows.
+- FixMath: F32Vec*.LengthSqr() now returns F64 to avoid overflows.
 
 ## 0.2 (2021-11-14)
 

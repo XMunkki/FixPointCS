@@ -45,6 +45,7 @@ namespace FixMath
         public static F64Vec3 AxisY     { [MethodImpl(FixedUtil.AggressiveInlining)] get { return new F64Vec3(Fixed64.Zero, Fixed64.One, Fixed64.Zero); } }
         public static F64Vec3 AxisZ     { [MethodImpl(FixedUtil.AggressiveInlining)] get { return new F64Vec3(Fixed64.Zero, Fixed64.Zero, Fixed64.One); } }
 
+        // Raw components
         public long RawX;
         public long RawY;
         public long RawZ;
@@ -75,6 +76,7 @@ namespace FixMath
             RawZ = z;
         }
 
+        public static F64Vec3 FromRaw(long rawX, long rawY, long rawZ) { return new F64Vec3(rawX, rawY, rawZ); }
         public static F64Vec3 FromInt(int x, int y, int z) { return new F64Vec3(Fixed64.FromInt(x), Fixed64.FromInt(y), Fixed64.FromInt(z)); }
         public static F64Vec3 FromFloat(float x, float y, float z) { return new F64Vec3(Fixed64.FromFloat(x), Fixed64.FromFloat(y), Fixed64.FromFloat(z)); }
         public static F64Vec3 FromDouble(double x, double y, double z) { return new F64Vec3(Fixed64.FromDouble(x), Fixed64.FromDouble(y), Fixed64.FromDouble(z)); }
@@ -179,11 +181,12 @@ namespace FixMath
 
         public static F64Vec3 Lerp(F64Vec3 a, F64Vec3 b, F64 t)
         {
-            long tr = t.Raw;
+            long tb = t.Raw;
+            long ta = Fixed64.One - tb;
             return new F64Vec3(
-                Fixed64.Lerp(a.RawX, b.RawX, tr),
-                Fixed64.Lerp(a.RawY, b.RawY, tr),
-                Fixed64.Lerp(a.RawZ, b.RawZ, tr));
+                Fixed64.Mul(a.RawX, ta) + Fixed64.Mul(b.RawX, tb),
+                Fixed64.Mul(a.RawY, ta) + Fixed64.Mul(b.RawY, tb),
+                Fixed64.Mul(a.RawZ, ta) + Fixed64.Mul(b.RawZ, tb));
         }
 
         public static F64Vec3 Cross(F64Vec3 a, F64Vec3 b)

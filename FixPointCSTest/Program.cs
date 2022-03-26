@@ -982,6 +982,21 @@ namespace FixPointCSTest
             //    }
             //),
 
+            // \todo [petri] implement Lerp
+            //new TernaryOpFamily(
+            //    (double i0, double i1, double i2) => { return (1.0-i2)*i0 + i2*i1; },
+            //    AbsoluteBinaryErrorEvaluator(),
+            //    Operation.Multi(
+            //        Operation.F64_F64_F64_F64("Fixed64.Lerp", (int n, F64[] i0, F64[] i1, F64[] i2, F64[] o) => { for (int i=0; i<n; i++) { o[i] = F64.Lerp(i0[i], i1[i], i2[i]); } }),
+            //        Operation.F32_F32_F32_F32("Fixed32.Lerp", (int n, F32[] i0, F32[] i1, F32[] i2, F32[] o) => { for (int i=0; i<n; i++) { o[i] = F32.Lerp(i0[i], i1[i], i2[i]); } })
+            //    ),
+            //    bounds => new[] {
+            //        InputGenerator.Ternary(Input.Uniform(-1.0, 1.0), Input.Uniform(-1.0, 1.0), Input.Uniform(-1.0, 2.0)),
+            //        InputGenerator.Ternary(Input.Uniform(-1e5, 1e5), Input.Uniform(-1e5, 1e5), Input.Uniform(-1e5, 1e5)),
+            //        InputGenerator.Ternary(Input.Uniform(bounds.InputNegMax, bounds.InputPosMax), Input.Uniform(bounds.InputNegMax, bounds.InputPosMax), Input.Uniform(0.0, 1.0)),
+            //    }
+            //),
+
             new UnaryOpFamily(
                 (double i0) => { return Math.Ceiling(i0); },
                 AbsoluteUnaryErrorEvaluator(),

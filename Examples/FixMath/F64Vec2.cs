@@ -64,6 +64,7 @@ namespace FixMath
             RawY = y;
         }
 
+        public static F64Vec2 FromRaw(long rawX, long rawY) { return new F64Vec2(rawX, rawY); }
         public static F64Vec2 FromInt(int x, int y) { return new F64Vec2(Fixed64.FromInt(x), Fixed64.FromInt(y)); }
         public static F64Vec2 FromFloat(float x, float y) { return new F64Vec2(Fixed64.FromFloat(x), Fixed64.FromFloat(y)); }
         public static F64Vec2 FromDouble(double x, double y) { return new F64Vec2(Fixed64.FromDouble(x), Fixed64.FromDouble(y)); }
@@ -166,10 +167,11 @@ namespace FixMath
 
         public static F64Vec2 Lerp(F64Vec2 a, F64Vec2 b, F64 t)
         {
-            long tr = t.Raw;
+            long tb = t.Raw;
+            long ta = Fixed64.One - tb;
             return new F64Vec2(
-                Fixed64.Lerp(a.RawX, b.RawX, tr),
-                Fixed64.Lerp(a.RawY, b.RawY, tr));
+                Fixed64.Mul(a.RawX, ta) + Fixed64.Mul(b.RawX, tb),
+                Fixed64.Mul(a.RawY, ta) + Fixed64.Mul(b.RawY, tb));
         }
 
         public bool Equals(F64Vec2 other)

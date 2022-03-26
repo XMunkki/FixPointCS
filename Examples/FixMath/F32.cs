@@ -31,7 +31,7 @@ namespace FixMath
     /// Signed 16.16 fixed point value struct.
     /// </summary>
     [Serializable]
-    public struct F32 : IComparable<F32>, IEquatable<F32>
+    public struct F32 : IComparable<F32>, IEquatable<F32>, IComparable
     {
         // Constants
         public static F32 Neg1      { [MethodImpl(FixedUtil.AggressiveInlining)] get { return FromRaw(Fixed32.Neg1); } }
@@ -50,11 +50,12 @@ namespace FixMath
         // Raw fixed point value
         public int Raw;
 
-        // Constructors
-        public F32(int v) { Raw = Fixed32.FromInt(v); }
-        public F32(float v) { Raw = Fixed32.FromFloat(v); }
-        public F32(double v) { Raw = Fixed32.FromDouble(v); }
-        public F32(F64 v) { Raw = (int)(v.Raw >> 16); }
+        // Construction
+        [MethodImpl(FixedUtil.AggressiveInlining)] public static F32 FromRaw(int raw) { F32 v; v.Raw = raw; return v; }
+        [MethodImpl(FixedUtil.AggressiveInlining)] public static F32 FromInt(int v) { return FromRaw(Fixed32.FromInt(v)); }
+        [MethodImpl(FixedUtil.AggressiveInlining)] public static F32 FromFloat(float v) { return FromRaw(Fixed32.FromFloat(v)); }
+        [MethodImpl(FixedUtil.AggressiveInlining)] public static F32 FromDouble(double v) { return FromRaw(Fixed32.FromDouble(v)); }
+        [MethodImpl(FixedUtil.AggressiveInlining)] public static F32 FromF64(F64 v) { return FromRaw((int)(v.Raw >> 16)); }
 
         // Conversions
         public static int FloorToInt(F32 a) { return Fixed32.FloorToInt(a.Raw); }
@@ -181,6 +182,7 @@ namespace FixMath
         public static F32 Min(F32 a, F32 b) { return FromRaw(Fixed32.Min(a.Raw, b.Raw)); }
         public static F32 Max(F32 a, F32 b) { return FromRaw(Fixed32.Max(a.Raw, b.Raw)); }
         public static F32 Clamp(F32 a, F32 min, F32 max) { return FromRaw(Fixed32.Clamp(a.Raw, min.Raw, max.Raw)); }
+        public static F32 Clamp01(F32 a) { return FromRaw(Fixed32.Clamp(a.Raw, Fixed32.Zero, Fixed32.One)); }
 
         public static F32 Lerp(F32 a, F32 b, F32 t)
         {
@@ -188,19 +190,6 @@ namespace FixMath
             int ta = Fixed32.One - tb;
             return FromRaw(Fixed32.Mul(a.Raw, ta) + Fixed32.Mul(b.Raw, tb));
         }
-
-        [MethodImpl(FixedUtil.AggressiveInlining)]
-        public static F32 FromRaw(int raw)
-        {
-            F32 r;
-            r.Raw = raw;
-            return r;
-        }
-
-        public static F32 FromInt(int v) { return new F32(v); }
-        public static F32 FromFloat(float v) { return new F32(v); }
-        public static F32 FromDouble(double v) { return new F32(v); }
-        public static F32 FromF64(F64 v) { return new F32(v); }
 
         public bool Equals(F32 other)
         {
@@ -229,6 +218,16 @@ namespace FixMath
         public override int GetHashCode()
         {
             return Raw;
+        }
+
+        int IComparable.CompareTo(object obj)
+        {
+            if (obj is F32 other)
+                return CompareTo(other);
+            else if (obj is null)
+                return 1;
+            // don't allow comparisons with other numeric or non-numeric types.
+            throw new ArgumentException("F32 can only be compared against another F32.");
         }
     }
 }
