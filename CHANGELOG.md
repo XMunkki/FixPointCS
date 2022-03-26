@@ -14,6 +14,7 @@
 - FixMath: F32 family of Length*() and Normalize*() methods now use 64-bit intermediate results to avoid overflows.
 - FixMath: F32Vec*.LengthSqr() now returns F64 to avoid overflows.
 - Fixed32.Nlz(): Disabled the System.Numerics.BitOperations.LeadingZeroCount() because it's slower in benchmarks.
+- Fixed32,64.ToString() now uses CultureInfo.InvariantCulture.
 
 ## 0.2 (2021-11-14)
 

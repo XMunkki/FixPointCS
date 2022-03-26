@@ -51,9 +51,9 @@ import java.lang.Double;
  * Use up-to C# 3 features to keep the library compatible with older versions
  * of Unity.
  */
-using System;
-using System.Runtime.CompilerServices;
 using System.Diagnostics;
+using System.Globalization;
+using System.Runtime.CompilerServices;
 #endif
 
 #if !TRANSPILE
@@ -178,7 +178,7 @@ namespace FixPointCS
 #else
         public static string ToString(int v)
         {
-            return ToDouble(v).ToString();
+            return ToDouble(v).ToString(CultureInfo.InvariantCulture);
         }
 #endif
 

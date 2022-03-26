@@ -52,8 +52,9 @@ import java.lang.Double;
  * of Unity.
  */
 using System;
-using System.Runtime.CompilerServices;
 using System.Diagnostics;
+using System.Globalization;
+using System.Runtime.CompilerServices;
 #endif
 
 #if !TRANSPILE
@@ -178,7 +179,7 @@ namespace FixPointCS
 #else
         public static string ToString(long v)
         {
-            return ToDouble(v).ToString();
+            return ToDouble(v).ToString(CultureInfo.InvariantCulture);
         }
 #endif
 
