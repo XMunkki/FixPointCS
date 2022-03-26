@@ -57,18 +57,21 @@ namespace RayTracer
         {
             this.Show();
 
-            Stopwatch sw = Stopwatch.StartNew();
-            System.Drawing.Color[,] pixels = FixedTracer.RayTracer.RenderDefaultScene(width, height, 16);
-            //System.Drawing.Color[,] pixels = DoubleTracer.RayTracer.RenderDefaultScene(width, height);
-            sw.Stop();
-            Console.WriteLine("Elapsed: {0:0.00}s", sw.Elapsed.TotalSeconds);
+            for (int ndx = 0; ndx < 10; ndx++)
+            {
+                Stopwatch sw = Stopwatch.StartNew();
+                System.Drawing.Color[,] pixels = FixedTracer.RayTracer.RenderDefaultScene(width, height, 16);
+                //System.Drawing.Color[,] pixels = DoubleTracer.RayTracer.RenderDefaultScene(width, height);
+                sw.Stop();
+                Console.WriteLine("Elapsed: {0:0.00}s", sw.Elapsed.TotalSeconds);
 
-            for (int y = 0; y < height; y++)
-                for (int x = 0; x < width; x++)
-                    bitmap.SetPixel(x, y, pixels[x, y]);
+                for (int y = 0; y < height; y++)
+                    for (int x = 0; x < width; x++)
+                        bitmap.SetPixel(x, y, pixels[x, y]);
 
-            pictureBox.Refresh();
-            pictureBox.Invalidate();
+                pictureBox.Refresh();
+                pictureBox.Invalidate();
+            }
         }
 
         [STAThread]
