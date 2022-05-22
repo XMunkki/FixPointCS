@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="BenchmarkDotNet" Version="0.10.14" />
+	<Compile Include="..\FixPointCS\F64.cs" Link="F64.cs" />
+	<Compile Include="..\FixPointCS\Fixed64.cs" Link="Fixed64.cs" />
+  </ItemGroup>
+
+</Project>
