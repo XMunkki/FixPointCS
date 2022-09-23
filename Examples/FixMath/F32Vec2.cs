@@ -1,7 +1,7 @@
 ﻿//
 // FixPointCS
 //
-// Copyright(c) 2018-2019 Jere Sanisalo, Petri Kero
+// Copyright(c) Jere Sanisalo, Petri Kero
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -21,9 +21,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 //
+using FixPointCS;
 using System;
 using System.Runtime.CompilerServices;
-using FixPointCS;
 
 namespace FixMath
 {
@@ -36,6 +36,7 @@ namespace FixMath
         // Constants
         public static F32Vec2 Zero     { [MethodImpl(FixedUtil.AggressiveInlining)] get { return new F32Vec2(Fixed32.Zero, Fixed32.Zero); } }
         public static F32Vec2 One      { [MethodImpl(FixedUtil.AggressiveInlining)] get { return new F32Vec2(Fixed32.One, Fixed32.One); } }
+        public static F32Vec2 Half     { [MethodImpl(FixedUtil.AggressiveInlining)] get { return new F32Vec2(Fixed32.Half, Fixed32.Half); } }
         public static F32Vec2 Down     { [MethodImpl(FixedUtil.AggressiveInlining)] get { return new F32Vec2(Fixed32.Zero, Fixed32.Neg1); } }
         public static F32Vec2 Up       { [MethodImpl(FixedUtil.AggressiveInlining)] get { return new F32Vec2(Fixed32.Zero, Fixed32.One); } }
         public static F32Vec2 Left     { [MethodImpl(FixedUtil.AggressiveInlining)] get { return new F32Vec2(Fixed32.Neg1, Fixed32.Zero); } }
@@ -64,6 +65,7 @@ namespace FixMath
             RawY = y;
         }
 
+        public static F32Vec2 FromRaw(int rawX, int rawY) { return new F32Vec2(rawX, rawY); }
         public static F32Vec2 FromInt(int x, int y) { return new F32Vec2(Fixed32.FromInt(x), Fixed32.FromInt(y)); }
         public static F32Vec2 FromFloat(float x, float y) { return new F32Vec2(Fixed32.FromFloat(x), Fixed32.FromFloat(y)); }
         public static F32Vec2 FromDouble(double x, double y) { return new F32Vec2(Fixed32.FromDouble(x), Fixed32.FromDouble(y)); }
@@ -134,13 +136,13 @@ namespace FixMath
         public static F32Vec2 PowFast(F32Vec2 a, F32Vec2 b) { return new F32Vec2(Fixed32.PowFast(a.RawX, b.RawX), Fixed32.PowFast(a.RawY, b.RawY)); }
         public static F32Vec2 PowFastest(F32Vec2 a, F32Vec2 b) { return new F32Vec2(Fixed32.PowFastest(a.RawX, b.RawX), Fixed32.PowFastest(a.RawY, b.RawY)); }
 
-        public static F32 Length(F32Vec2 a) { return F32.FromRaw(Fixed32.Sqrt(Fixed32.Mul(a.RawX, a.RawX) + Fixed32.Mul(a.RawY, a.RawY))); }
-        public static F32 LengthFast(F32Vec2 a) { return F32.FromRaw(Fixed32.SqrtFast(Fixed32.Mul(a.RawX, a.RawX) + Fixed32.Mul(a.RawY, a.RawY))); }
-        public static F32 LengthFastest(F32Vec2 a) { return F32.FromRaw(Fixed32.SqrtFastest(Fixed32.Mul(a.RawX, a.RawX) + Fixed32.Mul(a.RawY, a.RawY))); }
-        public static F32 LengthSqr(F32Vec2 a) { return F32.FromRaw(Fixed32.Mul(a.RawX, a.RawX) + Fixed32.Mul(a.RawY, a.RawY)); }
-        public static F32Vec2 Normalize(F32Vec2 a) { F32 ooLen = F32.FromRaw(Fixed32.RSqrt(Fixed32.Mul(a.RawX, a.RawX) + Fixed32.Mul(a.RawY, a.RawY))); return ooLen * a; }
-        public static F32Vec2 NormalizeFast(F32Vec2 a) { F32 ooLen = F32.FromRaw(Fixed32.RSqrtFast(Fixed32.Mul(a.RawX, a.RawX) + Fixed32.Mul(a.RawY, a.RawY))); return ooLen * a; }
-        public static F32Vec2 NormalizeFastest(F32Vec2 a) { F32 ooLen = F32.FromRaw(Fixed32.RSqrtFastest(Fixed32.Mul(a.RawX, a.RawX) + Fixed32.Mul(a.RawY, a.RawY))); return ooLen * a; }
+        public static F32 Length(F32Vec2 a) { return F32.FromRaw((int)(Fixed64.Sqrt((long)a.RawX * (long)a.RawX + (long)a.RawY * (long)a.RawY) >> 16)); }
+        public static F32 LengthFast(F32Vec2 a) { return F32.FromRaw((int)(Fixed64.SqrtFast((long)a.RawX * (long)a.RawX + (long)a.RawY * (long)a.RawY) >> 16)); }
+        public static F32 LengthFastest(F32Vec2 a) { return F32.FromRaw((int)(Fixed64.SqrtFastest((long)a.RawX * (long)a.RawX + (long)a.RawY * (long)a.RawY) >> 16)); }
+        public static F64 LengthSqr(F32Vec2 a) { return F64.FromRaw((long)a.RawX * (long)a.RawX + (long)a.RawY * (long)a.RawY); }
+        public static F32Vec2 Normalize(F32Vec2 a) { F32 ooLen = F32.FromRaw((int)(Fixed64.RSqrt((long)a.RawX * (long)a.RawX + (long)a.RawY * (long)a.RawY) >> 16)); return ooLen * a; }
+        public static F32Vec2 NormalizeFast(F32Vec2 a) { F32 ooLen = F32.FromRaw((int)(Fixed64.RSqrtFast((long)a.RawX * (long)a.RawX + (long)a.RawY * (long)a.RawY) >> 16)); return ooLen * a; }
+        public static F32Vec2 NormalizeFastest(F32Vec2 a) { F32 ooLen = F32.FromRaw((int)(Fixed64.RSqrtFastest((long)a.RawX * (long)a.RawX + (long)a.RawY * (long)a.RawY) >> 16)); return ooLen * a; }
 
         public static F32 Dot(F32Vec2 a, F32Vec2 b) { return F32.FromRaw(Fixed32.Mul(a.RawX, b.RawX) + Fixed32.Mul(a.RawY, b.RawY)); }
         public static F32 Distance(F32Vec2 a, F32Vec2 b) { return Length(a - b); }
@@ -166,10 +168,11 @@ namespace FixMath
 
         public static F32Vec2 Lerp(F32Vec2 a, F32Vec2 b, F32 t)
         {
-            int tr = t.Raw;
+            int tb = t.Raw;
+            int ta = Fixed32.One - tb;
             return new F32Vec2(
-                Fixed32.Lerp(a.RawX, b.RawX, tr),
-                Fixed32.Lerp(a.RawY, b.RawY, tr));
+                Fixed32.Mul(a.RawX, ta) + Fixed32.Mul(b.RawX, tb),
+                Fixed32.Mul(a.RawY, ta) + Fixed32.Mul(b.RawY, tb));
         }
 
         public bool Equals(F32Vec2 other)

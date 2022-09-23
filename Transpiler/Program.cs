@@ -1,7 +1,7 @@
 //
 // FixPointCS
 //
-// Copyright(c) 2018-2019 Jere Sanisalo, Petri Kero
+// Copyright(c) Jere Sanisalo, Petri Kero
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -27,9 +27,9 @@ namespace Transpiler
 {
     class Program
     {
-        const string InputPath      = "../../../../FixPointCS";
-        const string CppOutputPath  = "../../../../Cpp";
-        const string JavaOutputPath = "../../../../Java";
+        const string InputPath      = "../FixPointCS";
+        const string CppOutputPath  = "../Cpp";
+        const string JavaOutputPath = "../Java";
 
         static void Main(string[] args)
         {

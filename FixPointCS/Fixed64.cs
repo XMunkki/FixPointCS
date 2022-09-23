@@ -1,7 +1,7 @@
 //
 // FixPointCS
 //
-// Copyright(c) 2018-2019 Jere Sanisalo, Petri Kero
+// Copyright(c) Jere Sanisalo, Petri Kero
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -52,8 +52,9 @@ import java.lang.Double;
  * of Unity.
  */
 using System;
-using System.Runtime.CompilerServices;
 using System.Diagnostics;
+using System.Globalization;
+using System.Runtime.CompilerServices;
 #endif
 
 #if !TRANSPILE
@@ -178,7 +179,7 @@ namespace FixPointCS
 #else
         public static string ToString(long v)
         {
-            return ToDouble(v).ToString();
+            return ToDouble(v).ToString(CultureInfo.InvariantCulture);
         }
 #endif
 
@@ -346,6 +347,9 @@ namespace FixPointCS
         [MethodImpl(FixedUtil.AggressiveInlining)]
         private static int Nlz(ulong x)
         {
+        #if NET5_0_OR_GREATER
+            return System.Numerics.BitOperations.LeadingZeroCount(x);
+        #else
             int n = 0;
             if (x <= 0x00000000FFFFFFFFL) { n = n + 32; x = x << 32; }
             if (x <= 0x0000FFFFFFFFFFFFL) { n = n + 16; x = x << 16; }
@@ -355,6 +359,7 @@ namespace FixPointCS
             if (x <= 0x7FFFFFFFFFFFFFFFL) { n = n + 1; }
             if (x == 0) return 64;
             return n;
+        #endif
         }
 #endif
 
@@ -584,9 +589,13 @@ namespace FixPointCS
         /// </summary>
         public static long Mod(long a, long b)
         {
-            long di = a / b;
-            long ret = a - (di * b);
-            return ret;
+            if (b == 0)
+            {
+                FixedUtil.InvalidArgument("Fixed64.Mod", "b", b);
+                return 0;
+            }
+
+            return a % b;
         }
 
         /// <summary>
@@ -1110,6 +1119,10 @@ namespace FixPointCS
         /// </summary>
         public static long Pow(long x, long exponent)
         {
+            // n^0 == 1
+            if (exponent == 0)
+                return One;
+
             // Return 0 for invalid values
             if (x <= 0)
             {
@@ -1126,6 +1139,10 @@ namespace FixPointCS
         /// </summary>
         public static long PowFast(long x, long exponent)
         {
+            // n^0 == 1
+            if (exponent == 0)
+                return One;
+
             // Return 0 for invalid values
             if (x <= 0)
             {
@@ -1142,6 +1159,10 @@ namespace FixPointCS
         /// </summary>
         public static long PowFastest(long x, long exponent)
         {
+            // n^0 == 1
+            if (exponent == 0)
+                return One;
+
             // Return 0 for invalid values
             if (x <= 0)
             {

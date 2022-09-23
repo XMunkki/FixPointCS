@@ -1,7 +1,7 @@
 //
 // FixPointCS
 //
-// Copyright(c) 2018-2019 Jere Sanisalo, Petri Kero
+// Copyright(c) Jere Sanisalo, Petri Kero
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -438,9 +438,13 @@ public class Fixed64
     /// </summary>
     public static long Mod(long a, long b)
     {
-        long di = a / b;
-        long ret = a - (di * b);
-        return ret;
+        if (b == 0)
+        {
+            FixedUtil.InvalidArgument("Fixed64.Mod", "b", b);
+            return 0;
+        }
+
+        return a % b;
     }
 
     /// <summary>

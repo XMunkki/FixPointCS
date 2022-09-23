@@ -1,7 +1,7 @@
 ﻿//
 // FixPointCS
 //
-// Copyright(c) 2018-2019 Jere Sanisalo, Petri Kero
+// Copyright(c) Jere Sanisalo, Petri Kero
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -982,6 +982,21 @@ namespace FixPointCSTest
             //    }
             //),
 
+            // \todo [petri] implement Lerp
+            //new TernaryOpFamily(
+            //    (double i0, double i1, double i2) => { return (1.0-i2)*i0 + i2*i1; },
+            //    AbsoluteBinaryErrorEvaluator(),
+            //    Operation.Multi(
+            //        Operation.F64_F64_F64_F64("Fixed64.Lerp", (int n, F64[] i0, F64[] i1, F64[] i2, F64[] o) => { for (int i=0; i<n; i++) { o[i] = F64.Lerp(i0[i], i1[i], i2[i]); } }),
+            //        Operation.F32_F32_F32_F32("Fixed32.Lerp", (int n, F32[] i0, F32[] i1, F32[] i2, F32[] o) => { for (int i=0; i<n; i++) { o[i] = F32.Lerp(i0[i], i1[i], i2[i]); } })
+            //    ),
+            //    bounds => new[] {
+            //        InputGenerator.Ternary(Input.Uniform(-1.0, 1.0), Input.Uniform(-1.0, 1.0), Input.Uniform(-1.0, 2.0)),
+            //        InputGenerator.Ternary(Input.Uniform(-1e5, 1e5), Input.Uniform(-1e5, 1e5), Input.Uniform(-1e5, 1e5)),
+            //        InputGenerator.Ternary(Input.Uniform(bounds.InputNegMax, bounds.InputPosMax), Input.Uniform(bounds.InputNegMax, bounds.InputPosMax), Input.Uniform(0.0, 1.0)),
+            //    }
+            //),
+
             new UnaryOpFamily(
                 (double i0) => { return Math.Ceiling(i0); },
                 AbsoluteUnaryErrorEvaluator(),
@@ -1400,6 +1415,51 @@ namespace FixPointCSTest
             ),
         };
 
+        static void CheckEqual(string op, F32 result, F32 expected)
+        {
+            if (result != expected)
+                Console.WriteLine("FAIL: {0} returned {1}, expecting {2}", op, result, expected);
+        }
+
+        static void CheckEqual(string op, F64 result, F64 expected)
+        {
+            if (result != expected)
+                Console.WriteLine("FAIL: {0} returned {1], expecting {2}", op, result, expected);
+        }
+
+        static void UnitTests()
+        {
+            CheckEqual("F32.Pow(0, 0)", F32.Pow(F32.Zero, F32.Zero), F32.One);
+            CheckEqual("F32.Pow(0, 1)", F32.Pow(F32.Zero, F32.One), F32.Zero);
+            CheckEqual("F32.Pow(1, 0)", F32.Pow(F32.One, F32.Zero), F32.One);
+            CheckEqual("F32.Pow(pi, 0)", F32.Pow(F32.Pi, F32.Zero), F32.One);
+
+            CheckEqual("F32.PowFast(0, 0)", F32.PowFast(F32.Zero, F32.Zero), F32.One);
+            CheckEqual("F32.PowFast(0, 1)", F32.PowFast(F32.Zero, F32.One), F32.Zero);
+            CheckEqual("F32.PowFast(1, 0)", F32.PowFast(F32.One, F32.Zero), F32.One);
+            CheckEqual("F32.PowFast(pi, 0)", F32.PowFast(F32.Pi, F32.Zero), F32.One);
+
+            CheckEqual("F32.PowFastest(0, 0)", F32.PowFastest(F32.Zero, F32.Zero), F32.One);
+            CheckEqual("F32.PowFastest(0, 1)", F32.PowFastest(F32.Zero, F32.One), F32.Zero);
+            CheckEqual("F32.PowFastest(1, 0)", F32.PowFastest(F32.One, F32.Zero), F32.One);
+            CheckEqual("F32.PowFastest(pi, 0)", F32.PowFastest(F32.Pi, F32.Zero), F32.One);
+
+            CheckEqual("F64.Pow(0, 0)", F64.Pow(F64.Zero, F64.Zero), F64.One);
+            CheckEqual("F64.Pow(0, 1)", F64.Pow(F64.Zero, F64.One), F64.Zero);
+            CheckEqual("F64.Pow(1, 0)", F64.Pow(F64.One, F64.Zero), F64.One);
+            CheckEqual("F64.Pow(pi, 0)", F64.Pow(F64.Pi, F64.Zero), F64.One);
+
+            CheckEqual("F64.PowFast(0, 0)", F64.PowFast(F64.Zero, F64.Zero), F64.One);
+            CheckEqual("F64.PowFast(0, 1)", F64.PowFast(F64.Zero, F64.One), F64.Zero);
+            CheckEqual("F64.PowFast(1, 0)", F64.PowFast(F64.One, F64.Zero), F64.One);
+            CheckEqual("F64.PowFast(pi, 0)", F64.PowFast(F64.Pi, F64.Zero), F64.One);
+
+            CheckEqual("F64.PowFastest(0, 0)", F64.PowFastest(F64.Zero, F64.Zero), F64.One);
+            CheckEqual("F64.PowFastest(0, 1)", F64.PowFastest(F64.Zero, F64.One), F64.Zero);
+            CheckEqual("F64.PowFastest(1, 0)", F64.PowFastest(F64.One, F64.Zero), F64.One);
+            CheckEqual("F64.PowFastest(pi, 0)", F64.PowFastest(F64.Pi, F64.Zero), F64.One);
+        }
+
         static void TestOperations(string testFilter)
         {
             Console.WriteLine("|              Operation |     Mops/s | Precision |        Max error |        Avg error | Worst input");
@@ -1421,8 +1481,9 @@ namespace FixPointCSTest
         {
             Console.WriteLine("Generating Java unit tests..");
 
-            using (StreamWriter file = new StreamWriter("../../../../Java/UnitTest.java"))
+            using (StreamWriter file = new StreamWriter("../Java/UnitTest.java"))
             {
+                file.NewLine = "\n";
                 file.WriteLine("package fixpointcs.test;");
                 file.WriteLine("");
                 file.WriteLine("import fixpointcs.*;");
@@ -1465,8 +1526,9 @@ namespace FixPointCSTest
         {
             Console.WriteLine("Generating C++ unit tests..");
 
-            using (StreamWriter file = new StreamWriter("../../../../Cpp/UnitTest.cpp"))
+            using (StreamWriter file = new StreamWriter("../Cpp/UnitTest.cpp"))
             {
+                file.NewLine = "\n";
                 file.WriteLine("#include \"UnitTest.h\"");
                 file.WriteLine("#include \"Fixed32.h\"");
                 file.WriteLine("#include \"Fixed64.h\"");
@@ -1515,9 +1577,6 @@ namespace FixPointCSTest
 
         static void Main(string[] args)
         {
-            // Run on second core only, set process/thread priority to high.
-            // Produces more stable results from benchmarks.
-            Process.GetCurrentProcess().ProcessorAffinity = new IntPtr(2);
             Process.GetCurrentProcess().PriorityClass = ProcessPriorityClass.High;
             Thread.CurrentThread.Priority = ThreadPriority.Highest;
 
@@ -1535,6 +1594,9 @@ namespace FixPointCSTest
 
             // Generate unit tests for Java & C++
             GenerateUnitTests("");
+
+            // Basic unit tests
+            UnitTests();
 
             // Filter for choosing which tests to run. Empty runs all tests
             // Examples:

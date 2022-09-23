@@ -1,7 +1,7 @@
 ﻿//
 // FixPointCS
 //
-// Copyright(c) 2018-2019 Jere Sanisalo, Petri Kero
+// Copyright(c) Jere Sanisalo, Petri Kero
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -21,9 +21,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 //
+using FixPointCS;
 using System;
 using System.Runtime.CompilerServices;
-using FixPointCS;
 
 namespace FixMath
 {
@@ -175,12 +175,13 @@ namespace FixMath
 
         public static F64Vec4 Lerp(F64Vec4 a, F64Vec4 b, F64 t)
         {
-            long tr = t.Raw;
+            long tb = t.Raw;
+            long ta = Fixed64.One - tb;
             return new F64Vec4(
-                Fixed64.Lerp(a.RawX, b.RawX, tr),
-                Fixed64.Lerp(a.RawY, b.RawY, tr),
-                Fixed64.Lerp(a.RawZ, b.RawZ, tr),
-                Fixed64.Lerp(a.RawW, b.RawW, tr));
+                Fixed64.Mul(a.RawX, ta) + Fixed64.Mul(b.RawX, tb),
+                Fixed64.Mul(a.RawY, ta) + Fixed64.Mul(b.RawY, tb),
+                Fixed64.Mul(a.RawZ, ta) + Fixed64.Mul(b.RawZ, tb),
+                Fixed64.Mul(a.RawW, ta) + Fixed64.Mul(b.RawW, tb));
         }
 
         public bool Equals(F64Vec4 other)

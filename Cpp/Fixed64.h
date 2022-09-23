@@ -1,7 +1,7 @@
 //
 // FixPointCS
 //
-// Copyright(c) 2018-2019 Jere Sanisalo, Petri Kero
+// Copyright(c) Jere Sanisalo, Petri Kero
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -82,8 +82,8 @@ namespace Fixed64
     static const FP_LONG PiHalf = INT64_C(6746518852);
     static const FP_LONG E = INT64_C(11674931555);
 
-    static const FP_LONG MinValue = INT64_C(-9223372036854775808);
-    static const FP_LONG MaxValue = INT64_C(9223372036854775807);
+    static const FP_LONG MinValue = INT64_MIN;
+    static const FP_LONG MaxValue = INT64_MAX;
 
     // Private constants
     static const FP_LONG RCP_LN2      = INT64_C(0x171547652); // 1.0 / log(2.0) ~= 1.4426950408889634
@@ -295,6 +295,9 @@ namespace Fixed64
 
     static FP_INT Nlz(FP_ULONG x)
     {
+    #if NET5_0_OR_GREATER
+        return System.Numerics.BitOperations.LeadingZeroCount(x);
+    #else
         FP_INT n = 0;
         if (x <= INT64_C(0x00000000FFFFFFFF)) { n = n + 32; x = x << 32; }
         if (x <= INT64_C(0x0000FFFFFFFFFFFF)) { n = n + 16; x = x << 16; }
@@ -304,6 +307,7 @@ namespace Fixed64
         if (x <= INT64_C(0x7FFFFFFFFFFFFFFF)) { n = n + 1; }
         if (x == 0) return 64;
         return n;
+    #endif
     }
 
     /// <summary>
@@ -468,9 +472,13 @@ namespace Fixed64
     /// </summary>
     static FP_LONG Mod(FP_LONG a, FP_LONG b)
     {
-        FP_LONG di = a / b;
-        FP_LONG ret = a - (di * b);
-        return ret;
+        if (b == 0)
+        {
+            FixedUtil::InvalidArgument("Fixed64::Mod", "b", b);
+            return 0;
+        }
+
+        return a % b;
     }
 
     /// <summary>

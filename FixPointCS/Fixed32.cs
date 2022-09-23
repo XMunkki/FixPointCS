@@ -1,7 +1,7 @@
 //
 // FixPointCS
 //
-// Copyright(c) 2018-2019 Jere Sanisalo, Petri Kero
+// Copyright(c) Jere Sanisalo, Petri Kero
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -51,9 +51,9 @@ import java.lang.Double;
  * Use up-to C# 3 features to keep the library compatible with older versions
  * of Unity.
  */
-using System;
-using System.Runtime.CompilerServices;
 using System.Diagnostics;
+using System.Globalization;
+using System.Runtime.CompilerServices;
 #endif
 
 #if !TRANSPILE
@@ -178,7 +178,7 @@ namespace FixPointCS
 #else
         public static string ToString(int v)
         {
-            return ToDouble(v).ToString();
+            return ToDouble(v).ToString(CultureInfo.InvariantCulture);
         }
 #endif
 
@@ -326,6 +326,7 @@ namespace FixPointCS
         [MethodImpl(FixedUtil.AggressiveInlining)]
         private static int Nlz(uint x)
         {
+            //return System.Numerics.BitOperations.LeadingZeroCount(x); \note Disabled as this is slower in benchmarks
             int n = 0;
             if (x <= 0x0000FFFF) { n = n + 16; x = x << 16; }
             if (x <= 0x00FFFFFF) { n = n + 8; x = x << 8; }
@@ -426,9 +427,13 @@ namespace FixPointCS
         /// </summary>
         public static int Mod(int a, int b)
         {
-            int di = a / b;
-            int ret = a - (di * b);
-            return ret;
+            if (b == 0)
+            {
+                FixedUtil.InvalidArgument("Fixed32.Mod", "b", b);
+                return 0;
+            }
+
+            return a % b;
         }
 
         /// <summary>
@@ -956,6 +961,10 @@ namespace FixPointCS
         /// </summary>
         public static int Pow(int x, int exponent)
         {
+            // n^0 == 1
+            if (exponent == 0)
+                return One;
+
             // Return 0 for invalid values
             if (x <= 0)
             {
@@ -972,6 +981,10 @@ namespace FixPointCS
         /// </summary>
         public static int PowFast(int x, int exponent)
         {
+            // n^0 == 1
+            if (exponent == 0)
+                return One;
+
             // Return 0 for invalid values
             if (x <= 0)
             {
@@ -988,6 +1001,10 @@ namespace FixPointCS
         /// </summary>
         public static int PowFastest(int x, int exponent)
         {
+            // n^0 == 1
+            if (exponent == 0)
+                return One;
+
             // Return 0 for invalid values
             if (x <= 0)
             {

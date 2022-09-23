@@ -1,6 +1,6 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27130.2027
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31729.503
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FixPointCS", "FixPointCS\FixPointCS.csproj", "{53D6F31F-AE20-4C5C-9674-0CA79E4C36C1}"
 EndProject
@@ -12,6 +12,9 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Transpiler", "Transpiler\Transpiler.csproj", "{FAA807BE-4DA8-4A03-9C65-22AC74A83C92}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FixMath", "Examples\FixMath\FixMath.csproj", "{37DF7BEA-1665-482E-9BD5-63D09FF426B2}"
+	ProjectSection(ProjectDependencies) = postProject
+		{53D6F31F-AE20-4C5C-9674-0CA79E4C36C1} = {53D6F31F-AE20-4C5C-9674-0CA79E4C36C1}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FixedTracer", "Examples\FixedTracer\FixedTracer.csproj", "{657E3D4B-38AD-4961-9987-F27D14B677C5}"
 	ProjectSection(ProjectDependencies) = postProject

@@ -1,7 +1,7 @@
 //
 // FixPointCS
 //
-// Copyright(c) 2018-2019 Jere Sanisalo, Petri Kero
+// Copyright(c) Jere Sanisalo, Petri Kero
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -73,7 +73,7 @@ namespace Transpiler
             }
 
             // Save the file
-            File.WriteAllText(outPath, sb.ToString(), Encoding.ASCII);
+            File.WriteAllText(outPath, sb.ToString().Replace("\r", ""), Encoding.ASCII);
         }
 
         // Prefix for the generated file

@@ -1,7 +1,7 @@
 //
 // FixPointCS
 //
-// Copyright(c) 2018-2019 Jere Sanisalo, Petri Kero
+// Copyright(c) Jere Sanisalo, Petri Kero
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -83,22 +83,21 @@ namespace Transpiler
                 line = Util.ReplaceWholeWord(line, "Debug.Assert", "FP_ASSERT");
                 line = line.Replace("FixedUtil.", "FixedUtil::");
                 line = line.Replace("Fixed64.", "Fixed64::");
-                line = ConvertArrays(line);
-                line = Convert64bitConstants(line);
                 line = Util.ReplaceWholeWord(line, "-2147483648", "INT32_MIN");
                 line = Util.ReplaceWholeWord(line, "2147483647", "INT32_MAX");
+                line = Util.ReplaceWholeWord(line, "-9223372036854775808L", "INT64_MIN");
+                line = Util.ReplaceWholeWord(line, "9223372036854775807L", "INT64_MAX");
                 line = Util.ReplaceWholeWord(line, "// PREFIX", prefix);
                 line = Util.ReplaceWholeWord(line, "// SUFFIX", suffix);
+                line = ConvertArrays(line);
+                line = Convert64bitConstants(line);
 
                 // Add the line
                 sb.AppendLine(line);
             }
 
-            // Finalize the output
-            string dest_text = sb.ToString();
-
             // Save the file
-            File.WriteAllText(outPath, dest_text, Encoding.ASCII);
+            File.WriteAllText(outPath, sb.ToString().Replace("\r", ""), Encoding.ASCII);
         }
 
         private static string ConvertArrays(string str)

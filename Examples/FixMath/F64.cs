@@ -1,7 +1,7 @@
 ﻿//
 // FixPointCS
 //
-// Copyright(c) 2018-2019 Jere Sanisalo, Petri Kero
+// Copyright(c) Jere Sanisalo, Petri Kero
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -21,9 +21,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 //
+using FixPointCS;
 using System;
 using System.Runtime.CompilerServices;
-using FixPointCS;
 
 namespace FixMath
 {
@@ -31,7 +31,7 @@ namespace FixMath
     /// Signed 32.32 fixed point value struct.
     /// </summary>
     [Serializable]
-    public struct F64 : IComparable<F64>, IEquatable<F64>
+    public struct F64 : IComparable<F64>, IEquatable<F64>, IComparable
     {
         // Constants
         public static F64 Neg1      { [MethodImpl(FixedUtil.AggressiveInlining)] get { return FromRaw(Fixed64.Neg1); } }
@@ -50,11 +50,12 @@ namespace FixMath
         // Raw fixed point value
         public long Raw;
 
-        // Constructors
-        public F64(int v) { Raw = Fixed64.FromInt(v); }
-        public F64(float v) { Raw = Fixed64.FromFloat(v); }
-        public F64(double v) { Raw = Fixed64.FromDouble(v); }
-        public F64(F32 v) { Raw = (long)v.Raw << 16; }
+        // Construction
+        [MethodImpl(FixedUtil.AggressiveInlining)] public static F64 FromRaw(long raw) { F64 v; v.Raw = raw; return v; }
+        [MethodImpl(FixedUtil.AggressiveInlining)] public static F64 FromInt(int v) { return FromRaw(Fixed64.FromInt(v)); }
+        [MethodImpl(FixedUtil.AggressiveInlining)] public static F64 FromFloat(float v) { return FromRaw(Fixed64.FromFloat(v)); }
+        [MethodImpl(FixedUtil.AggressiveInlining)] public static F64 FromDouble(double v) { return FromRaw(Fixed64.FromDouble(v)); }
+        [MethodImpl(FixedUtil.AggressiveInlining)] public static F64 FromF32(F32 v) { return FromRaw((long)v.Raw << 16); }
 
         // Conversions
         public static int FloorToInt(F64 a) { return Fixed64.FloorToInt(a.Raw); }
@@ -72,16 +73,6 @@ namespace FixMath
         public static F64 Ratio100(int a) { return F64.FromRaw(((long)a << 32) / 100); }
         // Creates the fixed point number that's a divided by 1000.
         public static F64 Ratio1000(int a) { return F64.FromRaw(((long)a << 32) / 1000); }
-
-        public void test()
-        {
-            int x = 123;
-            test2(ref x, out x);
-        }
-        public void test2(ref int a, out int b)
-        {
-            b = a;
-        }
 
         // Operators
         public static F64 operator -(F64 v1) { return FromRaw(-v1.Raw); }
@@ -204,6 +195,7 @@ namespace FixMath
         public static F64 Min(F64 a, F64 b) { return FromRaw(Fixed64.Min(a.Raw, b.Raw)); }
         public static F64 Max(F64 a, F64 b) { return FromRaw(Fixed64.Max(a.Raw, b.Raw)); }
         public static F64 Clamp(F64 a, F64 min, F64 max) { return FromRaw(Fixed64.Clamp(a.Raw, min.Raw, max.Raw)); }
+        public static F64 Clamp01(F64 a) { return FromRaw(Fixed64.Clamp(a.Raw, Fixed64.Zero, Fixed64.One)); }
 
         public static F64 Lerp(F64 a, F64 b, F64 t)
         {
@@ -211,19 +203,6 @@ namespace FixMath
             long ta = Fixed64.One - tb;
             return FromRaw(Fixed64.Mul(a.Raw, ta) + Fixed64.Mul(b.Raw, tb));
         }
-
-        [MethodImpl(FixedUtil.AggressiveInlining)]
-        public static F64 FromRaw(long raw)
-        {
-            F64 r;
-            r.Raw = raw;
-            return r;
-        }
-
-        public static F64 FromInt(int v) { return new F64(v); }
-        public static F64 FromFloat(float v) { return new F64(v); }
-        public static F64 FromDouble(double v) { return new F64(v); }
-        public static F64 FromF32(F32 v) { return new F64(v); }
 
         public bool Equals(F64 other)
         {
@@ -251,7 +230,17 @@ namespace FixMath
 
         public override int GetHashCode()
         {
-            return (int)Raw ^ (int)(Raw >> 32);
+            return Raw.GetHashCode();
+        }
+
+        int IComparable.CompareTo(object obj)
+        {
+            if (obj is F64 other)
+                return CompareTo(other);
+            else if (obj is null)
+                return 1;
+            // don't allow comparisons with other numeric or non-numeric types.
+            throw new ArgumentException("F64 can only be compared against another F64.");
         }
     }
 }
