@@ -22,6 +22,8 @@
 // SOFTWARE.
 //
 
+//#define DISABLE_RUNTIME_VALIDATION
+
 // PREFIX
 #if CPP
 #elif JAVA
@@ -98,6 +100,7 @@ namespace FixPointCS
         // Backwards compatible way to use MethodImplOptions.AggressiveInlining
         public const MethodImplOptions AggressiveInlining = (MethodImplOptions)256;
 
+#if !DISABLE_RUNTIME_VALIDATION
         private static Action<string, string, int> InvalidArgumentHandler32 = (funcName, argName, argValue) => { };
         private static Action<string, string, int, int> InvalidArgumentHandler32_32 = (funcName, argName, argValue1, argValue2) => { };
         private static Action<string, string, long> InvalidArgumentHandler64 = (funcName, argName, argValue) => { };
@@ -153,6 +156,7 @@ namespace FixPointCS
         {
             InvalidArgumentHandler64_64.Invoke(funcName, argNames, argValue1, argValue2);
         }
+#endif // !DISABLE_RUNTIME_VALIDATION
 #endif
 
         [MethodImpl(AggressiveInlining)]
