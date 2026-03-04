@@ -22,6 +22,8 @@
 // SOFTWARE.
 //
 
+//#define DISABLE_RUNTIME_VALIDATION
+
 // PREFIX
 #if CPP
 #elif JAVA
@@ -357,7 +359,9 @@ namespace FixPointCS
         {
             if (b == MinValue || b == 0)
             {
+#if !DISABLE_RUNTIME_VALIDATION
                 FixedUtil.InvalidArgument("Fixed32.Div", "b", b);
+#endif
                 return 0;
             }
 
@@ -371,7 +375,9 @@ namespace FixPointCS
         {
             if (b == MinValue || b == 0)
             {
+#if !DISABLE_RUNTIME_VALIDATION
                 FixedUtil.InvalidArgument("Fixed32.DivFast", "b", b);
+#endif
                 return 0;
             }
 
@@ -400,7 +406,9 @@ namespace FixPointCS
         {
             if (b == MinValue || b == 0)
             {
+#if !DISABLE_RUNTIME_VALIDATION
                 FixedUtil.InvalidArgument("Fixed32.DivFastest", "b", b);
+#endif
                 return 0;
             }
 
@@ -429,7 +437,9 @@ namespace FixPointCS
         {
             if (b == 0)
             {
+#if !DISABLE_RUNTIME_VALIDATION
                 FixedUtil.InvalidArgument("Fixed32.Mod", "b", b);
+#endif
                 return 0;
             }
 
@@ -444,8 +454,10 @@ namespace FixPointCS
             // Adapted from https://github.com/chmike/fpsqrt
             if (a <= 0)
             {
+#if !DISABLE_RUNTIME_VALIDATION
                 if (a < 0)
                     FixedUtil.InvalidArgument("Fixed32.SqrtPrecise", "a", a);
+#endif
                 return 0;
             }
 
@@ -491,8 +503,10 @@ namespace FixPointCS
             // Return 0 for all non-positive values.
             if (x <= 0)
             {
+#if !DISABLE_RUNTIME_VALIDATION
                 if (x < 0)
                     FixedUtil.InvalidArgument("Fixed32.Sqrt", "x", x);
+#endif
                 return 0;
             }
 
@@ -503,7 +517,9 @@ namespace FixPointCS
             // Normalize input into [1.0, 2.0( range (as s2.30).
             int offset = 15 - Nlz((uint)x);
             int n = FixedUtil.ShiftRight(x, offset - 14);
+#if !DISABLE_RUNTIME_VALIDATION
             Debug.Assert(n >= ONE);
+#endif
             int y = FixedUtil.SqrtPoly3Lut8(n - ONE);
 
             // Divide offset by 2 (to get sqrt), compute adjust value for odd exponents.
@@ -520,8 +536,10 @@ namespace FixPointCS
             // Return 0 for all non-positive values.
             if (x <= 0)
             {
+#if !DISABLE_RUNTIME_VALIDATION
                 if (x < 0)
                     FixedUtil.InvalidArgument("Fixed32.SqrtFast", "x", x);
+#endif
                 return 0;
             }
 
@@ -549,8 +567,10 @@ namespace FixPointCS
             // Return 0 for all non-positive values.
             if (x <= 0)
             {
+#if !DISABLE_RUNTIME_VALIDATION
                 if (x < 0)
                     FixedUtil.InvalidArgument("Fixed32.SqrtFastest", "x", x);
+#endif
                 return 0;
             }
 
@@ -561,7 +581,9 @@ namespace FixPointCS
             // Normalize input into [1.0, 2.0( range (as s2.30).
             int offset = 15 - Nlz((uint)x);
             int n = FixedUtil.ShiftRight(x, offset - 14);
+#if !DISABLE_RUNTIME_VALIDATION
             Debug.Assert(n >= ONE);
+#endif
             int y = FixedUtil.SqrtPoly3(n - ONE);
 
             // Divide offset by 2 (to get sqrt), compute adjust value for odd exponents.
@@ -581,7 +603,9 @@ namespace FixPointCS
             // Return 0 for invalid values
             if (x <= 0)
             {
+#if !DISABLE_RUNTIME_VALIDATION
                 FixedUtil.InvalidArgument("Fixed32.RSqrt", "x", x);
+#endif
                 return 0;
             }
 
@@ -592,7 +616,9 @@ namespace FixPointCS
             // Normalize input into [1.0, 2.0( range (as s2.30).
             int offset = 1 - Nlz((uint)x);
             int n = FixedUtil.ShiftRight(x, offset);
+#if !DISABLE_RUNTIME_VALIDATION
             Debug.Assert(n >= ONE);
+#endif
             int y = FixedUtil.RSqrtPoly3Lut16(n - ONE);
 
             // Divide offset by 2 (to get sqrt), compute adjust value for odd exponents.
@@ -612,7 +638,9 @@ namespace FixPointCS
             // Return 0 for invalid values
             if (x <= 0)
             {
+#if !DISABLE_RUNTIME_VALIDATION
                 FixedUtil.InvalidArgument("Fixed32.RSqrtFast", "x", x);
+#endif
                 return 0;
             }
 
@@ -623,7 +651,9 @@ namespace FixPointCS
             // Normalize input into [1.0, 2.0( range (as s2.30).
             int offset = 1 - Nlz((uint)x);
             int n = FixedUtil.ShiftRight(x, offset);
+#if !DISABLE_RUNTIME_VALIDATION
             Debug.Assert(n >= ONE);
+#endif
             int y = FixedUtil.RSqrtPoly5(n - ONE);
 
             // Divide offset by 2 (to get sqrt), compute adjust value for odd exponents.
@@ -643,7 +673,9 @@ namespace FixPointCS
             // Return 0 for invalid values
             if (x <= 0)
             {
+#if !DISABLE_RUNTIME_VALIDATION
                 FixedUtil.InvalidArgument("Fixed32.RSqrtFastest", "x", x);
+#endif
                 return 0;
             }
 
@@ -654,7 +686,9 @@ namespace FixPointCS
             // Normalize input into [1.0, 2.0( range (as s2.30).
             int offset = 1 - Nlz((uint)x);
             int n = FixedUtil.ShiftRight(x, offset);
+#if !DISABLE_RUNTIME_VALIDATION
             Debug.Assert(n >= ONE);
+#endif
             int y = FixedUtil.RSqrtPoly3(n - ONE);
 
             // Divide offset by 2 (to get sqrt), compute adjust value for odd exponents.
@@ -673,7 +707,9 @@ namespace FixPointCS
         {
             if (x == MinValue || x == 0)
             {
+#if !DISABLE_RUNTIME_VALIDATION
                 FixedUtil.InvalidArgument("Fixed32.Rcp", "x", x);
+#endif
                 return 0;
             }
 
@@ -685,7 +721,9 @@ namespace FixPointCS
             int offset = 29 - Nlz((uint)x);
             int n = FixedUtil.ShiftRight(x, offset - 28);
             const int ONE = (1 << 30);
+#if !DISABLE_RUNTIME_VALIDATION
             Debug.Assert(n >= ONE);
+#endif
 
             // Polynomial approximation.
             int res = FixedUtil.RcpPoly4Lut8(n - ONE);
@@ -701,7 +739,9 @@ namespace FixPointCS
         {
             if (x == MinValue || x == 0)
             {
+#if !DISABLE_RUNTIME_VALIDATION
                 FixedUtil.InvalidArgument("Fixed32.RcpFast", "x", x);
+#endif
                 return 0;
             }
 
@@ -713,7 +753,9 @@ namespace FixPointCS
             int offset = 29 - Nlz((uint)x);
             int n = FixedUtil.ShiftRight(x, offset - 28);
             const int ONE = (1 << 30);
+#if !DISABLE_RUNTIME_VALIDATION
             Debug.Assert(n >= ONE);
+#endif
 
             // Polynomial approximation.
             int res = FixedUtil.RcpPoly6(n - ONE);
@@ -730,7 +772,9 @@ namespace FixPointCS
         {
             if (x == MinValue || x == 0)
             {
+#if !DISABLE_RUNTIME_VALIDATION
                 FixedUtil.InvalidArgument("Fixed32.RcpFastest", "x", x);
+#endif
                 return 0;
             }
 
@@ -742,7 +786,9 @@ namespace FixPointCS
             int offset = 29 - Nlz((uint)x);
             int n = FixedUtil.ShiftRight(x, offset - 28);
             const int ONE = (1 << 30);
+#if !DISABLE_RUNTIME_VALIDATION
             Debug.Assert(n >= ONE);
+#endif
 
             // Polynomial approximation.
             int res = FixedUtil.RcpPoly4(n - ONE);
@@ -829,7 +875,9 @@ namespace FixPointCS
             // Return 0 for invalid values
             if (x <= 0)
             {
+#if !DISABLE_RUNTIME_VALIDATION
                 FixedUtil.InvalidArgument("Fixed32.Log", "x", x);
+#endif
                 return 0;
             }
 
@@ -839,7 +887,9 @@ namespace FixPointCS
 
             // Polynomial approximation.
             const int ONE = (1 << 30);
+#if !DISABLE_RUNTIME_VALIDATION
             Debug.Assert(n >= ONE);
+#endif
             int y = FixedUtil.LogPoly5Lut8(n - ONE);
 
             // Combine integer and fractional parts (into s16.16).
@@ -851,7 +901,9 @@ namespace FixPointCS
             // Return 0 for invalid values
             if (x <= 0)
             {
+#if !DISABLE_RUNTIME_VALIDATION
                 FixedUtil.InvalidArgument("Fixed32.LogFast", "x", x);
+#endif
                 return 0;
             }
 
@@ -861,7 +913,9 @@ namespace FixPointCS
 
             // Polynomial approximation.
             const int ONE = (1 << 30);
+#if !DISABLE_RUNTIME_VALIDATION
             Debug.Assert(n >= ONE);
+#endif
             int y = FixedUtil.LogPoly3Lut8(n - ONE);
 
             // Combine integer and fractional parts (into s16.16).
@@ -873,7 +927,9 @@ namespace FixPointCS
             // Return 0 for invalid values
             if (x <= 0)
             {
+#if !DISABLE_RUNTIME_VALIDATION
                 FixedUtil.InvalidArgument("Fixed32.LogFastest", "x", x);
+#endif
                 return 0;
             }
 
@@ -883,7 +939,9 @@ namespace FixPointCS
 
             // Polynomial approximation.
             const int ONE = (1 << 30);
+#if !DISABLE_RUNTIME_VALIDATION
             Debug.Assert(n >= ONE);
+#endif
             int y = FixedUtil.LogPoly5(n - ONE);
 
             // Combine integer and fractional parts (into s16.16).
@@ -895,7 +953,9 @@ namespace FixPointCS
             // Return 0 for invalid values
             if (x <= 0)
             {
+#if !DISABLE_RUNTIME_VALIDATION
                 FixedUtil.InvalidArgument("Fixed32.Log2", "x", x);
+#endif
                 return 0;
             }
 
@@ -905,7 +965,9 @@ namespace FixPointCS
 
             // Polynomial approximation of mantissa.
             const int ONE = (1 << 30);
+#if !DISABLE_RUNTIME_VALIDATION
             Debug.Assert(n >= ONE);
+#endif
             int y = FixedUtil.Log2Poly4Lut16(n - ONE);
 
             // Combine integer and fractional parts (into s16.16).
@@ -917,7 +979,9 @@ namespace FixPointCS
             // Return 0 for invalid values
             if (x <= 0)
             {
+#if !DISABLE_RUNTIME_VALIDATION
                 FixedUtil.InvalidArgument("Fixed32.Log2Fast", "x", x);
+#endif
                 return 0;
             }
 
@@ -927,7 +991,9 @@ namespace FixPointCS
 
             // Polynomial approximation of mantissa.
             const int ONE = (1 << 30);
+#if !DISABLE_RUNTIME_VALIDATION
             Debug.Assert(n >= ONE);
+#endif
             int y = FixedUtil.Log2Poly3Lut16(n - ONE);
 
             // Combine integer and fractional parts (into s16.16).
@@ -939,7 +1005,9 @@ namespace FixPointCS
             // Return 0 for invalid values
             if (x <= 0)
             {
+#if !DISABLE_RUNTIME_VALIDATION
                 FixedUtil.InvalidArgument("Fixed32.Log2Fastest", "x", x);
+#endif
                 return 0;
             }
 
@@ -949,7 +1017,9 @@ namespace FixPointCS
 
             // Polynomial approximation of mantissa.
             const int ONE = (1 << 30);
+#if !DISABLE_RUNTIME_VALIDATION
             Debug.Assert(n >= ONE);
+#endif
             int y = FixedUtil.Log2Poly5(n - ONE);
 
             // Combine integer and fractional parts (into s16.16).
@@ -968,8 +1038,10 @@ namespace FixPointCS
             // Return 0 for invalid values
             if (x <= 0)
             {
+#if !DISABLE_RUNTIME_VALIDATION
                 if (x < 0)
                     FixedUtil.InvalidArgument("Fixed32.Pow", "x", x);
+#endif
                 return 0;
             }
 
@@ -988,8 +1060,10 @@ namespace FixPointCS
             // Return 0 for invalid values
             if (x <= 0)
             {
+#if !DISABLE_RUNTIME_VALIDATION
                 if (x < 0)
                     FixedUtil.InvalidArgument("Fixed32.PowFast", "x", x);
+#endif
                 return 0;
             }
 
@@ -1008,8 +1082,10 @@ namespace FixPointCS
             // Return 0 for invalid values
             if (x <= 0)
             {
+#if !DISABLE_RUNTIME_VALIDATION
                 if (x < 0)
                     FixedUtil.InvalidArgument("Fixed32.PowFastest", "x", x);
+#endif
                 return 0;
             }
 
@@ -1027,8 +1103,10 @@ namespace FixPointCS
                 z = (1 << 31) - z;
 
             // Now z is in range [-1, 1].
+#if !DISABLE_RUNTIME_VALIDATION
             const int ONE = (1 << 30);
             Debug.Assert((z >= -ONE) && (z <= ONE));
+#endif
 
             // Polynomial approximation.
             int zz = FixedUtil.Qmul30(z, z);
@@ -1049,8 +1127,10 @@ namespace FixPointCS
                 z = (1 << 31) - z;
 
             // Now z is in range [-1, 1].
+#if !DISABLE_RUNTIME_VALIDATION
             const int ONE = (1 << 30);
             Debug.Assert((z >= -ONE) && (z <= ONE));
+#endif
 
             // Polynomial approximation.
             int zz = FixedUtil.Qmul30(z, z);
@@ -1071,8 +1151,10 @@ namespace FixPointCS
                 z = (1 << 31) - z;
 
             // Now z is in range [-1, 1].
+#if !DISABLE_RUNTIME_VALIDATION
             const int ONE = (1 << 30);
             Debug.Assert((z >= -ONE) && (z <= ONE));
+#endif
 
             // Polynomial approximation.
             int zz = FixedUtil.Qmul30(z, z);
@@ -1156,18 +1238,26 @@ namespace FixPointCS
 
         private static int Atan2Div(int y, int x)
         {
+#if !DISABLE_RUNTIME_VALIDATION
             Debug.Assert(y >= 0 && x > 0 && x >= y);
+#endif
 
             // Normalize input into [1.0, 2.0( range (convert to s2.30).
             const int ONE = (1 << 30);
+#if !DISABLE_RUNTIME_VALIDATION
             const int HALF = (1 << 29);
+#endif
             int offset = 1 - Nlz((uint)x);
             int n = FixedUtil.ShiftRight(x, offset);
+#if !DISABLE_RUNTIME_VALIDATION
             Debug.Assert(n >= ONE);
+#endif
 
             // Polynomial approximation of reciprocal.
             int oox = FixedUtil.RcpPoly4Lut8(n - ONE);
+#if !DISABLE_RUNTIME_VALIDATION
             Debug.Assert(oox >= HALF && oox <= ONE);
+#endif
 
             // Apply exponent and multiply.
             int yr = FixedUtil.ShiftRight(y, offset);
@@ -1183,7 +1273,9 @@ namespace FixPointCS
                 if (y > 0) return PiHalf;
                 if (y < 0) return -PiHalf;
 
+#if !DISABLE_RUNTIME_VALIDATION
                 FixedUtil.InvalidArgument("Fixed32.Atan2", "y, x", y, x);
+#endif
                 return 0;
             }
 
@@ -1211,17 +1303,23 @@ namespace FixPointCS
 
         private static int Atan2DivFast(int y, int x)
         {
+#if !DISABLE_RUNTIME_VALIDATION
             Debug.Assert(y >= 0 && x > 0 && x >= y);
+#endif
 
             // Normalize input into [1.0, 2.0( range (convert to s2.30).
             const int ONE = (1 << 30);
+#if !DISABLE_RUNTIME_VALIDATION
             const int HALF = (1 << 29);
+#endif
             int offset = 1 - Nlz((uint)x);
             int n = FixedUtil.ShiftRight(x, offset);
 
             // Polynomial approximation.
             int oox = FixedUtil.RcpPoly6(n - ONE);
+#if !DISABLE_RUNTIME_VALIDATION
             Debug.Assert(oox >= HALF && oox <= ONE);
+#endif
 
             // Apply exponent and multiply.
             int yr = FixedUtil.ShiftRight(y, offset);
@@ -1237,7 +1335,9 @@ namespace FixPointCS
                 if (y > 0) return PiHalf;
                 if (y < 0) return -PiHalf;
 
+#if !DISABLE_RUNTIME_VALIDATION
                 FixedUtil.InvalidArgument("Fixed32.Atan2Fast", "y, x", y, x);
+#endif
                 return 0;
             }
 
@@ -1265,17 +1365,23 @@ namespace FixPointCS
 
         private static int Atan2DivFastest(int y, int x)
         {
+#if !DISABLE_RUNTIME_VALIDATION
             Debug.Assert(y >= 0 && x > 0 && x >= y);
+#endif
 
             // Normalize input into [1.0, 2.0( range (convert to s2.30).
             const int ONE = (1 << 30);
+#if !DISABLE_RUNTIME_VALIDATION
             const int HALF = (1 << 29);
+#endif
             int offset = 1 - Nlz((uint)x);
             int n = FixedUtil.ShiftRight(x, offset);
 
             // Polynomial approximation.
             int oox = FixedUtil.RcpPoly4(n - ONE);
+#if !DISABLE_RUNTIME_VALIDATION
             Debug.Assert(oox >= HALF && oox <= ONE);
+#endif
 
             // Apply exponent and multiply.
             int yr = FixedUtil.ShiftRight(y, offset);
@@ -1291,7 +1397,9 @@ namespace FixPointCS
                 if (y > 0) return PiHalf;
                 if (y < 0) return -PiHalf;
 
+#if !DISABLE_RUNTIME_VALIDATION
                 FixedUtil.InvalidArgument("Fixed32.Atan2Fastest", "y, x", y, x);
+#endif
                 return 0;
             }
 
@@ -1322,7 +1430,9 @@ namespace FixPointCS
             // Return 0 for invalid values
             if (x < -One || x > One)
             {
+#if !DISABLE_RUNTIME_VALIDATION
                 FixedUtil.InvalidArgument("Fixed32.Asin", "x", x);
+#endif
                 return 0;
             }
 
@@ -1337,7 +1447,9 @@ namespace FixPointCS
             // Return 0 for invalid values
             if (x < -One || x > One)
             {
+#if !DISABLE_RUNTIME_VALIDATION
                 FixedUtil.InvalidArgument("Fixed32.AsinFast", "x", x);
+#endif
                 return 0;
             }
 
@@ -1352,7 +1464,9 @@ namespace FixPointCS
             // Return 0 for invalid values
             if (x < -One || x > One)
             {
+#if !DISABLE_RUNTIME_VALIDATION
                 FixedUtil.InvalidArgument("Fixed32.AsinFastest", "x", x);
+#endif
                 return 0;
             }
 
@@ -1367,7 +1481,9 @@ namespace FixPointCS
             // Return 0 for invalid values
             if (x < -One || x > One)
             {
+#if !DISABLE_RUNTIME_VALIDATION
                 FixedUtil.InvalidArgument("Fixed32.Acos", "x", x);
+#endif
                 return 0;
             }
 
@@ -1382,7 +1498,9 @@ namespace FixPointCS
             // Return 0 for invalid values
             if (x < -One || x > One)
             {
+#if !DISABLE_RUNTIME_VALIDATION
                 FixedUtil.InvalidArgument("Fixed32.AcosFast", "x", x);
+#endif
                 return 0;
             }
 
@@ -1397,7 +1515,9 @@ namespace FixPointCS
             // Return 0 for invalid values
             if (x < -One || x > One)
             {
+#if !DISABLE_RUNTIME_VALIDATION
                 FixedUtil.InvalidArgument("Fixed32.AcosFastest", "x", x);
+#endif
                 return 0;
             }
 
