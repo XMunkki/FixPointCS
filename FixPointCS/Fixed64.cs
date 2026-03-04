@@ -335,7 +335,7 @@ namespace FixPointCS
         [MethodImpl(FixedUtil.AggressiveInlining)]
         public static long Lerp(long a, long b, long t)
         {
-            return Mul(a, t) + Mul(b, One - t);
+            return Mul(a, One - t) + Mul(b, t);
         }
 
 #if JAVA
