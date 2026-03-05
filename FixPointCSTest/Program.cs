@@ -50,6 +50,7 @@ namespace FixPointCSTest
     delegate double[] ValueGenerator(Random rnd, int count);
     delegate OperationError UnaryErrorEvaluator(double i0, double o, double reference, double ulpScale);
     delegate OperationError BinaryErrorEvaluator(double i0, double i1, double o, double reference, double ulpScale);
+    delegate OperationError TernaryErrorEvaluator(double i0, double i1, double i2, double o, double reference, double ulpScale);
 
     abstract class ValueBounds
     {
@@ -166,6 +167,11 @@ namespace FixPointCSTest
         {
             return new InputGenerator(new ValueGenerator[]{ gen0, gen1 });
         }
+
+        public static InputGenerator Ternary(ValueGenerator gen0, ValueGenerator gen1, ValueGenerator gen2)
+        {
+            return new InputGenerator(new ValueGenerator[]{ gen0, gen1, gen2 });
+        }
     }
 
     delegate InputGenerator[] InputProducerFactory(ValueBounds bounds);
@@ -235,6 +241,16 @@ namespace FixPointCSTest
         public static Operation F32_F32_F32(string funcName, Action<int, F32[], F32[], F32[]> execute)
         {
             return new Operation(funcName, new ValueBoundsF32(), new[] { typeof(F32), typeof(F32) }, new[] { typeof(F32) }, (int count, Array[] inputs, Array[] outputs) => { execute(count, (F32[])inputs[0], (F32[])inputs[1], (F32[])outputs[0]); });
+        }
+
+        public static Operation F64_F64_F64_F64(string funcName, Action<int, F64[], F64[], F64[], F64[]> execute)
+        {
+            return new Operation(funcName, new ValueBoundsF64(), new[] { typeof(F64), typeof(F64), typeof(F64) }, new[] { typeof(F64) }, (int count, Array[] inputs, Array[] outputs) => { execute(count, (F64[])inputs[0], (F64[])inputs[1], (F64[])inputs[2], (F64[])outputs[0]); });
+        }
+
+        public static Operation F32_F32_F32_F32(string funcName, Action<int, F32[], F32[], F32[], F32[]> execute)
+        {
+            return new Operation(funcName, new ValueBoundsF32(), new[] { typeof(F32), typeof(F32), typeof(F32) }, new[] { typeof(F32) }, (int count, Array[] inputs, Array[] outputs) => { execute(count, (F32[])inputs[0], (F32[])inputs[1], (F32[])inputs[2], (F32[])outputs[0]); });
         }
 
         public static Operation[] Multi(params Operation[] list)
@@ -422,6 +438,60 @@ namespace FixPointCSTest
 
             for (int ndx = 0; ndx < count; ndx++)
                 results[ndx] = refExecute(input0[ndx], input1[ndx]);
+
+            return results;
+        }
+    }
+
+    class TernaryOpFamily : OpFamilyBase
+    {
+        public Func<double, double, double, double> refExecute;
+        public TernaryErrorEvaluator                evaluateError;
+
+        public TernaryOpFamily(Func<double, double, double, double> refExec, TernaryErrorEvaluator evaluateError, Operation operation, InputProducerFactory inputFactory)
+        {
+            this.refExecute     = refExec;
+            this.evaluateError  = evaluateError;
+            this.operations     = new Operation[] { operation };
+            this.inputFactory   = inputFactory;
+        }
+
+        public TernaryOpFamily(Func<double, double, double, double> refExec, TernaryErrorEvaluator evaluateError, Operation[] operations, InputProducerFactory inputFactory)
+        {
+            this.refExecute     = refExec;
+            this.evaluateError  = evaluateError;
+            this.operations     = operations;
+            this.inputFactory   = inputFactory;
+        }
+
+        public override OperationError[] EvaluateErrors(int count, double[][] inputs, double[][] outputs, double ulpScale)
+        {
+            double[] input0 = inputs[0];
+            double[] input1 = inputs[1];
+            double[] input2 = inputs[2];
+            double[] output = outputs[0];
+
+            OperationError[] errors = new OperationError[count];
+            for (int i = 0; i < count; i++)
+            {
+                double reference = refExecute(input0[i], input1[i], input2[i]);
+                errors[i] = evaluateError(input0[i], input1[i], input2[i], output[i], reference, ulpScale);
+            }
+            return errors;
+        }
+
+        public override double[] ComputeReferences(double[][] inputs)
+        {
+            Debug.Assert(inputs.Length == 3);
+
+            double[] input0 = inputs[0];
+            double[] input1 = inputs[1];
+            double[] input2 = inputs[2];
+            int count = input0.Length;
+            double[] results = new double[count];
+
+            for (int ndx = 0; ndx < count; ndx++)
+                results[ndx] = refExecute(input0[ndx], input1[ndx], input2[ndx]);
 
             return results;
         }
@@ -819,6 +889,14 @@ namespace FixPointCSTest
             };
         }
 
+        static TernaryErrorEvaluator AbsoluteTernaryErrorEvaluator()
+        {
+            return (double a, double b, double c, double output, double reference, double ulpScale) =>
+            {
+                return new OperationError(Math.Abs(output - reference), 1.0, 0.0);
+            };
+        }
+
         static BinaryErrorEvaluator RelativeBinaryErrorEvaluator(double ulps = 4.0)
         {
             return (double a, double b, double output, double reference, double ulpScale) =>
@@ -982,20 +1060,19 @@ namespace FixPointCSTest
             //    }
             //),
 
-            // \todo [petri] implement Lerp
-            //new TernaryOpFamily(
-            //    (double i0, double i1, double i2) => { return (1.0-i2)*i0 + i2*i1; },
-            //    AbsoluteBinaryErrorEvaluator(),
-            //    Operation.Multi(
-            //        Operation.F64_F64_F64_F64("Fixed64.Lerp", (int n, F64[] i0, F64[] i1, F64[] i2, F64[] o) => { for (int i=0; i<n; i++) { o[i] = F64.Lerp(i0[i], i1[i], i2[i]); } }),
-            //        Operation.F32_F32_F32_F32("Fixed32.Lerp", (int n, F32[] i0, F32[] i1, F32[] i2, F32[] o) => { for (int i=0; i<n; i++) { o[i] = F32.Lerp(i0[i], i1[i], i2[i]); } })
-            //    ),
-            //    bounds => new[] {
-            //        InputGenerator.Ternary(Input.Uniform(-1.0, 1.0), Input.Uniform(-1.0, 1.0), Input.Uniform(-1.0, 2.0)),
-            //        InputGenerator.Ternary(Input.Uniform(-1e5, 1e5), Input.Uniform(-1e5, 1e5), Input.Uniform(-1e5, 1e5)),
-            //        InputGenerator.Ternary(Input.Uniform(bounds.InputNegMax, bounds.InputPosMax), Input.Uniform(bounds.InputNegMax, bounds.InputPosMax), Input.Uniform(0.0, 1.0)),
-            //    }
-            //),
+            new TernaryOpFamily(
+                (double i0, double i1, double i2) => { return (1.0-i2)*i0 + i2*i1; },
+                AbsoluteTernaryErrorEvaluator(),
+                Operation.Multi(
+                    Operation.F64_F64_F64_F64("Fixed64.Lerp", (int n, F64[] i0, F64[] i1, F64[] i2, F64[] o) => { for (int i=0; i<n; i++) { o[i] = F64.Lerp(i0[i], i1[i], i2[i]); } }),
+                    Operation.F32_F32_F32_F32("Fixed32.Lerp", (int n, F32[] i0, F32[] i1, F32[] i2, F32[] o) => { for (int i=0; i<n; i++) { o[i] = F32.Lerp(i0[i], i1[i], i2[i]); } })
+                ),
+                bounds => new[] {
+                    InputGenerator.Ternary(Input.Uniform(-1.0, 1.0), Input.Uniform(-1.0, 1.0), Input.Uniform(-1.0, 2.0)),
+                    InputGenerator.Ternary(Input.Uniform(-1e5, 1e5), Input.Uniform(-1e5, 1e5), Input.Uniform(-1e5, 1e5)),
+                    InputGenerator.Ternary(Input.Uniform(bounds.InputNegMax, bounds.InputPosMax), Input.Uniform(bounds.InputNegMax, bounds.InputPosMax), Input.Uniform(0.0, 1.0)),
+                }
+            ),
 
             new UnaryOpFamily(
                 (double i0) => { return Math.Ceiling(i0); },
