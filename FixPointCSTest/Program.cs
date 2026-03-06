@@ -509,6 +509,19 @@ namespace FixPointCSTest
 
         private static Random rnd = new Random(12345678);
 
+        private static int StableHash(string s)
+        {
+            int hash = 5381;
+            foreach (char c in s)
+                hash = hash * 33 + c;
+            return hash;
+        }
+
+        private static void SeedRng(string opName)
+        {
+            rnd = new Random(12345678 ^ StableHash(opName));
+        }
+
         public struct PrecisionResult
         {
             public double   avgError;
@@ -651,6 +664,7 @@ namespace FixPointCSTest
 
         public static PrecisionResult MeasureOpPrecision(OpFamilyBase opFamily, Operation opImpl)
         {
+            SeedRng(opImpl.FuncName);
             int         numTested   = 0;
             double      totalErr    = 0.0;
             double      maxErr      = 0.0;
@@ -743,6 +757,7 @@ namespace FixPointCSTest
 
         public static void GenerateUnitTestCases(TargetLanguage language, StreamWriter file, OpFamilyBase opFamily, Operation opImpl)
         {
+            SeedRng(opImpl.FuncName);
             file.WriteLine($"\t// {opImpl.FuncName}()");
 
             string funcType = (language == TargetLanguage.Java) ? "public static void" : "static void";
@@ -823,6 +838,7 @@ namespace FixPointCSTest
 
         public static BenchmarkResult BenchmarkOperation(OpFamilyBase opFamily, Operation opImpl)
         {
+            SeedRng(opImpl.FuncName);
             // Generate inputs and output arrays.
             // \todo [petri] use all input generators?
             InputGenerator[] inputGenerators = opFamily.inputFactory(opImpl.ValueBounds);
@@ -1045,20 +1061,19 @@ namespace FixPointCSTest
                 }
             ),
 
-            // \todo [petri] implement clamp
-            //new TernaryOpFamily(
-            //    (double i0, double i1, double i2) => { return Math.Clamp(i0, i1, i2); },
-            //    AbsoluteBinaryErrorEvaluator(),
-            //    Operation.Multi(
-            //        Operation.F64_F64_F64_F64("Fixed64.Clamp", (int n, F64[] i0, F64[] i1, F64[] i2, F64[] o) => { for (int i=0; i<n; i++) { o[i] = F64.Clamp(i0[i], i1[i], i2[i]); } }),
-            //        Operation.F32_F32_F32_F32("Fixed32.Clamp", (int n, F32[] i0, F32[] i1, F32[] i2, F32[] o) => { for (int i=0; i<n; i++) { o[i] = F32.Clamp(i0[i], i1[i], i2[i]); } })
-            //    ),
-            //    bounds => new[] {
-            //        InputGenerator.Ternary(Input.Uniform(-1.0, 1.0), Input.Uniform(-1.0, 1.0), Input.Uniform(-1.0, 1.0)),
-            //        InputGenerator.Ternary(Input.Uniform(-1e5, 1e5), Input.Uniform(-1e5, 1e5), Input.Uniform(-1e5, 1e5)),
-            //        InputGenerator.Ternary(Input.Uniform(bounds.InputNegMax, bounds.InputPosMax), Input.Uniform(bounds.InputNegMax, bounds.InputPosMax), Input.Uniform(bounds.InputNegMax, bounds.InputPosMax)),
-            //    }
-            //),
+            new TernaryOpFamily(
+                (double i0, double i1, double i2) => { return (i0 > i2) ? i2 : (i0 < i1) ? i1 : i0; },
+                AbsoluteTernaryErrorEvaluator(),
+                Operation.Multi(
+                    Operation.F64_F64_F64_F64("Fixed64.Clamp", (int n, F64[] i0, F64[] i1, F64[] i2, F64[] o) => { for (int i=0; i<n; i++) { o[i] = F64.Clamp(i0[i], i1[i], i2[i]); } }),
+                    Operation.F32_F32_F32_F32("Fixed32.Clamp", (int n, F32[] i0, F32[] i1, F32[] i2, F32[] o) => { for (int i=0; i<n; i++) { o[i] = F32.Clamp(i0[i], i1[i], i2[i]); } })
+                ),
+                bounds => new[] {
+                    InputGenerator.Ternary(Input.Uniform(-1.0, 1.0), Input.Uniform(-1.0, 1.0), Input.Uniform(-1.0, 1.0)),
+                    InputGenerator.Ternary(Input.Uniform(-1e5, 1e5), Input.Uniform(-1e5, 1e5), Input.Uniform(-1e5, 1e5)),
+                    InputGenerator.Ternary(Input.Uniform(bounds.InputNegMax, bounds.InputPosMax), Input.Uniform(bounds.InputNegMax, bounds.InputPosMax), Input.Uniform(bounds.InputNegMax, bounds.InputPosMax)),
+                }
+            ),
 
             new TernaryOpFamily(
                 (double i0, double i1, double i2) => { return (1.0-i2)*i0 + i2*i1; },
@@ -1069,7 +1084,7 @@ namespace FixPointCSTest
                 ),
                 bounds => new[] {
                     InputGenerator.Ternary(Input.Uniform(-1.0, 1.0), Input.Uniform(-1.0, 1.0), Input.Uniform(-1.0, 2.0)),
-                    InputGenerator.Ternary(Input.Uniform(-1e5, 1e5), Input.Uniform(-1e5, 1e5), Input.Uniform(-1e5, 1e5)),
+                    InputGenerator.Ternary(Input.Uniform(-1e5, 1e5), Input.Uniform(-1e5, 1e5), Input.Uniform(-1.0, 2.0)),
                     InputGenerator.Ternary(Input.Uniform(bounds.InputNegMax, bounds.InputPosMax), Input.Uniform(bounds.InputNegMax, bounds.InputPosMax), Input.Uniform(0.0, 1.0)),
                 }
             ),
