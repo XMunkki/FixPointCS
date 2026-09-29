@@ -1348,6 +1348,10 @@ namespace FixPointCS
             // \note these round negative numbers slightly
             long nx = x ^ (x >> 63);
             long ny = y ^ (y >> 63);
+            // raw -1 rounds to 0, which breaks the x > 0 precondition of Atan2DivFastest; the true
+            // magnitude of raw -1 is 1, so restore that when the rounding zeroed a nonzero input.
+            if (nx == 0 && x != 0) nx = 1;
+            if (ny == 0 && y != 0) ny = 1;
             long negMask = ((x ^ y) >> 63);
 
             if (nx >= ny)
@@ -1404,6 +1408,10 @@ namespace FixPointCS
             // \note these round negative numbers slightly
             long nx = x ^ (x >> 63);
             long ny = y ^ (y >> 63);
+            // raw -1 rounds to 0, which breaks the x > 0 precondition of Atan2DivFast; the true
+            // magnitude of raw -1 is 1, so restore that when the rounding zeroed a nonzero input.
+            if (nx == 0 && x != 0) nx = 1;
+            if (ny == 0 && y != 0) ny = 1;
             long negMask = ((x ^ y) >> 63);
 
             if (nx >= ny)
@@ -1460,6 +1468,10 @@ namespace FixPointCS
             // \note these round negative numbers slightly
             long nx = x ^ (x >> 63);
             long ny = y ^ (y >> 63);
+            // raw -1 rounds to 0, which breaks the x > 0 precondition of Atan2Div; the true
+            // magnitude of raw -1 is 1, so restore that when the rounding zeroed a nonzero input.
+            if (nx == 0 && x != 0) nx = 1;
+            if (ny == 0 && y != 0) ny = 1;
             long negMask = ((x ^ y) >> 63);
 
             if (nx >= ny)

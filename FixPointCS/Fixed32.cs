@@ -1189,6 +1189,10 @@ namespace FixPointCS
 
             int nx = Abs(x);
             int ny = Abs(y);
+            // Abs(MinValue) overflows back to MinValue (still negative), which breaks the x > 0
+            // precondition of Atan2DivFastest; clamp to the closest representable magnitude, MaxValue.
+            if (x == MinValue) nx = MaxValue;
+            if (y == MinValue) ny = MaxValue;
             int negMask = ((x ^ y) >> 31);
 
             if (nx >= ny)
@@ -1243,6 +1247,10 @@ namespace FixPointCS
 
             int nx = Abs(x);
             int ny = Abs(y);
+            // Abs(MinValue) overflows back to MinValue (still negative), which breaks the x > 0
+            // precondition of Atan2DivFast; clamp to the closest representable magnitude, MaxValue.
+            if (x == MinValue) nx = MaxValue;
+            if (y == MinValue) ny = MaxValue;
             int negMask = ((x ^ y) >> 31);
 
             if (nx >= ny)
@@ -1297,6 +1305,10 @@ namespace FixPointCS
 
             int nx = Abs(x);
             int ny = Abs(y);
+            // Abs(MinValue) overflows back to MinValue (still negative), which breaks the x > 0
+            // precondition of Atan2Div; clamp to the closest representable magnitude, MaxValue.
+            if (x == MinValue) nx = MaxValue;
+            if (y == MinValue) ny = MaxValue;
             int negMask = ((x ^ y) >> 31);
 
             if (nx >= ny)
